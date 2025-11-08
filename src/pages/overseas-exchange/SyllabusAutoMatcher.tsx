@@ -324,6 +324,42 @@ const SyllabusAutoMatcher = () => {
     credits: `${courses.filter(c => c.transferable).reduce((sum, c) => sum + c.credits, 0)}/${courses.reduce((sum, c) => sum + c.credits, 0)}`,
   };
 
+  const showInlineStats = Boolean(location.state?.schoolId && selectedSchool && selectedMajor);
+
+  const statsSummaryContent = (
+    <div className="flex flex-wrap gap-2 text-sm">
+      <div className="flex items-center gap-2 rounded-lg border bg-muted/20 px-3 py-2 shadow-sm">
+        <div className="p-1.5 rounded-md bg-primary-light">
+          <BookOpen className="h-4 w-4 text-primary" />
+        </div>
+        <div className="leading-tight">
+          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Total Courses</p>
+          <p className="text-base font-semibold">{stats.total}</p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 rounded-lg border bg-muted/20 px-3 py-2 shadow-sm">
+        <div className="p-1.5 rounded-md bg-accent-light">
+          <CheckCircle2 className="h-4 w-4 text-accent" />
+        </div>
+        <div className="leading-tight">
+          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Transfer Eligible</p>
+          <p className="text-base font-semibold">{stats.transferable}</p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 rounded-lg border bg-muted/20 px-3 py-2 shadow-sm">
+        <div className="p-1.5 rounded-md bg-secondary-light">
+          <Trophy className="h-4 w-4 text-secondary" />
+        </div>
+        <div className="leading-tight">
+          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Eligible Credits</p>
+          <p className="text-base font-semibold">{stats.credits}</p>
+        </div>
+      </div>
+    </div>
+  );
+
   const schoolNameMap: Record<string, string> = {
     eth: "ETH Zurich",
     tum: "TU Munich",
@@ -351,39 +387,67 @@ const SyllabusAutoMatcher = () => {
           </p>
         </div>
 
-        {/* Dropdowns */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-8">
-          <Select value={selectedSchool} onValueChange={setSelectedSchool} disabled={!!location.state?.schoolId}>
-            <SelectTrigger className="w-full sm:w-[250px]">
-              <SelectValue placeholder="Choose a school..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="eth">ETH Zurich</SelectItem>
-              <SelectItem value="tum">TU Munich</SelectItem>
-              <SelectItem value="nus">National University of Singapore</SelectItem>
-              <SelectItem value="uoft">University of Toronto</SelectItem>
-              <SelectItem value="oxford">University of Oxford</SelectItem>
-              <SelectItem value="mit">Massachusetts Institute of Technology</SelectItem>
-              <SelectItem value="utokyo">University of Tokyo</SelectItem>
-              <SelectItem value="melbourne">University of Melbourne</SelectItem>
-              <SelectItem value="hec">HEC Paris</SelectItem>
-              <SelectItem value="snu">Seoul National University</SelectItem>
-            </SelectContent>
-          </Select>
+        {/* School Selection */}
+        {location.state?.schoolId ? (
+          <div className="mb-8">
+            <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-4">
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm text-muted-foreground uppercase tracking-wide">Selected School</p>
+                  <h2 className="text-3xl font-semibold text-foreground">{schoolName}</h2>
+                </div>
+                <div className="w-full sm:w-[250px]">
+                  <Select value={selectedMajor} onValueChange={setSelectedMajor}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a major..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableMajorOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              {showInlineStats && <div className="self-start">{statsSummaryContent}</div>}
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col sm:flex-row gap-4 mb-8">
+            <Select value={selectedSchool} onValueChange={setSelectedSchool}>
+              <SelectTrigger className="w-full sm:w-[250px]">
+                <SelectValue placeholder="Choose a school..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="eth">ETH Zurich</SelectItem>
+                <SelectItem value="tum">TU Munich</SelectItem>
+                <SelectItem value="nus">National University of Singapore</SelectItem>
+                <SelectItem value="uoft">University of Toronto</SelectItem>
+                <SelectItem value="oxford">University of Oxford</SelectItem>
+                <SelectItem value="mit">Massachusetts Institute of Technology</SelectItem>
+                <SelectItem value="utokyo">University of Tokyo</SelectItem>
+                <SelectItem value="melbourne">University of Melbourne</SelectItem>
+                <SelectItem value="hec">HEC Paris</SelectItem>
+                <SelectItem value="snu">Seoul National University</SelectItem>
+              </SelectContent>
+            </Select>
 
-          <Select value={selectedMajor} onValueChange={setSelectedMajor}>
-            <SelectTrigger className="w-full sm:w-[250px]">
-              <SelectValue placeholder="Choose a major..." />
-            </SelectTrigger>
-            <SelectContent>
-              {availableMajorOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+            <Select value={selectedMajor} onValueChange={setSelectedMajor}>
+              <SelectTrigger className="w-full sm:w-[250px]">
+                <SelectValue placeholder="Choose a major..." />
+              </SelectTrigger>
+              <SelectContent>
+                {availableMajorOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         {!selectedSchool || !selectedMajor ? (
           <div className="text-center py-20">
@@ -392,50 +456,12 @@ const SyllabusAutoMatcher = () => {
           </div>
         ) : (
           <>
-            {/* Statistics Cards */}
-            <div className="grid md:grid-cols-3 gap-4 mb-8">
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-lg bg-primary-light">
-                      <BookOpen className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Total Courses</p>
-                      <p className="text-2xl font-bold">{stats.total}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-lg bg-accent-light">
-                      <CheckCircle2 className="h-6 w-6 text-accent" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Transfer Eligible</p>
-                      <p className="text-2xl font-bold">{stats.transferable}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-lg bg-secondary-light">
-                      <Trophy className="h-6 w-6 text-secondary" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Eligible Credits</p>
-                      <p className="text-2xl font-bold">{stats.credits}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            {/* Statistics Summary */}
+            {!showInlineStats && (
+              <div className="flex justify-end mb-6">
+                {statsSummaryContent}
+              </div>
+            )}
 
             {/* Course List Title */}
             <h2 className="text-2xl font-bold mb-6">
