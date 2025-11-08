@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { GraduationCap, Users, Target, Briefcase, Globe } from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,12 +33,18 @@ const Navigation = () => {
         <div className="hidden md:flex items-center gap-1">
           {navItems.map((item) => {
             const Icon = item.icon;
+            const active = isActive(item.path);
             return (
               <Button
                 key={item.path}
                 asChild
-                variant={isActive(item.path) ? "default" : "ghost"}
-                className="gap-2"
+                variant="ghost"
+                className={cn(
+                  "gap-2",
+                  active
+                    ? "bg-primary text-primary-foreground !hover:bg-primary-hover !hover:text-primary-foreground"
+                    : "!hover:bg-primary !hover:text-primary-foreground"
+                )}
               >
                 <Link to={item.path}>
                   <Icon className="h-4 w-4" />

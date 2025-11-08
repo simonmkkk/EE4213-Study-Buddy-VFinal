@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Globe, BookOpen, ArrowRight } from "lucide-react";
+import { Globe, ArrowRight } from "lucide-react";
 import Navigation from "@/components/Navigation";
 
 const OverseasExchange = () => {
@@ -15,14 +15,6 @@ const OverseasExchange = () => {
       path: "/overseas-exchange/visual-explorer",
       color: "text-primary",
       bgColor: "bg-primary-light",
-    },
-    {
-      title: "Syllabus Auto-Matcher",
-      description: "Automatically match courses from partner universities with your home institution for credit transfer",
-      icon: BookOpen,
-      path: "/overseas-exchange/syllabus-matcher",
-      color: "text-secondary",
-      bgColor: "bg-secondary-light",
     },
   ];
 
@@ -38,7 +30,7 @@ const OverseasExchange = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <div className="flex flex-wrap justify-center gap-8 max-w-5xl mx-auto">
           {features.map((feature) => {
             const Icon = feature.icon;
             return (
