@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Star, MessageSquare, Users } from "lucide-react";
+import { Star, MessageSquare, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Navigation from "@/components/Navigation";
@@ -20,13 +20,10 @@ interface School {
   id: string;
   name: string;
   country: string;
-  program: string;
+  majors: string[];
   image: string;
-  flag: string;
   rating: number;
-  studentCount: number;
-  courses: string[];
-  reviews: { name: string; rating: number; date: string; content: string }[];
+  reviews: { name: string; rating: number; date: string; content: string; isUser?: boolean }[];
 }
 
 const schools: School[] = [
@@ -34,12 +31,9 @@ const schools: School[] = [
     id: "eth",
     name: "ETH Zurich",
     country: "Switzerland",
-    program: "Computer Science",
+    majors: ["Computer Science", "Electrical Engineering", "Mathematics", "Data Science"],
     image: "/eth-zurich.jpg",
-    flag: "🇨🇭",
     rating: 4.8,
-    studentCount: 25,
-    courses: ["AI", "Data Structures", "Algorithms"],
     reviews: [
       { name: "Alex Chen", rating: 5, date: "2025-01-15", content: "Amazing program with world-class faculty. Highly recommended!" },
       { name: "Sarah Kim", rating: 4, date: "2025-01-10", content: "Great courses, but challenging workload. Prepare well!" },
@@ -49,12 +43,9 @@ const schools: School[] = [
     id: "tum",
     name: "TU Munich",
     country: "Germany",
-    program: "Engineering",
+    majors: ["Mechanical Engineering", "Aerospace Engineering", "Robotics", "Industrial Engineering"],
     image: "/tu-munich.jpg",
-    flag: "🇩🇪",
     rating: 4.7,
-    studentCount: 30,
-    courses: ["Robotics", "Control Systems", "Mechatronics"],
     reviews: [
       { name: "John Mueller", rating: 5, date: "2025-01-12", content: "Excellent hands-on experience and industry connections." },
     ],
@@ -63,12 +54,9 @@ const schools: School[] = [
     id: "nus",
     name: "National University of Singapore",
     country: "Singapore",
-    program: "Business",
+    majors: ["Business Administration", "Finance", "Marketing", "Information Systems"],
     image: "/nus.jpg",
-    flag: "🇸🇬",
     rating: 4.9,
-    studentCount: 40,
-    courses: ["Finance", "Marketing", "Strategy"],
     reviews: [
       { name: "Wei Zhang", rating: 5, date: "2025-01-08", content: "Top-tier business education in Asia. Amazing opportunities!" },
     ],
@@ -77,12 +65,9 @@ const schools: School[] = [
     id: "uoft",
     name: "University of Toronto",
     country: "Canada",
-    program: "Medicine",
+    majors: ["Medicine", "Biomedical Sciences", "Public Health", "Neuroscience"],
     image: "/uoft.jpg",
-    flag: "🇨🇦",
     rating: 4.6,
-    studentCount: 20,
-    courses: ["Anatomy", "Pharmacology", "Clinical Skills"],
     reviews: [
       { name: "Emma Watson", rating: 4, date: "2025-01-05", content: "Rigorous medical program with excellent clinical training." },
     ],
@@ -91,28 +76,87 @@ const schools: School[] = [
     id: "oxford",
     name: "University of Oxford",
     country: "United Kingdom",
-    program: "Law",
+    majors: ["Law", "International Relations", "Philosophy", "Public Policy"],
     image: "/oxford.jpg",
-    flag: "🇬🇧",
     rating: 4.9,
-    studentCount: 15,
-    courses: ["Constitutional Law", "Criminal Law", "International Law"],
     reviews: [
       { name: "James Brown", rating: 5, date: "2025-01-01", content: "Prestigious program with incredible networking opportunities." },
     ],
   },
+  {
+    id: "mit",
+    name: "Massachusetts Institute of Technology",
+    country: "United States",
+    majors: ["Computer Science", "Physics", "Aerospace Engineering", "Artificial Intelligence"],
+    image: "/images/mit.jpg",
+    rating: 4.9,
+    reviews: [
+      { name: "Liam Johnson", rating: 5, date: "2025-02-02", content: "Cutting-edge research opportunities and inspiring faculty." },
+      { name: "Priya Desai", rating: 4, date: "2025-01-28", content: "Intense workload but unparalleled innovation culture." },
+    ],
+  },
+  {
+    id: "utokyo",
+    name: "University of Tokyo",
+    country: "Japan",
+    majors: ["Materials Science", "Computer Engineering", "Architecture", "Robotics"],
+    image: "/images/_Tokyo_University_3.jpg",
+    rating: 4.7,
+    reviews: [
+      { name: "Haruka Sato", rating: 5, date: "2025-01-20", content: "Beautiful campus and supportive professors for exchange students." },
+    ],
+  },
+  {
+    id: "melbourne",
+    name: "University of Melbourne",
+    country: "Australia",
+    majors: ["Environmental Science", "Medicine", "Data Analytics", "Business"],
+    image: "/images/Melbone.jpg",
+    rating: 4.8,
+    reviews: [
+      { name: "Olivia Harris", rating: 4, date: "2025-01-18", content: "Great student life with strong academic support services." },
+    ],
+  },
+  {
+    id: "hec",
+    name: "HEC Paris",
+    country: "France",
+    majors: ["Business Administration", "Entrepreneurship", "Finance", "Luxury Management"],
+    image: "/images/HEC.png",
+    rating: 4.6,
+    reviews: [
+      { name: "Camille Dupont", rating: 5, date: "2025-02-05", content: "Fantastic networking opportunities and real-world projects." },
+    ],
+  },
+  {
+    id: "snu",
+    name: "Seoul National University",
+    country: "South Korea",
+    majors: ["Computer Science", "Bioengineering", "Economics", "Design"],
+    image: "/images/Souel.jpg",
+    rating: 4.7,
+    reviews: [
+      { name: "Minseo Park", rating: 4, date: "2025-01-30", content: "Rigorous academics with vibrant campus culture." },
+    ],
+  },
 ];
+
+const countryOptions = Array.from(new Set(schools.map((school) => school.country))).sort();
+const majorOptions = Array.from(new Set(schools.flatMap((school) => school.majors))).sort();
 
 const VisualSchoolExplorer = () => {
   const navigate = useNavigate();
+  const [schoolsData, setSchoolsData] = useState<School[]>(schools);
   const [countryFilter, setCountryFilter] = useState("all");
   const [programFilter, setProgramFilter] = useState("all");
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
   const [reviewText, setReviewText] = useState("");
+  const [reviewRating, setReviewRating] = useState(0);
+  const [brokenImages, setBrokenImages] = useState<Record<string, boolean>>({});
 
-  const filteredSchools = schools.filter((school) => {
+  const filteredSchools = schoolsData.filter((school) => {
     const countryMatch = countryFilter === "all" || school.country === countryFilter;
-    const programMatch = programFilter === "all" || school.program === programFilter;
+    const programMatch = programFilter === "all" || school.majors.includes(programFilter);
     return countryMatch && programMatch;
   });
 
@@ -121,10 +165,54 @@ const VisualSchoolExplorer = () => {
   };
 
   const handlePostReview = () => {
-    if (reviewText.trim()) {
-      toast.success("Review posted successfully!");
-      setReviewText("");
+    if (!selectedSchool) {
+      return;
     }
+
+    if (!reviewRating) {
+      toast.error("Please select a rating before posting your review.");
+      return;
+    }
+
+    if (!reviewText.trim()) {
+      toast.error("Please share some feedback before posting.");
+      return;
+    }
+
+    const newReview = {
+      name: "You",
+      rating: reviewRating,
+      date: new Date().toISOString().split("T")[0],
+      content: reviewText.trim(),
+      isUser: true,
+    };
+
+    const updatedSchools = schoolsData.map((school) =>
+      school.id === selectedSchool.id
+        ? { ...school, reviews: [...school.reviews, newReview] }
+        : school,
+    );
+
+    setSchoolsData(updatedSchools);
+    setSelectedSchool(updatedSchools.find((school) => school.id === selectedSchool.id) ?? null);
+    toast.success("Review posted successfully!");
+    setReviewText("");
+    setReviewRating(0);
+  };
+
+  const handleDeleteReview = (schoolId: string, reviewIndex: number) => {
+    const updatedSchools = schoolsData.map((school) => {
+      if (school.id !== schoolId) return school;
+      const updatedReviews = school.reviews.filter((_, idx) => idx !== reviewIndex);
+      return { ...school, reviews: updatedReviews };
+    });
+
+    setSchoolsData(updatedSchools);
+    if (selectedSchool?.id === schoolId) {
+      const updatedSelected = updatedSchools.find((school) => school.id === schoolId) ?? null;
+      setSelectedSchool(updatedSelected);
+    }
+    toast.success("Review deleted.");
   };
 
   return (
@@ -147,11 +235,11 @@ const VisualSchoolExplorer = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Countries</SelectItem>
-              <SelectItem value="Switzerland">Switzerland</SelectItem>
-              <SelectItem value="Germany">Germany</SelectItem>
-              <SelectItem value="Singapore">Singapore</SelectItem>
-              <SelectItem value="Canada">Canada</SelectItem>
-              <SelectItem value="United Kingdom">United Kingdom</SelectItem>
+              {countryOptions.map((country) => (
+                <SelectItem key={country} value={country}>
+                  {country}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
@@ -161,63 +249,86 @@ const VisualSchoolExplorer = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Programs</SelectItem>
-              <SelectItem value="Computer Science">Computer Science</SelectItem>
-              <SelectItem value="Engineering">Engineering</SelectItem>
-              <SelectItem value="Business">Business</SelectItem>
-              <SelectItem value="Medicine">Medicine</SelectItem>
-              <SelectItem value="Law">Law</SelectItem>
+              {majorOptions.map((major) => (
+                <SelectItem key={major} value={major}>
+                  {major}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
 
         {/* School Cards Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredSchools.map((school) => (
-            <Card 
-              key={school.id}
-              className="transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer group relative overflow-hidden"
-            >
-              <div className="absolute top-4 right-4 z-10 text-3xl">{school.flag}</div>
-              <CardContent className="p-6" onClick={() => handleSchoolClick(school)}>
-                <div className="aspect-video bg-muted rounded-lg mb-4 flex items-center justify-center overflow-hidden">
-                  <img src={school.image} alt={school.name} className="w-full h-full object-cover" />
-                </div>
-                
-                <h3 className="text-xl font-semibold mb-2">{school.name}</h3>
-                <p className="text-sm text-muted-foreground mb-3">{school.program}</p>
-                
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {school.courses.map((course) => (
-                    <Badge key={course} variant="secondary">{course}</Badge>
-                  ))}
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1 text-sm">
-                    <Star className="h-4 w-4 fill-primary text-primary" />
-                    <span className="font-medium">{school.rating}</span>
+          {filteredSchools.map((school) => {
+            const commentDisplayCount = 2;
+            return (
+              <Card 
+                key={school.id}
+                className="transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer group"
+              >
+                <CardContent className="p-6" onClick={() => handleSchoolClick(school)}>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm font-semibold text-foreground">{school.country}</span>
                   </div>
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <Users className="h-4 w-4" />
-                    <span>{school.studentCount} students</span>
+
+                  <div className="aspect-video bg-muted rounded-lg mb-4 flex items-center justify-center overflow-hidden">
+                    {brokenImages[school.id] ? (
+                      <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-center px-4">
+                        <p className="text-sm text-muted-foreground">Image unavailable for {school.name}</p>
+                      </div>
+                    ) : (
+                      <img
+                        src={school.image}
+                        alt={school.name}
+                        className="w-full h-full object-cover"
+                        onError={() => setBrokenImages((prev) => ({ ...prev, [school.id]: true }))}
+                        loading="lazy"
+                      />
+                    )}
                   </div>
-                </div>
-                
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full mt-4"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedSchool(school);
-                  }}
-                >
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  View Comments
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+
+                  <h3 className="text-xl font-semibold mb-3">{school.name}</h3>
+
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {school.majors.map((major) => (
+                      <Badge key={`${school.id}-${major}`} variant="secondary">{major}</Badge>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1 text-sm">
+                      <Star className="h-4 w-4 fill-primary text-primary" />
+                      <span className="font-medium">{school.rating}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedSchool(school);
+                      }}
+                      className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      <span role="img" aria-label="people">👤</span>
+                      <span>{commentDisplayCount}</span>
+                    </button>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full mt-4"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedSchool(school);
+                    }}
+                  >
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    View Comments
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         {filteredSchools.length === 0 && (
@@ -228,7 +339,16 @@ const VisualSchoolExplorer = () => {
       </main>
 
       {/* Reviews Modal */}
-      <Dialog open={!!selectedSchool} onOpenChange={() => setSelectedSchool(null)}>
+      <Dialog
+        open={!!selectedSchool}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedSchool(null);
+            setReviewText("");
+            setReviewRating(0);
+          }
+        }}
+      >
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{selectedSchool?.name} - Student Reviews</DialogTitle>
@@ -236,10 +356,13 @@ const VisualSchoolExplorer = () => {
           
           <div className="space-y-6">
             {selectedSchool?.reviews.map((review, idx) => (
-              <Card key={idx}>
+              <Card key={`${review.name}-${review.date}-${idx}`}>
                 <CardContent className="pt-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium">{review.name}</span>
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <span className="font-medium">{review.name}</span>
+                      <p className="text-sm text-muted-foreground">{review.date}</p>
+                    </div>
                     <div className="flex items-center gap-1">
                       {[...Array(5)].map((_, i) => (
                         <Star
@@ -249,14 +372,44 @@ const VisualSchoolExplorer = () => {
                       ))}
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground mb-2">{review.date}</p>
-                  <p className="text-sm">{review.content}</p>
+                  <p className="text-sm mb-3">{review.content}</p>
+                  {review.isUser && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="ml-auto text-destructive hover:text-destructive flex items-center gap-2"
+                      onClick={() => handleDeleteReview(selectedSchool.id, idx)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Delete
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             ))}
             
             <div className="pt-4 border-t">
               <h3 className="font-semibold mb-3">Share Your Experience</h3>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-muted-foreground">Your Rating</span>
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      className="transition-colors text-muted-foreground hover:text-primary"
+                      onClick={() => setReviewRating(value)}
+                      aria-label={`Rate ${value} star${value > 1 ? "s" : ""}`}
+                    >
+                      <Star
+                        className={`h-5 w-5 ${
+                          reviewRating >= value ? "fill-primary text-primary" : ""
+                        }`}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
               <Textarea
                 placeholder="Write your review here..."
                 value={reviewText}
