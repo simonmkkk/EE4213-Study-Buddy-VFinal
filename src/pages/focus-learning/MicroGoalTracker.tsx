@@ -1,12 +1,11 @@
-import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { useState, useMemo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import { Plus, GripVertical, Undo2 } from "lucide-react";
 import { toast } from "sonner";
-import Navigation from "@/components/Navigation";
 
 interface Goal {
   id: string;
@@ -83,8 +82,6 @@ const MicroGoalTracker = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation />
-      
       <main className="container py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Micro-Goal Study Tracker</h1>

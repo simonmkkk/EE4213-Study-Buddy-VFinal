@@ -3,17 +3,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Send, Heart } from "lucide-react";
+import { AlertCircle, Send, Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import Navigation from "@/components/Navigation";
 
 const emotions = [
-  { id: "calm", label: "Calm", icon: "😌" },
-  { id: "anxious", label: "Anxious", icon: "😰" },
-  { id: "excited", label: "Excited", icon: "😄" },
-  { id: "sad", label: "Sad", icon: "😔" },
-  { id: "confused", label: "Confused", icon: "🤔" },
+  { id: "calm", label: "Calm", icon: "" },
+  { id: "anxious", label: "Anxious", icon: "" },
+  { id: "excited", label: "Excited", icon: "" },
+  { id: "sad", label: "Sad", icon: "" },
+  { id: "confused", label: "Confused", icon: "" },
 ];
 
 const topics = [
@@ -33,26 +32,13 @@ const SoulMatch = () => {
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
-  const [timeLeft, setTimeLeft] = useState(1800); // 30 minutes in seconds
   const [isTyping, setIsTyping] = useState(false);
   const [showEndModal, setShowEndModal] = useState(false);
   const [matchedUser, setMatchedUser] = useState<{ name: string; icon: string } | null>(null);
+  const [isChatMinimized, setIsChatMinimized] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (stage === "chatting" && timeLeft > 0) {
-      const timer = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            setShowEndModal(true);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      return () => clearInterval(timer);
-    }
-  }, [stage, timeLeft]);
+  const selfAvatarLabel = "You";
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -137,9 +123,13 @@ const SoulMatch = () => {
     setShowEndModal(true);
   };
 
-  const handleContinueChat = () => {
-    toast.info("Both users must agree to continue chatting");
+  const handleKeepChat = () => {
+    setIsChatMinimized(true);
     setShowEndModal(false);
+  };
+
+  const handleResumeChat = () => {
+    setIsChatMinimized(false);
   };
 
   const handleNeverAgain = () => {
@@ -148,15 +138,8 @@ const SoulMatch = () => {
     setSelectedEmotion("");
     setSelectedTopics([]);
     setMessages([]);
-    setTimeLeft(1800);
     setMatchedUser(null);
     setShowEndModal(false);
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   const toggleTopic = (topic: string) => {
@@ -170,8 +153,6 @@ const SoulMatch = () => {
   if (stage === "select") {
     return (
       <div className="min-h-screen bg-background">
-        <Navigation />
-        
         <main className="container py-8">
           <div className="max-w-2xl mx-auto">
             <div className="mb-8 text-center">
@@ -184,15 +165,15 @@ const SoulMatch = () => {
             <Card>
               <CardContent className="pt-6 space-y-6">
                 <div>
-                  <h3 className="font-semibold mb-4">How are you feeling?</h3>
+                  <h3 className="font-semibold mb-4">Feeling</h3>
                   <div className="grid grid-cols-5 gap-3">
                     {emotions.map((emotion) => (
                       <div
                         key={emotion.id}
                         className={`flex flex-col items-center p-4 rounded-lg border-2 cursor-pointer transition-smooth ${
                           selectedEmotion === emotion.id
-                            ? "border-primary bg-primary-light"
-                            : "border-border hover:border-primary/50"
+                            ? "border-[rgba(34,139,34,0.6)] bg-[rgba(34,139,34,0.12)]"
+                            : "border-border hover:border-[rgba(34,139,34,0.35)]"
                         }`}
                         onClick={() => setSelectedEmotion(emotion.id)}
                       >
@@ -204,13 +185,13 @@ const SoulMatch = () => {
                 </div>
 
                 <div>
-                  <h3 className="font-semibold mb-4">What topics interest you?</h3>
+                  <h3 className="font-semibold mb-4">Interested Topic</h3>
                   <div className="flex flex-wrap gap-2">
                     {topics.map((topic) => (
                       <Badge
                         key={topic}
                         variant={selectedTopics.includes(topic) ? "default" : "outline"}
-                        className="cursor-pointer px-4 py-2"
+                        className={`cursor-pointer px-4 py-2 ${selectedTopics.includes(topic) ? "bg-[rgba(34,139,34,0.15)] text-[rgba(34,139,34,0.9)]" : ""}`}
                         onClick={() => toggleTopic(topic)}
                       >
                         {topic}
@@ -219,8 +200,8 @@ const SoulMatch = () => {
                   </div>
                 </div>
 
-                <div className="bg-info-light p-4 rounded-lg border border-info">
-                  <p className="text-sm text-info-foreground">
+                <div className="rounded-lg border border-[rgba(34,139,34,0.18)] bg-[rgba(34,139,34,0.05)] p-4">
+                  <p className="text-sm text-foreground/85">
                     <strong>Privacy Note:</strong> Your conversation is anonymous and will be automatically deleted after 24 hours. Neither party will know each other's real identity unless you both agree to exchange nicknames.
                   </p>
                 </div>
@@ -245,7 +226,7 @@ const SoulMatch = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="relative w-32 h-32 mx-auto mb-8">
-            <Heart className="w-32 h-32 text-primary animate-pulse" />
+            <Search className="w-32 h-32 text-primary animate-pulse" />
           </div>
           <h2 className="text-2xl font-bold mb-2">Searching for your soul mate...</h2>
           <p className="text-muted-foreground">Finding someone who shares your feelings</p>
@@ -269,10 +250,10 @@ const SoulMatch = () => {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-4">
-              <Badge variant={timeLeft < 300 ? "destructive" : "secondary"}>
-                {formatTime(timeLeft)}
-              </Badge>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={handleKeepChat}>
+                Keep Chat
+              </Button>
               <Button variant="destructive" size="sm" onClick={handleEndChat}>
                 <AlertCircle className="h-4 w-4 mr-2" />
                 End Chat
@@ -283,59 +264,92 @@ const SoulMatch = () => {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto bg-muted/30">
-        <div className="container py-6 space-y-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.sender === "me" ? "justify-end" : "justify-start"}`}
-            >
-              <div
-                className={`max-w-[70%] rounded-2xl px-4 py-3 ${
-                  message.sender === "me"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-card"
-                }`}
-              >
-                <p className="text-sm">{message.text}</p>
-                <p className={`text-xs mt-1 ${
-                  message.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"
-                }`}>
-                  {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </p>
-              </div>
-            </div>
-          ))}
-          
-          {isTyping && (
-            <div className="flex justify-start">
-              <div className="bg-card rounded-2xl px-4 py-3">
-                <p className="text-sm text-muted-foreground">Typing...</p>
-              </div>
-            </div>
-          )}
-          
-          <div ref={messagesEndRef} />
+      {isChatMinimized ? (
+        <div className="flex-1 relative bg-muted/30 flex flex-col items-center justify-center gap-4 px-4 text-center">
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold">Chat kept for later</h3>
+            <p className="text-sm text-muted-foreground">
+              Your conversation is still active. Resume when you&apos;re ready.
+            </p>
+          </div>
+          <Button onClick={handleResumeChat}>Reopen Chat</Button>
         </div>
-      </div>
+      ) : (
+        <div className="flex-1 relative bg-muted/30">
+          <div className="h-full overflow-y-auto">
+            <div className="container py-6 pb-32 space-y-4">
+              {messages.map((message) => (
+                <div key={message.id} className={`flex ${message.sender === "me" ? "justify-end" : "justify-start"}`}>
+                  <div className={`flex items-end gap-3 ${message.sender === "me" ? "flex-row-reverse" : ""}`}>
+                    <div
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
+                        message.sender === "me"
+                          ? "bg-primary/15 text-primary"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {message.sender === "me" ? selfAvatarLabel : matchedUser?.icon ?? "🙂"}
+                    </div>
+                    <div
+                      className={`max-w-[70%] rounded-2xl px-4 py-3 ${
+                        message.sender === "me"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-card"
+                      }`}
+                    >
+                      <p className="text-sm">{message.text}</p>
+                      <p
+                        className={`text-xs mt-1 ${
+                          message.sender === "me"
+                            ? "text-primary-foreground/70"
+                            : "text-muted-foreground"
+                        }`}
+                      >
+                        {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
 
-      {/* Input Area */}
-      <div className="border-t border-border bg-card">
-        <div className="container py-4">
-          <div className="flex gap-2">
-            <Input
-              placeholder="Type your message..."
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-              className="flex-1"
-            />
-            <Button onClick={handleSendMessage}>
-              <Send className="h-4 w-4" />
-            </Button>
+              {isTyping && (
+                <div className="flex justify-start">
+                  <div className="flex items-end gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                      {matchedUser?.icon ?? "🙂"}
+                    </div>
+                    <div className="bg-card rounded-2xl px-4 py-3">
+                      <p className="text-sm text-muted-foreground">Typing...</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              <div ref={messagesEndRef} />
+            </div>
+          </div>
+
+          {/* Floating Input Bubble */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-6">
+            <div className="container flex justify-center px-4">
+              <div className="pointer-events-auto w-full max-w-3xl rounded-xl border border-border bg-card shadow-lg">
+                <div className="flex items-center gap-2 px-4 py-3">
+                  <Input
+                    placeholder="Type your message..."
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                    className="flex-1 border-0 bg-transparent p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  />
+                  <Button size="icon" className="h-10 w-10 rounded-lg" onClick={handleSendMessage}>
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* End Chat Modal */}
       <Dialog open={showEndModal} onOpenChange={setShowEndModal}>
@@ -349,28 +363,20 @@ const SoulMatch = () => {
             </p>
             <div className="space-y-2">
               <Button
-                variant="outline"
-                className="w-full"
-                onClick={handleContinueChat}
-              >
-                Continue Chat (requires mutual agreement)
-              </Button>
-              <Button
-                variant="destructive"
-                className="w-full"
+                className="w-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 onClick={handleNeverAgain}
               >
-                End & Never Match Again
+                End
               </Button>
               <Button
-                variant="secondary"
-                className="w-full"
+                variant="outline"
+                className="w-full border-destructive text-destructive hover:bg-destructive/10"
                 onClick={() => {
                   toast.info("Report submitted");
                   handleNeverAgain();
                 }}
               >
-                Report & End
+                End & Report
               </Button>
             </div>
           </div>

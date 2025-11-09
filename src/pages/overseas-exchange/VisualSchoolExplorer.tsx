@@ -14,7 +14,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Star, MessageSquare, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import Navigation from "@/components/Navigation";
 
 interface School {
   id: string;
@@ -217,8 +216,6 @@ const VisualSchoolExplorer = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation />
-      
       <main className="container py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Visual School Explorer</h1>

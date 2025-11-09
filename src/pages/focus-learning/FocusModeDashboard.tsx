@@ -1,68 +1,61 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Play, Pause, RotateCcw, RefreshCw, X, CheckCircle2 } from "lucide-react";
-import { toast } from "sonner";
-import Navigation from "@/components/Navigation";
+import { ArrowLeft, Pause, Play, RefreshCw, BellOff } from "lucide-react";
 
 const motivationalQuotes = [
-  "The secret of getting ahead is getting started. - Mark Twain",
-  "Focus is the gateway to success. - Unknown",
-  "Quality is not an act, it is a habit. - Aristotle",
-  "The future depends on what you do today. - Mahatma Gandhi",
-  "Don't watch the clock; do what it does. Keep going. - Sam Levenson",
+  "The successful warrior is the average person, with laser-like focus.",
+  "Do something today that your future self will thank you for.",
+  "Small daily improvements are the key to long-term results.",
+  "Your focus determines your reality.",
+  "Distraction is the enemy of progress.",
 ];
 
+const presetDurations = [25, 5, 15];
+
 const FocusModeDashboard = () => {
-  const [selectedTime, setSelectedTime] = useState(25);
-  const [timeLeft, setTimeLeft] = useState(25 * 60);
+  const [selectedTime, setSelectedTime] = useState(presetDurations[0]);
+  const [timeLeft, setTimeLeft] = useState(presetDurations[0] * 60);
   const [isRunning, setIsRunning] = useState(false);
-  const [showQuote, setShowQuote] = useState(true);
-  const [currentQuote, setCurrentQuote] = useState(motivationalQuotes[0]);
-  const [showRitualModal, setShowRitualModal] = useState(false);
-  const [hideRitualToday, setHideRitualToday] = useState(false);
-  const [showReflection, setShowReflection] = useState(false);
-  const [reflectionMood, setReflectionMood] = useState(0);
-  const [reflectionNote, setReflectionNote] = useState("");
-  const [distractionFreeMode, setDistractionFreeMode] = useState(false);
+  const [quoteIndex, setQuoteIndex] = useState(0);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isRunning && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft((time) => time - 1);
-      }, 1000);
-    } else if (timeLeft === 0 && isRunning) {
-      setIsRunning(false);
-      toast.success("Great job! Take a short break (5 min).");
-      setTimeout(() => setShowReflection(true), 2000);
-    }
-    return () => clearInterval(interval);
+    if (!isRunning || timeLeft <= 0) return;
+    const timer = window.setInterval(() => {
+      setTimeLeft((value) => Math.max(0, value - 1));
+    }, 1000);
+    return () => window.clearInterval(timer);
   }, [isRunning, timeLeft]);
 
-  // Keyboard shortcut for distraction-free mode
   useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === 'f' || e.key === 'F') {
-        setDistractionFreeMode(prev => !prev);
-      }
-    };
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
+    if (timeLeft === 0) {
+      setIsRunning(false);
+      setQuoteIndex((prev) => (prev + 1) % motivationalQuotes.length);
+    }
+  }, [timeLeft]);
+
+  useEffect(() => {
+    const quoteTimer = window.setInterval(() => {
+      setQuoteIndex((prev) => (prev + 1) % motivationalQuotes.length);
+    }, 20000);
+
+    return () => window.clearInterval(quoteTimer);
   }, []);
 
-  const handleStart = () => {
-    if (isRunning) {
-      setIsRunning(false);
+  const formattedTime = useMemo(() => {
+    const minutes = Math.floor(timeLeft / 60)
+      .toString()
+      .padStart(2, "0");
+    const seconds = (timeLeft % 60).toString().padStart(2, "0");
+    return `${minutes}:${seconds}`;
+  }, [timeLeft]);
+
+  const handleToggle = () => {
+    if (timeLeft === 0) {
+      setTimeLeft(selectedTime * 60);
+      setIsRunning(true);
     } else {
-      if (!hideRitualToday && timeLeft === selectedTime * 60) {
-        setShowRitualModal(true);
-      } else {
-        setIsRunning(true);
-      }
+      setIsRunning((prev) => !prev);
     }
   };
 
@@ -71,291 +64,123 @@ const FocusModeDashboard = () => {
     setTimeLeft(selectedTime * 60);
   };
 
-  const handleTimeSelect = (minutes: number) => {
+  const handlePresetChange = (minutes: number) => {
     setSelectedTime(minutes);
     setTimeLeft(minutes * 60);
     setIsRunning(false);
   };
 
-  const handleRefreshQuote = () => {
-    const randomQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
-    setCurrentQuote(randomQuote);
+  const handleCycleQuote = () => {
+    setQuoteIndex((prev) => (prev + 1) % motivationalQuotes.length);
   };
 
-  const handleSubmitReflection = () => {
-    if (reflectionMood > 0) {
-      toast.success("Reflection saved!");
-      setShowReflection(false);
-      setReflectionMood(0);
-      setReflectionNote("");
-    }
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  };
-
-  const progress = ((selectedTime * 60 - timeLeft) / (selectedTime * 60)) * 100;
+  const TimerIcon = isRunning ? Pause : Play;
+  const currentQuote = motivationalQuotes[quoteIndex];
 
   return (
-    <div className={`min-h-screen bg-background ${distractionFreeMode ? 'pb-8' : ''}`}>
-      {!distractionFreeMode && <Navigation />}
-      
-      <main className="container py-8">
-        {!distractionFreeMode && (
-          <>
-            <div className="mb-8">
-              <h1 className="text-4xl font-bold mb-2">Focus Mode</h1>
-              <p className="text-lg text-muted-foreground">
-                Stay focused with Pomodoro-style study sessions
-              </p>
-            </div>
+    <div
+        className="relative min-h-screen overflow-hidden text-white"
+        style={{
+          backgroundImage:
+            "linear-gradient(180deg, rgba(8,18,38,0.88) 0%, rgba(8,18,38,0.75) 40%, rgba(6,14,27,0.92) 100%), url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2000&q=80')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed",
+        }}
+      >
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(100,149,237,0.22),_transparent_58%)]" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-[linear-gradient(180deg,rgba(12,19,33,0)_0%,rgba(12,19,33,0.65)_45%,rgba(12,19,33,0.92)_100%)]" />
 
-            {/* Motivational Quote */}
-            {showQuote && (
-              <Card className="mb-8 bg-primary-light border-primary">
-                <CardContent className="pt-6">
-                  <div className="flex items-start justify-between">
-                    <p className="text-sm italic flex-1">{currentQuote}</p>
-                    <div className="flex gap-2 ml-4">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleRefreshQuote}
-                      >
-                        <RefreshCw className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setShowQuote(false)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </>
-        )}
+      <div className="relative z-10 flex min-h-screen flex-col pb-12">
+        <header className="flex items-center justify-between px-6 py-8">
+          <Button
+            asChild
+            variant="ghost"
+            className="rounded-full bg-white/10 px-6 text-white hover:bg-white/20 focus-visible:ring-offset-0"
+          >
+            <Link to="/focus-learning" className="flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Link>
+          </Button>
 
-        {/* Timer Section */}
-        <div className="max-w-2xl mx-auto">
-          <Card>
-            <CardContent className="pt-8 pb-8">
-              {/* Time Presets */}
-              <div className="flex flex-wrap justify-center gap-3 mb-8">
-                {[25, 45, 60].map((time) => (
-                  <Badge
-                    key={time}
-                    variant={selectedTime === time ? "default" : "outline"}
-                    className="cursor-pointer px-4 py-2 text-base"
-                    onClick={() => handleTimeSelect(time)}
-                  >
-                    {time} min
-                  </Badge>
-                ))}
+          <div className="flex items-center gap-3 text-sm text-white/70">
+            <span className="hidden sm:inline">Stay focused</span>
+          </div>
+        </header>
+
+        <main className="flex flex-1 items-center justify-center px-6">
+          <div className="w-full max-w-xl space-y-12 text-center">
+            <div className="space-y-4">
+              <p className="text-sm uppercase tracking-[0.35em] text-white/60">Focus Session</p>
+              <div className="text-[6.5rem] font-semibold leading-none tracking-tight drop-shadow-[0_6px_18px_rgba(0,0,0,0.35)]">
+                {formattedTime}
               </div>
-
-              {/* Timer Display */}
-              <div className="text-center mb-8">
-                <div className="relative inline-block">
-                  <svg className="w-64 h-64 transform -rotate-90">
-                    <circle
-                      cx="128"
-                      cy="128"
-                      r="120"
-                      stroke="currentColor"
-                      strokeWidth="8"
-                      fill="none"
-                      className="text-muted"
-                    />
-                    <circle
-                      cx="128"
-                      cy="128"
-                      r="120"
-                      stroke="currentColor"
-                      strokeWidth="8"
-                      fill="none"
-                      strokeDasharray={`${2 * Math.PI * 120}`}
-                      strokeDashoffset={`${2 * Math.PI * 120 * (1 - progress / 100)}`}
-                      className="text-primary transition-all duration-1000"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-6xl font-bold">{formatTime(timeLeft)}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Control Buttons */}
-              <div className="flex justify-center gap-4">
-                <Button size="lg" onClick={handleStart}>
-                  {isRunning ? (
-                    <>
-                      <Pause className="h-5 w-5 mr-2" />
-                      Pause
-                    </>
-                  ) : (
-                    <>
-                      <Play className="h-5 w-5 mr-2" />
-                      Start
-                    </>
-                  )}
+              <div className="flex flex-wrap items-center justify-center gap-4">
+                <Button
+                  size="lg"
+                  onClick={handleToggle}
+                  className="flex items-center gap-2 rounded-full bg-white/20 px-10 text-lg font-semibold text-white backdrop-blur hover:bg-white/30"
+                >
+                  <TimerIcon className="h-5 w-5" />
+                  {isRunning ? "Pause" : "Start"}
                 </Button>
-                <Button size="lg" variant="outline" onClick={handleReset}>
-                  <RotateCcw className="h-5 w-5 mr-2" />
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={handleReset}
+                  className="flex items-center gap-2 rounded-full border-white/40 bg-white/10 px-10 text-lg font-semibold text-white hover:bg-white/20 hover:text-white"
+                >
+                  <RefreshCw className="h-5 w-5" />
                   Reset
                 </Button>
               </div>
+            </div>
 
-              {/* Distraction-Free Mode Toggle */}
-              {!distractionFreeMode && (
-                <div className="text-center mt-6">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setDistractionFreeMode(true)}
-                  >
-                    Enable Distraction-Free Mode (F)
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+            <div className="flex flex-wrap justify-center gap-3">
+              {presetDurations.map((minutes) => (
+                <Button
+                  key={minutes}
+                  variant={selectedTime === minutes ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => handlePresetChange(minutes)}
+                  className={`rounded-full border border-white/30 px-5 text-sm font-medium backdrop-blur transition ${
+                    selectedTime === minutes
+                      ? "bg-white text-slate-900 hover:bg-white"
+                      : "bg-white/10 text-white hover:bg-white/25"
+                  }`}
+                >
+                  {minutes} min
+                </Button>
+              ))}
+            </div>
 
-          {/* Daily Summary */}
-          {!distractionFreeMode && (
-            <Card className="mt-8">
-              <CardContent className="pt-6">
-                <h3 className="font-semibold mb-4">Daily Summary</h3>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-primary">3</p>
-                    <p className="text-sm text-muted-foreground">Goals Planned</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-accent">2</p>
-                    <p className="text-sm text-muted-foreground">Completed</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-warning">1</p>
-                    <p className="text-sm text-muted-foreground">Spillover</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      </main>
-
-      {/* Focus Ritual Modal */}
-      <Dialog open={showRitualModal} onOpenChange={setShowRitualModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Before You Start</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <CheckCircle2 className="h-5 w-5 text-accent" />
-              <span>Is your phone on Do Not Disturb?</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <CheckCircle2 className="h-5 w-5 text-accent" />
-              <span>Are notifications turned off?</span>
-            </div>
-            <div className="flex items-center gap-2 pt-2">
-              <input
-                type="checkbox"
-                id="hideToday"
-                checked={hideRitualToday}
-                onChange={(e) => setHideRitualToday(e.target.checked)}
-              />
-              <label htmlFor="hideToday" className="text-sm">Hide for today</label>
-            </div>
-            <Button
-              className="w-full"
-              onClick={() => {
-                setShowRitualModal(false);
-                setIsRunning(true);
-              }}
-            >
-              Start Focusing
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Reflection Modal */}
-      <Dialog open={showReflection} onOpenChange={setShowReflection}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Session Reflection</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm font-medium mb-3">How do you feel?</p>
-              <div className="flex justify-center gap-2">
-                {[1, 2, 3, 4, 5].map((mood) => (
-                  <Button
-                    key={mood}
-                    variant={reflectionMood === mood ? "default" : "outline"}
-                    size="lg"
-                    className="w-12 h-12 rounded-full"
-                    onClick={() => setReflectionMood(mood)}
-                  >
-                    {mood}
-                  </Button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <p className="text-sm font-medium mb-2">Notes (optional, max 140 chars)</p>
-              <Textarea
-                value={reflectionNote}
-                onChange={(e) => setReflectionNote(e.target.value.slice(0, 140))}
-                placeholder="Any thoughts about this session?"
-                maxLength={140}
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                {reflectionNote.length}/140
-              </p>
-            </div>
-            <div className="flex gap-2">
+            <div className="space-y-3">
+              <p className="text-lg font-medium text-white/90">“{currentQuote}”</p>
               <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => setShowReflection(false)}
+                variant="ghost"
+                size="sm"
+                onClick={handleCycleQuote}
+                className="text-sm text-white/70 hover:text-white"
               >
-                Skip
-              </Button>
-              <Button
-                className="flex-1"
-                onClick={handleSubmitReflection}
-                disabled={reflectionMood === 0}
-              >
-                Submit
+                Refresh quote
               </Button>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
 
-      {/* Distraction-Free Exit Hint */}
-      {distractionFreeMode && (
-        <div className="fixed bottom-4 right-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setDistractionFreeMode(false)}
-          >
-            Exit Distraction-Free Mode (F)
-          </Button>
-        </div>
-      )}
+            <div className="inline-flex items-center gap-3 rounded-full bg-black/20 px-4 py-2 text-sm text-white/80 backdrop-blur">
+              <span className="h-2 w-2 rounded-full bg-emerald-300" />
+              <span className="flex items-center gap-2">
+                <span>Is your device in</span>
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs font-semibold text-white/90">
+                  <BellOff className="h-3.5 w-3.5" />
+                  Do Not Disturb Mode
+                </span>
+                <span>?</span>
+              </span>
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

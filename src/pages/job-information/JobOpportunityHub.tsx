@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/select";
 import { Building2, MapPin, Calendar, Bookmark, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
-import Navigation from "@/components/Navigation";
 
 interface Job {
   id: string;
@@ -93,8 +92,6 @@ const JobOpportunityHub = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation />
-      
       <main className="container py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Job Opportunity Discovery Hub</h1>

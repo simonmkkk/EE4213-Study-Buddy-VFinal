@@ -1,10 +1,12 @@
+import { useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Globe, Briefcase, Target, Users, ArrowRight } from "lucide-react";
-import Navigation from "@/components/Navigation";
 
 const LandingPage = () => {
+  const modulesRef = useRef<HTMLElement | null>(null);
+
   const modules = [
     {
       title: "Overseas Exchange",
@@ -42,43 +44,45 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation />
-      
+
       {/* Hero Section */}
-      <section className="container py-20 md:py-32">
-        <div className="mx-auto max-w-3xl text-center space-y-6">
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
-            Your Complete
-            <span className="text-primary"> Study Companion</span>
-          </h1>
-          <p className="text-xl text-muted-foreground">
-            Study Buddy empowers students with tools for academic success, career development, focused learning, and meaningful connections.
-          </p>
-          <div className="flex gap-4 justify-center pt-4">
-            <Button size="lg" asChild>
-              <Link to="/overseas-exchange">
+      <section className="relative border-b border-border/60 bg-muted/40">
+        <div className="container flex min-h-[calc(100vh-260px)] flex-col justify-start pt-32 pb-6 md:pt-52 md:pb-14">
+          <div className="mx-auto max-w-3xl text-center space-y-6">
+            <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
+              Your Complete
+              <span className="text-primary"> Study Companion</span>
+            </h1>
+            <div className="flex gap-4 justify-center pt-4">
+              <Button
+                size="lg"
+                className="transition-smooth hover:-translate-y-0.5"
+                onClick={() => modulesRef.current?.scrollIntoView({ behavior: "smooth" })}
+              >
                 Start Exploring
                 <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild>
-              <Link to="/community">Join Community</Link>
-            </Button>
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="transition-smooth hover:-translate-y-0.5"
+                asChild
+              >
+                <Link to="/community">Join Community</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Modules Section */}
-      <section className="container pb-20">
+      <section className="container pb-32 pt-16 md:pt-20" ref={modulesRef}>
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-3">Explore Our Modules</h2>
-            <p className="text-lg text-muted-foreground">
-              Everything you need for academic and personal growth
-            </p>
+            <h2 className="text-3xl font-bold mb-3">Modules</h2>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             {modules.map((module) => {
               const Icon = module.icon;
               return (
@@ -92,9 +96,6 @@ const LandingPage = () => {
                       <Icon className={`h-7 w-7 ${module.color}`} />
                     </div>
                     <CardTitle className="text-2xl">{module.title}</CardTitle>
-                    <CardDescription className="text-base">
-                      {module.description}
-                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <Button variant="ghost" className="gap-2 group-hover:gap-3 transition-smooth" asChild>
@@ -113,31 +114,7 @@ const LandingPage = () => {
 
       {/* Footer */}
       <footer className="border-t border-border bg-muted/30">
-        <div className="container py-12">
-          <div className="grid md:grid-cols-3 gap-8 text-center md:text-left">
-            <div>
-              <h3 className="font-semibold mb-3">About Study Buddy</h3>
-              <p className="text-sm text-muted-foreground">
-                Your all-in-one platform for academic success and personal growth.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-3">Quick Links</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link to="/overseas-exchange" className="hover:text-foreground transition-smooth">Overseas Exchange</Link></li>
-                <li><Link to="/job-information" className="hover:text-foreground transition-smooth">Job Information</Link></li>
-                <li><Link to="/focus-learning" className="hover:text-foreground transition-smooth">Focus Learning</Link></li>
-                <li><Link to="/community" className="hover:text-foreground transition-smooth">Community</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-3">Connect</h3>
-              <p className="text-sm text-muted-foreground">
-                © 2025 Study Buddy. All rights reserved.
-              </p>
-            </div>
-          </div>
-        </div>
+        <div className="container py-12" />
       </footer>
     </div>
   );

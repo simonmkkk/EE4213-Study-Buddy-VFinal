@@ -1,8 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BarChart3, Search, Target, ArrowRight } from "lucide-react";
-import Navigation from "@/components/Navigation";
 
 const JobInformation = () => {
   const navigate = useNavigate();
@@ -10,7 +9,6 @@ const JobInformation = () => {
   const features = [
     {
       title: "Career Progress Dashboard",
-      description: "Track your saved jobs, bookmarked resources, and application progress all in one place",
       icon: BarChart3,
       path: "/job-information/dashboard",
       color: "text-primary",
@@ -18,7 +16,6 @@ const JobInformation = () => {
     },
     {
       title: "Job Opportunity Discovery Hub",
-      description: "Find internships and graduate positions with smart filters and deadline reminders",
       icon: Search,
       path: "/job-information/job-hub",
       color: "text-secondary",
@@ -26,7 +23,6 @@ const JobInformation = () => {
     },
     {
       title: "Skill Mapping & Gap Analysis",
-      description: "Compare your skills with job requirements and get personalized learning recommendations",
       icon: Target,
       path: "/job-information/dashboard",
       color: "text-accent",
@@ -36,14 +32,9 @@ const JobInformation = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation />
-      
       <main className="container py-8">
         <div className="mb-12 text-center max-w-3xl mx-auto">
           <h1 className="text-5xl font-bold mb-4">Job Information</h1>
-          <p className="text-xl text-muted-foreground">
-            Navigate your career journey with confidence. Track opportunities, analyze skills, and achieve your professional goals.
-          </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
@@ -60,9 +51,6 @@ const JobInformation = () => {
                     <Icon className={`h-7 w-7 ${feature.color}`} />
                   </div>
                   <CardTitle className="text-xl">{feature.title}</CardTitle>
-                  <CardDescription>
-                    {feature.description}
-                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Button variant="ghost" className="gap-2 group-hover:gap-3 transition-smooth" size="sm">

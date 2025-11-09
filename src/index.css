@@ -21,11 +21,11 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 220 14% 16%;
     
-    /* Primary brand color - Professional Blue */
-    --primary: 217 91% 60%;
+    /* Primary brand color - Deep Green */
+    --primary: 143 60% 32%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 217 91% 55%;
-    --primary-light: 217 91% 95%;
+    --primary-hover: 143 60% 28%;
+    --primary-light: 143 60% 88%;
     
     /* Secondary accent - Warm Coral */
     --secondary: 14 90% 65%;
@@ -37,10 +37,10 @@ All colors MUST be HSL.
     --muted: 210 40% 96%;
     --muted-foreground: 220 9% 46%;
     
-    /* Accent color - Brand Blue */
-    --accent: 217 91% 60%;
+    /* Accent color - Complementary Green */
+    --accent: 141 50% 42%;
     --accent-foreground: 0 0% 100%;
-    --accent-light: 217 91% 95%;
+    --accent-light: 141 50% 88%;
     
     /* Destructive/Error */
     --destructive: 0 84% 60%;
@@ -93,10 +93,10 @@ All colors MUST be HSL.
     --popover: 220 14% 14%;
     --popover-foreground: 210 40% 98%;
     
-    --primary: 217 91% 60%;
+    --primary: 143 60% 38%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 217 91% 65%;
-    --primary-light: 217 91% 20%;
+    --primary-hover: 143 60% 42%;
+    --primary-light: 143 60% 22%;
     
     --secondary: 14 90% 65%;
     --secondary-foreground: 0 0% 100%;
@@ -106,9 +106,9 @@ All colors MUST be HSL.
     --muted: 220 14% 18%;
     --muted-foreground: 220 9% 60%;
     
-    --accent: 217 91% 60%;
+    --accent: 141 50% 38%;
     --accent-foreground: 0 0% 100%;
-    --accent-light: 217 91% 20%;
+    --accent-light: 141 50% 24%;
     
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
@@ -134,6 +134,46 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 220 14% 18%;
     --sidebar-ring: 217 91% 60%;
+  }
+
+  html[data-color-vision="red-green"] {
+    --primary: 165 45% 32%; /* teal */
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 165 45% 27%;
+    --primary-light: 165 45% 82%;
+
+    --secondary: 32 92% 58%; /* amber */
+    --secondary-foreground: 0 0% 15%;
+    --secondary-hover: 32 92% 52%;
+    --secondary-light: 32 92% 90%;
+
+    --accent: 215 65% 48%; /* blue */
+    --accent-foreground: 0 0% 100%;
+    --accent-light: 215 65% 90%;
+
+    --info: 210 30% 35%;
+    --info-foreground: 0 0% 100%;
+    --info-light: 210 30% 80%;
+  }
+
+  html[data-color-vision="blue-yellow"] {
+    --primary: 30 80% 52%; /* warm orange */
+    --primary-foreground: 0 0% 15%;
+    --primary-hover: 30 80% 46%;
+    --primary-light: 30 80% 88%;
+
+    --secondary: 200 65% 45%; /* cool blue */
+    --secondary-foreground: 0 0% 100%;
+    --secondary-hover: 200 65% 40%;
+    --secondary-light: 200 65% 90%;
+
+    --accent: 145 45% 35%; /* deep green */
+    --accent-foreground: 0 0% 100%;
+    --accent-light: 145 45% 80%;
+
+    --info: 52 90% 60%;
+    --info-foreground: 0 0% 20%;
+    --info-light: 52 90% 92%;
   }
 }
 

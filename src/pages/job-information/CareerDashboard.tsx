@@ -1,7 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Briefcase, Bookmark, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import Navigation from "@/components/Navigation";
 
 const CareerDashboard = () => {
   const navigate = useNavigate();
@@ -35,8 +34,6 @@ const CareerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation />
-      
       <main className="container py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Here's your career journey overview.</h1>

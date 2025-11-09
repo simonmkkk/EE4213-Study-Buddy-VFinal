@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BookOpen, CheckCircle2, XCircle, Trophy, MessageSquare, Star } from "lucide-react";
-import Navigation from "@/components/Navigation";
 
 interface Course {
   code: string;
@@ -377,8 +376,6 @@ const SyllabusAutoMatcher = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation />
-      
       <main className="container py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Syllabus Auto-Matcher</h1>

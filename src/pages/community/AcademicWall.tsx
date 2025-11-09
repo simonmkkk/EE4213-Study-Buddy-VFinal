@@ -5,7 +5,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, Send, Lightbulb, MessageSquare, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-import Navigation from "@/components/Navigation";
 
 interface Course {
   id: string;
@@ -92,8 +91,6 @@ const AcademicWall = () => {
   if (!selectedCourse) {
     return (
       <div className="min-h-screen bg-background">
-        <Navigation />
-        
         <main className="container py-8">
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-2">Course Discussion Groups</h1>
@@ -135,8 +132,6 @@ const AcademicWall = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation />
-      
       <main className="container py-8">
         <Button
           variant="ghost"
