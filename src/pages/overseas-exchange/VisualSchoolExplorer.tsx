@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Star, MessageSquare, Trash2 } from "lucide-react";
+import { Star, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -200,21 +200,6 @@ const VisualSchoolExplorer = () => {
     setReviewRating(0);
   };
 
-  const handleDeleteReview = (schoolId: string, reviewIndex: number) => {
-    const updatedSchools = schoolsData.map((school) => {
-      if (school.id !== schoolId) return school;
-      const updatedReviews = school.reviews.filter((_, idx) => idx !== reviewIndex);
-      return { ...school, reviews: updatedReviews };
-    });
-
-    setSchoolsData(updatedSchools);
-    if (selectedSchool?.id === schoolId) {
-      const updatedSelected = updatedSchools.find((school) => school.id === schoolId) ?? null;
-      setSelectedSchool(updatedSelected);
-    }
-    toast.success("Review deleted.");
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <main className="container py-8">
@@ -373,17 +358,6 @@ const VisualSchoolExplorer = () => {
                     </div>
                   </div>
                   <p className="text-sm mb-3">{review.content}</p>
-                  {review.isUser && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="ml-auto text-destructive hover:text-destructive flex items-center gap-2"
-                      onClick={() => handleDeleteReview(selectedSchool.id, idx)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      Delete
-                    </Button>
-                  )}
                 </CardContent>
               </Card>
             ))}
