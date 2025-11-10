@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Building2, MapPin, Calendar, Bookmark, ExternalLink, ArrowLeft } from "lucide-react";
+import { Building2, MapPin, Calendar, Bookmark, ExternalLink, ArrowLeft, Search } from "lucide-react";
 import { toast } from "sonner";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSavedJobs } from "@/context/SavedJobsContext";
@@ -78,6 +78,7 @@ const JobOpportunityHub = () => {
   const [typeFilter, setTypeFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
   const [selectedTag, setSelectedTag] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const { addJob, removeJob, isJobSaved } = useSavedJobs();
   const location = useLocation();
   const navigate = useNavigate();
@@ -120,7 +121,12 @@ const JobOpportunityHub = () => {
     const typeMatch = typeFilter === "all" || job.type === typeFilter;
     const locationMatch = locationFilter === "all" || job.location.includes(locationFilter);
     const tagMatch = selectedTag === "all" || job.tags.includes(selectedTag);
-    return typeMatch && locationMatch && tagMatch;
+    const searchMatch =
+      searchTerm === "" ||
+      job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+    return typeMatch && locationMatch && tagMatch && searchMatch;
   });
 
   const handleSave = (job: Job) => {
@@ -163,39 +169,50 @@ const JobOpportunityHub = () => {
           </PageTitle>
         </div>
 
-        {/* Filters */}
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Position Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="Internship">Internship</SelectItem>
-                <SelectItem value="Graduate">Graduate</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={locationFilter} onValueChange={setLocationFilter}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Location" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Locations</SelectItem>
-                <SelectItem value="CA">California</SelectItem>
-                <SelectItem value="NY">New York</SelectItem>
-                <SelectItem value="WA">Washington</SelectItem>
-              </SelectContent>
-            </Select>
+        {/* Filters and Search */}
+        <div className="mb-6 space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by job title, company, or skill..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
           </div>
-          <Button
-            asChild
-            variant="default"
-            className="self-start sm:self-auto sm:ml-auto"
-          >
-            <Link to="/job-information/saved-jobs">Saved Jobs</Link>
-          </Button>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Position Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="Internship">Internship</SelectItem>
+                  <SelectItem value="Graduate">Graduate</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={locationFilter} onValueChange={setLocationFilter}>
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Location" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Locations</SelectItem>
+                  <SelectItem value="CA">California</SelectItem>
+                  <SelectItem value="NY">New York</SelectItem>
+                  <SelectItem value="WA">Washington</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              asChild
+              variant="default"
+              className="self-start sm:self-auto sm:ml-auto"
+            >
+              <Link to="/job-information/saved-jobs">Saved Jobs</Link>
+            </Button>
+          </div>
         </div>
 
         {/* Category Filters */}

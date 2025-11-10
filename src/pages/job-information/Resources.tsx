@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BookOpen, ExternalLink, Bookmark, Calendar, ArrowLeft } from "lucide-react";
+import { BookOpen, ExternalLink, Bookmark, Calendar, ArrowLeft, Search } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { PageTitle } from "@/components/PageTitle";
 import { useSavedResources } from "@/context/SavedResourcesContext";
@@ -207,48 +207,53 @@ const Resources = () => {
           </PageTitle>
         </div>
 
-        {/* Filters */}
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
+        {/* Filters and Search */}
+        <div className="mb-6 space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Search resources"
-              className="w-full sm:w-[260px]"
+              placeholder="Search by resource title or category..."
+              className="pl-10"
             />
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                <SelectItem value="Event">Event</SelectItem>
-                <SelectItem value="Workshop">Workshop</SelectItem>
-                <SelectItem value="Seminar">Seminar</SelectItem>
-                <SelectItem value="Meetup">Meetup</SelectItem>
-                <SelectItem value="Conference">Conference</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={locationFilter} onValueChange={setLocationFilter}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Location" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Locations</SelectItem>
-                <SelectItem value="Online">Online</SelectItem>
-                <SelectItem value="Hybrid">Hybrid</SelectItem>
-                <SelectItem value="Singapore">Singapore</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
-          <Button
-            variant="default"
-            className="self-start sm:self-auto sm:ml-auto"
-            onClick={() => navigate("/job-information/saved-resources")}
-          >
-            Saved Resources
-          </Button>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="Event">Event</SelectItem>
+                  <SelectItem value="Workshop">Workshop</SelectItem>
+                  <SelectItem value="Seminar">Seminar</SelectItem>
+                  <SelectItem value="Meetup">Meetup</SelectItem>
+                  <SelectItem value="Conference">Conference</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={locationFilter} onValueChange={setLocationFilter}>
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Location" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Locations</SelectItem>
+                  <SelectItem value="Online">Online</SelectItem>
+                  <SelectItem value="Hybrid">Hybrid</SelectItem>
+                  <SelectItem value="Singapore">Singapore</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              variant="default"
+              className="self-start sm:self-auto sm:ml-auto"
+              onClick={() => navigate("/job-information/saved-resources")}
+            >
+              Saved Resources
+            </Button>
+          </div>
         </div>
 
         {/* Tag Filters */}

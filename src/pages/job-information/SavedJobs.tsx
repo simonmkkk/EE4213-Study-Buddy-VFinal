@@ -1,8 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Building2, MapPin, Calendar, Bookmark, ExternalLink, ArrowLeft } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Building2, MapPin, Calendar, Bookmark, ExternalLink, ArrowLeft, Search } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSavedJobs } from "@/context/SavedJobsContext";
@@ -11,6 +12,7 @@ const SavedJobs = () => {
   const { savedJobs, removeJob } = useSavedJobs();
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const state = location.state as { highlightId?: string; priority?: number } | null;
@@ -72,8 +74,28 @@ const SavedJobs = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-4">
-            {savedJobs.map((job) => (
+          <>
+            {/* Search Bar */}
+            <div className="mb-6">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by job title or company..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {savedJobs
+                .filter((job) =>
+                  searchTerm === "" ||
+                  job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  job.company.toLowerCase().includes(searchTerm.toLowerCase())
+                )
+                .map((job) => (
               <Card key={job.id} className="transition-smooth hover:shadow-md" data-highlight-id={job.highlightId}>
                 <CardContent className="pt-6">
                   <div className="flex items-start justify-between gap-4">
@@ -122,7 +144,8 @@ const SavedJobs = () => {
                 </CardContent>
               </Card>
             ))}
-          </div>
+            </div>
+          </>
         )}
       </main>
     </div>
