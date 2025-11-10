@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BookOpen, Send, Lightbulb, MessageSquare, ArrowLeft, Search } from "lucide-react";
+import { BookOpen, Send, Lightbulb, MessageSquare, Search } from "lucide-react";
 import { toast } from "sonner";
 
 interface Course {
@@ -268,15 +268,6 @@ const AcademicWall = () => {
   return (
     <div className="min-h-screen bg-background">
       <main className="container py-8">
-        <Button
-          variant="ghost"
-          className="mb-4"
-          onClick={() => setSelectedCourse(null)}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Course List
-        </Button>
-
         <div className="mb-8">
           <Badge variant="secondary" className="mb-2">{selectedCourse.code}</Badge>
           <h1 className="text-4xl font-bold mb-2">{selectedCourse.name}</h1>

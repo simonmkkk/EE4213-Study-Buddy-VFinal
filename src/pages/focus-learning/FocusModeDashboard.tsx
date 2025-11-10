@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Pause, Play, RefreshCw, BellOff } from "lucide-react";
+import { Pause, Play, RefreshCw, BellOff } from "lucide-react";
 
 const motivationalQuotes = [
   "The successful warrior is the average person, with laser-like focus.",
@@ -92,18 +91,7 @@ const FocusModeDashboard = () => {
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-[linear-gradient(180deg,rgba(12,19,33,0)_0%,rgba(12,19,33,0.65)_45%,rgba(12,19,33,0.92)_100%)]" />
 
       <div className="relative z-10 flex min-h-screen flex-col pb-12">
-        <header className="flex items-center justify-between px-6 py-8">
-          <Button
-            asChild
-            variant="ghost"
-            className="rounded-full bg-white/10 px-6 text-white hover:bg-white/20 focus-visible:ring-offset-0"
-          >
-            <Link to="/focus-learning" className="flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Link>
-          </Button>
-
+        <header className="flex items-center justify-end px-6 py-8">
           <div className="flex items-center gap-3 text-sm text-white/70">
             <span className="hidden sm:inline">Stay focused</span>
           </div>
