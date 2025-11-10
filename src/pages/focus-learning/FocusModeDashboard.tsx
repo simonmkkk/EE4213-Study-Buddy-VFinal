@@ -11,10 +11,12 @@ const motivationalQuotes = [
   "Distraction is the enemy of progress.",
 ];
 
-const presetDurations = [25, 5, 15];
+const presetDurations = [25, 15, 5];
 
 const FocusModeDashboard = () => {
-  const [selectedTime, setSelectedTime] = useState(presetDurations[0]);
+  const [selectedTime, setSelectedTime] = useState<number | null>(presetDurations[0]);
+  const [showCustomTimer, setShowCustomTimer] = useState(false);
+  const [customTime, setCustomTime] = useState(10); // 單位：分鐘，預設10
   const [timeLeft, setTimeLeft] = useState(presetDurations[0] * 60);
   const [isRunning, setIsRunning] = useState(false);
   const [quoteIndex, setQuoteIndex] = useState(0);
@@ -53,7 +55,8 @@ const FocusModeDashboard = () => {
 
   const handleToggle = () => {
     if (timeLeft === 0) {
-      setTimeLeft(selectedTime * 60);
+      const duration = showCustomTimer ? customTime : selectedTime;
+      setTimeLeft(duration * 60);
       setIsRunning(true);
     } else {
       setIsRunning((prev) => !prev);
@@ -62,12 +65,31 @@ const FocusModeDashboard = () => {
 
   const handleReset = () => {
     setIsRunning(false);
-    setTimeLeft(selectedTime * 60);
+    const duration = showCustomTimer ? customTime : selectedTime;
+    setTimeLeft(duration * 60);
   };
+
 
   const handlePresetChange = (minutes: number) => {
     setSelectedTime(minutes);
+    setShowCustomTimer(false);
     setTimeLeft(minutes * 60);
+    setIsRunning(false);
+  };
+
+  const handleCustomClick = () => {
+    setShowCustomTimer(true);
+    setSelectedTime(null);
+    setCustomTime(10);
+    setTimeLeft(10 * 60);
+    setIsRunning(false);
+  };
+
+  const handleCustomTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = parseInt(e.target.value, 10);
+    if (isNaN(value) || value <= 0) value = 1;
+    setCustomTime(value);
+    setTimeLeft(value * 60);
     setIsRunning(false);
   };
 
@@ -144,15 +166,16 @@ const FocusModeDashboard = () => {
               </div>
             </div>
 
+
             <div className="flex flex-wrap justify-center gap-2">
               {presetDurations.map((minutes) => (
                 <Button
                   key={minutes}
-                  variant={selectedTime === minutes ? "default" : "ghost"}
+                  variant={selectedTime === minutes && !showCustomTimer ? "default" : "ghost"}
                   size="sm"
                   onClick={() => handlePresetChange(minutes)}
                   className={`rounded-full border border-white/30 px-4 text-sm font-medium backdrop-blur transition ${
-                    selectedTime === minutes
+                    selectedTime === minutes && !showCustomTimer
                       ? "bg-white text-slate-900 hover:bg-white"
                       : "bg-white/10 text-white hover:bg-white/25"
                   }`}
@@ -160,7 +183,33 @@ const FocusModeDashboard = () => {
                   {minutes} min
                 </Button>
               ))}
+              <Button
+                variant={showCustomTimer ? "default" : "ghost"}
+                size="sm"
+                onClick={handleCustomClick}
+                className={`rounded-full border border-white/30 px-4 text-sm font-medium backdrop-blur transition ${
+                  showCustomTimer
+                    ? "bg-white text-slate-900 hover:bg-white"
+                    : "bg-white/10 text-white hover:bg-white/25"
+                }`}
+              >
+                Custom
+              </Button>
             </div>
+
+            {showCustomTimer && (
+              <div className="flex justify-center mt-2">
+                <input
+                  type="number"
+                  min={1}
+                  max={180}
+                  value={customTime}
+                  onChange={handleCustomTimeChange}
+                  className="w-24 rounded-full px-3 py-1.5 text-center text-base font-semibold text-slate-900 bg-white border border-white/40 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+                <span className="ml-2 text-white/80 self-center">分鐘</span>
+              </div>
+            )}
 
             <div className="space-y-2">
               <p className="text-base font-medium text-white/90">"{currentQuote}"</p>

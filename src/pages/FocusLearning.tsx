@@ -161,6 +161,12 @@ const FocusLearning = () => {
   const [isTrackerCollapsed, setIsTrackerCollapsed] = useState(true);
   const [editingMajorIds, setEditingMajorIds] = useState<Record<string, string>>({});
   const [editingMinorIds, setEditingMinorIds] = useState<Record<string, Record<string, string>>>({});
+  const [customHours, setCustomHours] = useState<number>(0);
+  const [customMinutes, setCustomMinutes] = useState<number>(25);
+  const [customSeconds, setCustomSeconds] = useState<number>(0);
+  const [directTimeInput, setDirectTimeInput] = useState<string>("00:25:00");
+  const [showCustomTimer, setShowCustomTimer] = useState<boolean>(false);
+  const [isCustomSelected, setIsCustomSelected] = useState<boolean>(false);
 
   const ambientAudioRef = useRef<Record<string, HTMLAudioElement>>({});
   const trackerRef = useRef<HTMLDivElement | null>(null);
@@ -247,6 +253,48 @@ const FocusLearning = () => {
     setSelectedDuration(minutes);
     setIsRunning(false);
     setRemainingSeconds(minutes * 60);
+    setShowCustomTimer(false);
+    setIsCustomSelected(false);
+  };
+
+  const updateCustomTime = (hours: number, minutes: number, seconds: number) => {
+    const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+    if (totalSeconds > 0) {
+      setSelectedDuration(totalSeconds / 60);
+      setIsRunning(false);
+      setRemainingSeconds(totalSeconds);
+      setDirectTimeInput(
+        `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
+      );
+    }
+  };
+
+  const handleDirectTimeInputChange = (value: string) => {
+    setDirectTimeInput(value);
+    
+    // Auto-format as user types
+    const cleaned = value.replace(/[^0-9]/g, "");
+    
+    if (cleaned.length >= 6) {
+      const hours = parseInt(cleaned.slice(0, 2), 10);
+      const minutes = parseInt(cleaned.slice(2, 4), 10);
+      const seconds = parseInt(cleaned.slice(4, 6), 10);
+      
+      // Validate ranges
+      if (hours <= 23 && minutes <= 59 && seconds <= 59) {
+        setCustomHours(hours);
+        setCustomMinutes(minutes);
+        setCustomSeconds(seconds);
+        updateCustomTime(hours, minutes, seconds);
+      }
+    }
+  };
+
+  const handleDirectTimeInputBlur = () => {
+    // Format on blur to ensure proper display
+    setDirectTimeInput(
+      `${String(customHours).padStart(2, "0")}:${String(customMinutes).padStart(2, "0")}:${String(customSeconds).padStart(2, "0")}`
+    );
   };
 
   const toggleFullscreen = () => {
@@ -552,11 +600,7 @@ const FocusLearning = () => {
     );
   };
 
-  useEffect(() => {
-    if (!isRunning) {
-      setRemainingSeconds(selectedDuration * 60);
-    }
-  }, [selectedDuration, isRunning]);
+  // Removed the useEffect that was resetting time on pause
 
   useEffect(() => {
     if (!isRunning) {
@@ -714,17 +758,9 @@ const FocusLearning = () => {
           </div>
 
           <div className="space-y-3">
-            <p
-              className={cn(
-                "text-xs uppercase tracking-[0.35em]",
-                isWallpaperActive ? "text-white/60" : "text-slate-500",
-              )}
-            >
-              Quick Presets
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-3">
+            <div className="flex items-center justify-center gap-3">
               {presetDurations.map((minutes) => {
-                const isSelected = selectedDuration === minutes;
+                const isSelected = selectedDuration === minutes && !isCustomSelected;
 
                 return (
                   <Button
@@ -747,6 +783,180 @@ const FocusLearning = () => {
                   </Button>
                 );
               })}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setShowCustomTimer(!showCustomTimer);
+                  // Only reset time if switching from preset to custom (not already in custom mode)
+                  if (!showCustomTimer && !isCustomSelected) {
+                    setIsCustomSelected(true);
+                    setIsRunning(false);
+                    setCustomHours(0);
+                    setCustomMinutes(10);
+                    setCustomSeconds(0);
+                    setRemainingSeconds(10 * 60);
+                    setSelectedDuration(10);
+                    setDirectTimeInput("00:10:00");
+                  } else if (!showCustomTimer && isCustomSelected) {
+                    // Just opening the panel again, don't reset anything
+                    setIsCustomSelected(true);
+                  }
+                }}
+                className={cn(
+                  "rounded-full px-5 text-sm font-medium transition-colors duration-200",
+                  isCustomSelected
+                    ? isWallpaperActive
+                      ? "border-white bg-white text-slate-900 hover:bg-white hover:text-slate-900"
+                      : "border-primary bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
+                    : isWallpaperActive
+                      ? "border-white/70 bg-white/12 text-white hover:bg-white/20 hover:text-white"
+                      : "border-primary text-primary hover:bg-primary hover:text-primary-foreground",
+                )}
+              >
+                Custom
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  setShowCustomTimer(false);
+                  // Keep the timer running and don't reset time or isCustomSelected
+                }}
+                className={cn(
+                  "h-8 w-8 rounded-full transition-colors duration-200",
+                  showCustomTimer
+                    ? isWallpaperActive
+                      ? "text-white hover:bg-white/20"
+                      : "text-slate-600 hover:bg-slate-100"
+                    : "invisible",
+                )}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            {/* Fixed height container for custom timer to prevent layout shift */}
+            <div className={cn("transition-all duration-300", showCustomTimer ? "h-[60px]" : "h-0")}>
+              {showCustomTimer && (
+                <div className="flex items-center justify-center gap-3 pt-4">
+                  <div className="flex flex-col items-center gap-1">
+                    <span className={cn("text-xs font-medium", isWallpaperActive ? "text-white/70" : "text-slate-600")}>
+                      Hours
+                    </span>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className={cn(
+                            "w-20 rounded-full px-3 text-sm font-medium transition-colors duration-200",
+                            isWallpaperActive
+                              ? "border-white/70 bg-white/12 text-white hover:bg-white/20 hover:text-white"
+                              : "border-primary text-primary hover:bg-primary/10",
+                          )}
+                        >
+                          {String(customHours).padStart(2, "0")}
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="h-48 overflow-y-auto">
+                        {Array.from({ length: 24 }, (_, i) => (
+                          <DropdownMenuItem
+                            key={i}
+                            onClick={() => {
+                              setCustomHours(i);
+                              updateCustomTime(i, customMinutes, customSeconds);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            {String(i).padStart(2, "0")}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+
+                  <span className={cn("text-2xl font-bold mt-5", isWallpaperActive ? "text-white" : "text-slate-900")}>
+                    :
+                  </span>
+
+                  <div className="flex flex-col items-center gap-1">
+                    <span className={cn("text-xs font-medium", isWallpaperActive ? "text-white/70" : "text-slate-600")}>
+                      Minutes
+                    </span>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className={cn(
+                            "w-20 rounded-full px-3 text-sm font-medium transition-colors duration-200",
+                            isWallpaperActive
+                              ? "border-white/70 bg-white/12 text-white hover:bg-white/20 hover:text-white"
+                              : "border-primary text-primary hover:bg-primary/10",
+                          )}
+                        >
+                          {String(customMinutes).padStart(2, "0")}
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="h-48 overflow-y-auto">
+                        {Array.from({ length: 60 }, (_, i) => (
+                          <DropdownMenuItem
+                            key={i}
+                            onClick={() => {
+                              setCustomMinutes(i);
+                              updateCustomTime(customHours, i, customSeconds);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            {String(i).padStart(2, "0")}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+
+                  <span className={cn("text-2xl font-bold mt-5", isWallpaperActive ? "text-white" : "text-slate-900")}>
+                    :
+                  </span>
+
+                  <div className="flex flex-col items-center gap-1">
+                    <span className={cn("text-xs font-medium", isWallpaperActive ? "text-white/70" : "text-slate-600")}>
+                      Seconds
+                    </span>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className={cn(
+                            "w-20 rounded-full px-3 text-sm font-medium transition-colors duration-200",
+                            isWallpaperActive
+                              ? "border-white/70 bg-white/12 text-white hover:bg-white/20 hover:text-white"
+                              : "border-primary text-primary hover:bg-primary/10",
+                          )}
+                        >
+                          {String(customSeconds).padStart(2, "0")}
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="h-48 overflow-y-auto">
+                        {Array.from({ length: 60 }, (_, i) => (
+                          <DropdownMenuItem
+                            key={i}
+                            onClick={() => {
+                              setCustomSeconds(i);
+                              updateCustomTime(customHours, customMinutes, i);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            {String(i).padStart(2, "0")}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
