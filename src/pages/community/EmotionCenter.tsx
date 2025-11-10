@@ -538,7 +538,7 @@ const EmotionCenter = () => {
                       </div>
                       <div className="flex flex-wrap gap-2 mb-3">
                         {post.tags.map((tag) => (
-                          <Badge key={tag} variant="secondary" className="text-xs">
+                          <Badge key={tag} variant="outline" className="text-xs bg-slate-100 border-slate-400 text-slate-800 font-medium">
                             {tag}
                           </Badge>
                         ))}

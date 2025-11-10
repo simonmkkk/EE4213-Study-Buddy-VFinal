@@ -214,7 +214,7 @@ const Resources = () => {
             <Input
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Search by resource title or category..."
+              placeholder="Search by resource title, category, or tags (e.g., Career, Resume, Interview)..."
               className="pl-10"
             />
           </div>
@@ -257,34 +257,37 @@ const Resources = () => {
         </div>
 
         {/* Tag Filters */}
-        <div className="mb-8 flex flex-wrap gap-2">
-          <Button
-            size="sm"
-            onClick={() => setSelectedTag("all")}
-            className={cn(
-              "border-gray-300 text-foreground hover:bg-gray-50 rounded-full",
-              "bg-background",
-              selectedTag === "all" &&
-                "bg-primary text-white border-primary hover:bg-primary/90 hover:text-white"
-            )}
-          >
-            All Tags
-          </Button>
-          {allTags.map((tag) => (
+        <div className="mb-8">
+          <h3 className="text-sm font-semibold text-muted-foreground mb-3">Filter by Tags</h3>
+          <div className="flex flex-wrap gap-2">
             <Button
-              key={tag}
               size="sm"
-              onClick={() => setSelectedTag(tag)}
+              onClick={() => setSelectedTag("all")}
               className={cn(
                 "border-gray-300 text-foreground hover:bg-gray-50 rounded-full",
                 "bg-background",
-                selectedTag === tag &&
+                selectedTag === "all" &&
                   "bg-primary text-white border-primary hover:bg-primary/90 hover:text-white"
               )}
             >
-              {tag}
+              All Tags
             </Button>
-          ))}
+            {allTags.map((tag) => (
+              <Button
+                key={tag}
+                size="sm"
+                onClick={() => setSelectedTag(tag)}
+                className={cn(
+                  "border-gray-300 text-foreground hover:bg-gray-50 rounded-full",
+                  "bg-background",
+                  selectedTag === tag &&
+                    "bg-primary text-white border-primary hover:bg-primary/90 hover:text-white"
+                )}
+              >
+                {tag}
+              </Button>
+            ))}
+          </div>
         </div>
 
         <div className="space-y-4">

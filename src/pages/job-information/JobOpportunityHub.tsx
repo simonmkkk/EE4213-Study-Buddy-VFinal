@@ -174,7 +174,7 @@ const JobOpportunityHub = () => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by job title, company, or skill..."
+              placeholder="Search by job title, company, or tags (e.g., AI, Cloud, Finance)..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -216,34 +216,37 @@ const JobOpportunityHub = () => {
         </div>
 
         {/* Category Filters */}
-        <div className="mb-8 flex flex-wrap gap-2">
-          <Button
-            size="sm"
-            onClick={() => setSelectedTag("all")}
-            className={cn(
-              "border-primary/30 text-foreground hover:bg-primary/10 rounded-full",
-              "bg-background",
-              selectedTag === "all" &&
-                "bg-primary text-white border-primary hover:bg-primary/90 hover:text-white"
-            )}
-          >
-            All Categories
-          </Button>
-          {categories.map((category) => (
+        <div className="mb-8">
+          <h3 className="text-sm font-semibold text-muted-foreground mb-3">Filter by Tags</h3>
+          <div className="flex flex-wrap gap-2">
             <Button
-              key={category}
               size="sm"
-              onClick={() => setSelectedTag(category)}
+              onClick={() => setSelectedTag("all")}
               className={cn(
                 "border-primary/30 text-foreground hover:bg-primary/10 rounded-full",
                 "bg-background",
-                selectedTag === category &&
+                selectedTag === "all" &&
                   "bg-primary text-white border-primary hover:bg-primary/90 hover:text-white"
               )}
             >
-              {category}
+              All Categories
             </Button>
-          ))}
+            {categories.map((category) => (
+              <Button
+                key={category}
+                size="sm"
+                onClick={() => setSelectedTag(category)}
+                className={cn(
+                  "border-primary/30 text-foreground hover:bg-primary/10 rounded-full",
+                  "bg-background",
+                  selectedTag === category &&
+                    "bg-primary text-white border-primary hover:bg-primary/90 hover:text-white"
+                )}
+              >
+                {category}
+              </Button>
+            ))}
+          </div>
         </div>
 
         {/* Job Cards */}
@@ -294,23 +297,22 @@ const JobOpportunityHub = () => {
                         </div>
                       </div>
 
+                      {/* Position Type */}
+                      <div className="mb-3">
+                        <Badge 
+                          variant="outline" 
+                          className="bg-slate-200 border-slate-600 text-slate-900 font-semibold"
+                        >
+                          {job.type}
+                        </Badge>
+                      </div>
+
                       {/* Tags and Buttons */}
                       <div className="flex flex-wrap items-center gap-3 mb-6">
-                        {/* Tags */}
+                        {/* Job Field Tags */}
                         <div className="flex flex-wrap gap-2">
-                          <Badge 
-                            variant="outline" 
-                            className={cn(
-                              "bg-background border-gray-300 hover:bg-gray-50",
-                              job.type === "Internship" || job.type === "Graduate"
-                                ? "text-orange-600"
-                                : "text-foreground"
-                            )}
-                          >
-                            {job.type}
-                          </Badge>
                           {job.tags.map((tag) => (
-                            <Badge key={tag} variant="outline" className="bg-background text-foreground border-gray-300 hover:bg-gray-50">
+                            <Badge key={tag} variant="outline" className="bg-slate-200 border-slate-600 text-slate-900 font-medium">
                               {tag}
                             </Badge>
                           ))}

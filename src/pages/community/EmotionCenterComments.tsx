@@ -153,7 +153,7 @@ export default function EmotionCenterComments() {
 
               <div className="mb-4 flex flex-wrap gap-2">
                 {post.tags.map((tag) => (
-                  <Badge key={tag} variant="secondary">
+                  <Badge key={tag} variant="outline" className="bg-slate-100 border-slate-400 text-slate-800 font-medium">
                     {tag}
                   </Badge>
                 ))}

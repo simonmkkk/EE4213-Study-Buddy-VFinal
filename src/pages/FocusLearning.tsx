@@ -688,22 +688,24 @@ const FocusLearning = () => {
       )}
       style={{
         ...backgroundStyle,
-        height: 'calc(100vh - 4rem)',
+        height: isFullscreen ? '100vh' : 'calc(100vh - 4rem)',
         overflow: 'hidden',
       }}
     >
       <div className="container py-8 h-full flex flex-col overflow-hidden">
-        <div className="mb-12 flex-shrink-0">
-          <PageTitle
-            as="h1"
-            variant={isWallpaperActive ? "inverted" : "default"}
-            className="text-5xl md:text-6xl"
-          >
-            Deep Focus
-          </PageTitle>
-        </div>
+        {!isFullscreen && (
+          <div className="mb-12 flex-shrink-0">
+            <PageTitle
+              as="h1"
+              variant={isWallpaperActive ? "inverted" : "default"}
+              className="text-5xl md:text-6xl"
+            >
+              Deep Focus
+            </PageTitle>
+          </div>
+        )}
 
-        <main className="flex-1 flex items-center justify-center overflow-hidden">
+        <main className="flex-1 flex items-end justify-center overflow-hidden pb-20">
           <div className="flex w-full flex-col gap-8 text-center">
         <div className="space-y-6">
           <div
@@ -758,82 +760,84 @@ const FocusLearning = () => {
           </div>
 
           <div className="space-y-3">
-            <div className="flex items-center justify-center gap-3">
-              {presetDurations.map((minutes) => {
-                const isSelected = selectedDuration === minutes && !isCustomSelected;
+            <div className="relative flex items-center justify-center">
+              <div className="flex items-center gap-3">
+                {presetDurations.map((minutes) => {
+                  const isSelected = selectedDuration === minutes && !isCustomSelected;
 
-                return (
-                  <Button
-                    key={minutes}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handlePresetSelect(minutes)}
-                    className={cn(
-                      "rounded-full px-5 text-sm font-medium transition-colors duration-200",
-                      isSelected
-                        ? isWallpaperActive
-                          ? "border-white bg-white text-slate-900 hover:bg-white hover:text-slate-900"
-                          : "border-primary bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
-                        : isWallpaperActive
-                          ? "border-white/70 bg-white/12 text-white hover:bg-white/20 hover:text-white"
-                          : "border-primary text-primary hover:bg-primary hover:text-primary-foreground",
-                    )}
-                  >
-                    {minutes} min
-                  </Button>
-                );
-              })}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setShowCustomTimer(!showCustomTimer);
-                  // Only reset time if switching from preset to custom (not already in custom mode)
-                  if (!showCustomTimer && !isCustomSelected) {
-                    setIsCustomSelected(true);
-                    setIsRunning(false);
-                    setCustomHours(0);
-                    setCustomMinutes(10);
-                    setCustomSeconds(0);
-                    setRemainingSeconds(10 * 60);
-                    setSelectedDuration(10);
-                    setDirectTimeInput("00:10:00");
-                  } else if (!showCustomTimer && isCustomSelected) {
-                    // Just opening the panel again, don't reset anything
-                    setIsCustomSelected(true);
-                  }
-                }}
-                className={cn(
-                  "rounded-full px-5 text-sm font-medium transition-colors duration-200",
-                  isCustomSelected
-                    ? isWallpaperActive
-                      ? "border-white bg-white text-slate-900 hover:bg-white hover:text-slate-900"
-                      : "border-primary bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
-                    : isWallpaperActive
-                      ? "border-white/70 bg-white/12 text-white hover:bg-white/20 hover:text-white"
-                      : "border-primary text-primary hover:bg-primary hover:text-primary-foreground",
-                )}
-              >
-                Custom
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  setShowCustomTimer(false);
-                  // Keep the timer running and don't reset time or isCustomSelected
-                }}
-                className={cn(
-                  "h-8 w-8 rounded-full transition-colors duration-200",
-                  showCustomTimer
-                    ? isWallpaperActive
-                      ? "text-white hover:bg-white/20"
-                      : "text-slate-600 hover:bg-slate-100"
-                    : "invisible",
-                )}
-              >
-                <X className="h-4 w-4" />
-              </Button>
+                  return (
+                    <Button
+                      key={minutes}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePresetSelect(minutes)}
+                      className={cn(
+                        "rounded-full px-5 text-sm font-medium transition-colors duration-200",
+                        isSelected
+                          ? isWallpaperActive
+                            ? "border-white bg-white text-slate-900 hover:bg-white hover:text-slate-900"
+                            : "border-primary bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
+                          : isWallpaperActive
+                            ? "border-white/70 bg-white/12 text-white hover:bg-white/20 hover:text-white"
+                            : "border-primary text-primary hover:bg-primary hover:text-primary-foreground",
+                      )}
+                    >
+                      {minutes} min
+                    </Button>
+                  );
+                })}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setShowCustomTimer(!showCustomTimer);
+                    // Only reset time if switching from preset to custom (not already in custom mode)
+                    if (!showCustomTimer && !isCustomSelected) {
+                      setIsCustomSelected(true);
+                      setIsRunning(false);
+                      setCustomHours(0);
+                      setCustomMinutes(10);
+                      setCustomSeconds(0);
+                      setRemainingSeconds(10 * 60);
+                      setSelectedDuration(10);
+                      setDirectTimeInput("00:10:00");
+                    } else if (!showCustomTimer && isCustomSelected) {
+                      // Just opening the panel again, don't reset anything
+                      setIsCustomSelected(true);
+                    }
+                  }}
+                  className={cn(
+                    "rounded-full px-5 text-sm font-medium transition-colors duration-200",
+                    isCustomSelected
+                      ? isWallpaperActive
+                        ? "border-white bg-white text-slate-900 hover:bg-white hover:text-slate-900"
+                        : "border-primary bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
+                      : isWallpaperActive
+                        ? "border-white/70 bg-white/12 text-white hover:bg-white/20 hover:text-white"
+                        : "border-primary text-primary hover:bg-primary hover:text-primary-foreground",
+                  )}
+                >
+                  Custom
+                </Button>
+              </div>
+              {showCustomTimer && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    setShowCustomTimer(false);
+                    // Keep the timer running and don't reset time or isCustomSelected
+                  }}
+                  className={cn(
+                    "absolute left-[calc(50%+250px)] h-10 w-10 rounded-full border-2 transition-colors duration-200",
+                    isWallpaperActive
+                      ? "bg-white/20 border-white/40 text-white hover:bg-white/30"
+                      : "bg-slate-200 border-slate-400 text-slate-700 hover:bg-slate-300",
+                  )}
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              )}
             </div>
             
             {/* Fixed height container for custom timer to prevent layout shift */}
@@ -1182,7 +1186,7 @@ const FocusLearning = () => {
             >
               {/* Section 1: Header + Create */}
               <div className={cn("px-5 py-4 sm:px-6 sm:py-5 border-b", isWallpaperActive ? "border-white/20" : "border-slate-300")}> 
-                <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-2xl font-bold tracking-tight">Micro Goal Study Tracker</p>
                   </div>

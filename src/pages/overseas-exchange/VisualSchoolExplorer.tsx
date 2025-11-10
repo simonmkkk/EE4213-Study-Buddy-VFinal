@@ -10,6 +10,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -18,9 +30,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Star, MessageSquare, ArrowLeft, Search, Edit2, Trash2, X } from "lucide-react";
+import { Star, MessageSquare, ArrowLeft, Search, Edit2, Trash2, X, Check, ChevronsUpDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface School {
   id: string;
@@ -163,6 +176,10 @@ const VisualSchoolExplorer = () => {
   const [editingReviewIndex, setEditingReviewIndex] = useState<number | null>(null);
   const [editingReviewText, setEditingReviewText] = useState("");
   const [editingReviewRating, setEditingReviewRating] = useState(0);
+  const [openCountry, setOpenCountry] = useState(false);
+  const [openProgram, setOpenProgram] = useState(false);
+  const [countrySearchTerm, setCountrySearchTerm] = useState("");
+  const [programSearchTerm, setProgramSearchTerm] = useState("");
 
   const filteredSchools = schoolsData.filter((school) => {
     const countryMatch = countryFilter === "all" || school.country === countryFilter;
@@ -332,40 +349,127 @@ const VisualSchoolExplorer = () => {
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by school name, country, or program..."
+              placeholder="Search by school name, country, or major (e.g., Computer Science, Business)..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
             />
           </div>
+          <h3 className="text-sm font-semibold text-muted-foreground mb-3">Filter by Country & Program</h3>
           <div className="flex flex-col sm:flex-row gap-4">
-            <Select value={countryFilter} onValueChange={setCountryFilter}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Select Country" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Countries</SelectItem>
-                {countryOptions.map((country) => (
-                  <SelectItem key={country} value={country}>
-                    {country}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover open={openCountry} onOpenChange={setOpenCountry}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={openCountry}
+                  className="w-full sm:w-[200px] justify-between"
+                >
+                  {countryFilter === "all"
+                    ? "All Countries"
+                    : countryOptions.find((country) => country === countryFilter) || "Select Country"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[200px] p-0">
+                <Command>
+                  <CommandInput placeholder="Search country..." />
+                  <CommandEmpty>No country found.</CommandEmpty>
+                  <CommandGroup>
+                    <CommandItem
+                      value="all"
+                      onSelect={() => {
+                        setCountryFilter("all");
+                        setOpenCountry(false);
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          countryFilter === "all" ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      All Countries
+                    </CommandItem>
+                    {countryOptions.map((country) => (
+                      <CommandItem
+                        key={country}
+                        value={country}
+                        onSelect={() => {
+                          setCountryFilter(country);
+                          setOpenCountry(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            countryFilter === country ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {country}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
 
-            <Select value={programFilter} onValueChange={setProgramFilter}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Select Program" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Programs</SelectItem>
-                {majorOptions.map((major) => (
-                  <SelectItem key={major} value={major}>
-                    {major}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover open={openProgram} onOpenChange={setOpenProgram}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={openProgram}
+                  className="w-full sm:w-[200px] justify-between"
+                >
+                  {programFilter === "all"
+                    ? "All Programs"
+                    : majorOptions.find((major) => major === programFilter) || "Select Program"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[200px] p-0">
+                <Command>
+                  <CommandInput placeholder="Search program..." />
+                  <CommandEmpty>No program found.</CommandEmpty>
+                  <CommandGroup>
+                    <CommandItem
+                      value="all"
+                      onSelect={() => {
+                        setProgramFilter("all");
+                        setOpenProgram(false);
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          programFilter === "all" ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      All Programs
+                    </CommandItem>
+                    {majorOptions.map((major) => (
+                      <CommandItem
+                        key={major}
+                        value={major}
+                        onSelect={() => {
+                          setProgramFilter(major);
+                          setOpenProgram(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            programFilter === major ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {major}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 
@@ -406,7 +510,7 @@ const VisualSchoolExplorer = () => {
 
                       <div className="flex flex-wrap gap-2 mb-4">
                         {school.majors.map((major) => (
-                          <Badge key={`${school.id}-${major}`} variant="outline" className="bg-slate-50 border-slate-300 text-slate-700">{major}</Badge>
+                          <Badge key={`${school.id}-${major}`} variant="outline" className="bg-slate-200 border-slate-600 text-slate-900 font-semibold">{major}</Badge>
                         ))}
                       </div>
 

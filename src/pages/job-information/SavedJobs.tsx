@@ -100,12 +100,11 @@ const SavedJobs = () => {
                 <CardContent className="pt-6">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
-                      <h3 className="text-xl font-semibold mb-2">{job.title}</h3>
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-3">
-                        <div className="flex items-center gap-1">
-                          <Building2 className="h-4 w-4" />
-                          {job.company}
-                        </div>
+                      <div className="mb-3">
+                        <h3 className="text-2xl font-bold mb-1">{job.title}</h3>
+                        <p className="text-lg font-medium text-foreground">{job.company}</p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-4">
                         <div className="flex items-center gap-1">
                           <MapPin className="h-4 w-4" />
                           {job.location}
@@ -115,14 +114,14 @@ const SavedJobs = () => {
                           Due: {job.deadline}
                         </div>
                       </div>
-                      <p className="text-sm text-muted-foreground mb-3">{job.description}</p>
+                      <p className="text-base text-muted-foreground mb-4">{job.description}</p>
                       <div className="flex flex-wrap gap-2">
                         {job.tags.map((tag) => (
-                          <Badge key={tag} variant="secondary">
+                          <Badge key={tag} variant="outline" className="bg-slate-50 border-slate-300 text-slate-700">
                             {tag}
                           </Badge>
                         ))}
-                        <Badge variant="outline">{job.type}</Badge>
+                        <Badge variant="outline" className="bg-slate-100 border-slate-400 text-slate-700 font-semibold">{job.type}</Badge>
                       </div>
                     </div>
                     <Button
