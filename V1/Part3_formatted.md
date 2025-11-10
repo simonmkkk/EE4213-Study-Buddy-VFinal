@@ -86,9 +86,9 @@
 - **Evidence:** User B stared at the timer: "I want 45 minutes, not just 25 how do I change it?"
 - **Insight:** Fixed timer options create rigid user control, violating flexibility in mental models.
 
-### Key Finding 7: Inconsistent progress bar colors and unspecified metrics on the Career Journey Overview page confuse users about their status
-- **Evidence:** User B: "Why is Profile blue and Success orange? Is 40% bad? What does 'success' even mean?"
-- **Insight:** Unspecified colors and undefined metrics violate visual hierarchy principles, increasing cognitive load.
+### Key Finding 7: School comment button is too small and hard to locate
+- **Evidence:** By our inspection, users spent too long time to locate the comment button in the Visual School Explorer. Users needed to search on the school card to find the small-sized "View Comments" button.
+- **Insight:** Small button size reduces visibility and violates visual hierarchy principles, increasing interaction cost and user search time.
 
 ### Key Finding 8: Job Opportunity Discovery Hub tags (e.g., AI, Cloud, Finance) exist but cannot be used to search for specific tags
 - **Evidence:** User B: "There's no search bar for me to search specific Intern?"
