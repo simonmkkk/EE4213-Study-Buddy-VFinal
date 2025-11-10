@@ -99,7 +99,7 @@ const Navigation = () => {
               className="hidden sm:inline-flex items-center gap-2 border border-transparent transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-primary hover:bg-transparent hover:text-foreground"
             >
               <Palette className="h-5 w-5" />
-              <span className="text-sm">Color Vision</span>
+              <span className="text-sm">Color Blind Mode</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">

@@ -102,7 +102,7 @@ const CareerDashboard = () => {
     <div className="min-h-screen bg-background">
       <main className="container py-8">
         <div className="mb-12">
-          <PageTitle className="text-5xl md:text-6xl">Dashboard</PageTitle>
+          <PageTitle className="text-5xl md:text-6xl">Career Information</PageTitle>
         </div>
         <section>
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">

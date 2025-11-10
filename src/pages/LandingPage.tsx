@@ -17,10 +17,10 @@ const LandingPage = () => {
       bgColor: "bg-primary-light",
     },
     {
-      title: "Dashboard",
+      title: "Career Information",
       description: "Discover career opportunities, track applications, and boost your professional development.",
       icon: Briefcase,
-      path: "/job-information",
+      path: "/job-information/dashboard",
       color: "text-secondary",
       bgColor: "bg-secondary-light",
     },
@@ -50,7 +50,7 @@ const LandingPage = () => {
         <div className="flex min-h-[calc(100vh-260px)] flex-col justify-start pt-32 pb-6 md:pt-52 md:pb-14">
           <div className="mx-auto max-w-3xl text-center space-y-6">
             <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
-              Your Complete <span className="text-primary">Study Companion</span>
+              Study Buddy, Your <span className="text-primary">Buddy</span>
             </h1>
             <div className="flex gap-4 justify-center pt-4">
               <Button
