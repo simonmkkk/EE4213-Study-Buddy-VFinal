@@ -77,7 +77,6 @@ const JobOpportunityHub = () => {
   const [jobs, setJobs] = useState<Job[]>(mockJobs);
   const [typeFilter, setTypeFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedTag, setSelectedTag] = useState("all");
   const { addJob, removeJob, isJobSaved } = useSavedJobs();
   const location = useLocation();
@@ -120,15 +119,8 @@ const JobOpportunityHub = () => {
   const filteredJobs = jobs.filter((job) => {
     const typeMatch = typeFilter === "all" || job.type === typeFilter;
     const locationMatch = locationFilter === "all" || job.location.includes(locationFilter);
-    const normalizedQuery = searchTerm.trim().toLowerCase();
-    const searchMatch =
-      normalizedQuery.length === 0 ||
-      [job.title, job.company, job.location, job.description, job.tags.join(" ")]
-        .join(" ")
-        .toLowerCase()
-        .includes(normalizedQuery);
     const tagMatch = selectedTag === "all" || job.tags.includes(selectedTag);
-    return typeMatch && locationMatch && searchMatch && tagMatch;
+    return typeMatch && locationMatch && tagMatch;
   });
 
   const handleSave = (job: Job) => {
@@ -163,12 +155,6 @@ const JobOpportunityHub = () => {
         {/* Filters */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
-            <Input
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Search jobs"
-              className="w-full sm:w-[260px]"
-            />
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="w-full sm:w-[200px]">
                 <SelectValue placeholder="Position Type" />
