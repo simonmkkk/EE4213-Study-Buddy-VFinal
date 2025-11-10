@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Building2, MapPin, Calendar, Bookmark, ExternalLink } from "lucide-react";
+import { Building2, MapPin, Calendar, Bookmark, ExternalLink, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSavedJobs } from "@/context/SavedJobsContext";
@@ -52,6 +52,12 @@ const SavedJobs = () => {
     <div className="min-h-screen bg-background">
       <main className="container py-8">
         <div className="mb-12">
+          <div className="flex items-center gap-4 mb-4">
+            <Button variant="default" size="sm" onClick={() => navigate(-1)} className="gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+          </div>
           <h1 className="text-5xl md:text-6xl font-bold">Saved Jobs</h1>
         </div>
 

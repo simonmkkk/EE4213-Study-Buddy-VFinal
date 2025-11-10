@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import BackToTop from "@/components/BackToTop";
+import ScrollToTop from "@/components/ScrollToTop";
 import VisualSchoolExplorer from "./pages/overseas-exchange/VisualSchoolExplorer";
 import SyllabusAutoMatcher from "./pages/overseas-exchange/SyllabusAutoMatcher";
 import JobInformation from "./pages/JobInformation";
@@ -37,6 +38,7 @@ const App = () => (
       <SavedJobsProvider>
         <SavedResourcesProvider>
           <BrowserRouter>
+            <ScrollToTop />
             <Navigation />
           <Routes>
           <Route

@@ -63,21 +63,23 @@ const KeptChats = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="container py-8">
-        <div className="mb-8 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
             <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate("/community/soul-match")}
+              variant="default"
+              size="sm"
+              onClick={() => navigate(-1)}
+              className="gap-2"
             >
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className="h-4 w-4" />
+              Back
             </Button>
-            <div>
-              <h1 className="text-3xl font-bold">Kept Chats</h1>
-              <p className="text-muted-foreground">
-                {keptChats.length} {keptChats.length === 1 ? "conversation" : "conversations"} saved
-              </p>
-            </div>
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold">Kept Chats</h1>
+            <p className="text-muted-foreground">
+              {keptChats.length} {keptChats.length === 1 ? "conversation" : "conversations"} saved
+            </p>
           </div>
         </div>
 

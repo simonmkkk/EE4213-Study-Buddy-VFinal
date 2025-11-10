@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Bookmark } from "lucide-react";
+import { Calendar, Bookmark, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSavedResources } from "@/context/SavedResourcesContext";
@@ -52,6 +52,12 @@ const SavedResources = () => {
     <div className="min-h-screen bg-background">
       <main className="container py-8">
         <div className="mb-12">
+          <div className="flex items-center gap-4 mb-4">
+            <Button variant="default" size="sm" onClick={() => navigate(-1)} className="gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+          </div>
           <h1 className="text-5xl md:text-6xl font-bold">Saved Resources</h1>
         </div>
 

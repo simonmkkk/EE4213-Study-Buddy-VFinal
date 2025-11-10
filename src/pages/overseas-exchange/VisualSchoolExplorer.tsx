@@ -204,17 +204,6 @@ const VisualSchoolExplorer = () => {
     <div className="min-h-screen bg-background">
       <main className="container py-8">
         <div className="mb-12">
-          <div className="flex items-center gap-4 mb-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/overseas-exchange')}
-              className="gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Overseas Exchange
-            </Button>
-          </div>
           <PageTitle as="h1" className="text-5xl md:text-6xl">
             School Explorer
           </PageTitle>

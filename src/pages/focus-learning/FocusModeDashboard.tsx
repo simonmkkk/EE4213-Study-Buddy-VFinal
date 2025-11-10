@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Pause, Play, RefreshCw, BellOff } from "lucide-react";
+import { Pause, Play, RefreshCw, BellOff, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const motivationalQuotes = [
   "The successful warrior is the average person, with laser-like focus.",
@@ -17,6 +18,7 @@ const FocusModeDashboard = () => {
   const [timeLeft, setTimeLeft] = useState(presetDurations[0] * 60);
   const [isRunning, setIsRunning] = useState(false);
   const [quoteIndex, setQuoteIndex] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!isRunning || timeLeft <= 0) return;
@@ -91,7 +93,13 @@ const FocusModeDashboard = () => {
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-[linear-gradient(180deg,rgba(12,19,33,0)_0%,rgba(12,19,33,0.65)_45%,rgba(12,19,33,0.92)_100%)]" />
 
       <div className="relative z-10 flex min-h-screen flex-col pb-12">
-        <header className="flex items-center justify-end px-6 py-8">
+        <header className="flex items-center justify-between px-6 py-8">
+          <div>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/focus-learning')} className="gap-2 text-white/90">
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+          </div>
           <div className="flex items-center gap-3 text-sm text-white/70">
             <span className="hidden sm:inline">Stay focused</span>
           </div>

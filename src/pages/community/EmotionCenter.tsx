@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Heart, MessageCircle, Share2, Bookmark, Plus, Image as ImageIcon, X } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, Plus, Image as ImageIcon, X, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 interface PostComment {
@@ -176,6 +177,7 @@ const mockPosts: Post[] = [
 ];
 
 const EmotionCenter = () => {
+  const navigate = useNavigate();
   const [posts, setPosts] = useState<Post[]>(mockPosts);
   const [showPostModal, setShowPostModal] = useState(false);
   const [newPostContent, setNewPostContent] = useState("");
@@ -349,16 +351,26 @@ const EmotionCenter = () => {
     <div className="min-h-screen bg-background">
       <main className="container py-8">
         <div className="mb-12">
+          <div className="flex items-center gap-4 mb-4">
+            <Button variant="default" size="sm" onClick={() => navigate(-1)} className="gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+          </div>
           <h1 className="text-5xl md:text-6xl font-bold">Emotion Center</h1>
           <p className="text-lg text-muted-foreground mt-4">
             A safe space to share your feelings anonymously
           </p>
         </div>
-        <div className="flex gap-4 mb-6">
-          <Button onClick={() => setShowPostModal(true)} size="lg" className="self-start">
-            <Plus className="h-5 w-5 mr-2" />
-            Post Anonymously
-          </Button>
+        <div className="flex gap-4 mb-6 items-center">
+          <div className="flex-1">
+          </div>
+          <div>
+            <Button onClick={() => setShowPostModal(true)} size="lg" className="self-start">
+              <Plus className="h-5 w-5 mr-2" />
+              Post Anonymously
+            </Button>
+          </div>
         </div>
 
         {/* Posts Feed */}

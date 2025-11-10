@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Plus, GripVertical, Undo2 } from "lucide-react";
+import { Plus, GripVertical, Undo2, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 interface Goal {
@@ -17,6 +18,7 @@ interface Goal {
 }
 
 const MicroGoalTracker = () => {
+  const navigate = useNavigate();
   const [goals, setGoals] = useState<Goal[]>([
     { id: "1", title: "Review linear algebra notes", estimate: 30, tag: "Math", completed: false },
     { id: "2", title: "Complete React tutorial chapter 3", estimate: 45, tag: "Programming", completed: false },
@@ -84,6 +86,12 @@ const MicroGoalTracker = () => {
     <div className="min-h-screen bg-background">
       <main className="container py-8">
         <div className="mb-12">
+          <div className="flex items-center gap-4 mb-4">
+            <Button variant="ghost" size="sm" onClick={() => navigate('/focus-learning')} className="gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+          </div>
           <h1 className="text-5xl md:text-6xl font-bold">Micro-Goal Study Tracker</h1>
           <p className="text-lg text-muted-foreground mt-4">
             Break down your tasks into achievable micro-goals

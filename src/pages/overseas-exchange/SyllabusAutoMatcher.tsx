@@ -11,7 +11,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { BookOpen, CheckCircle2, XCircle, Trophy, MessageSquare, Star } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { BookOpen, CheckCircle2, XCircle, Trophy, MessageSquare, Star, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface Course {
   code: string;
@@ -276,16 +279,31 @@ const getAvailableMajorOptions = (school: string | null | undefined) => {
 
 const SyllabusAutoMatcher = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [selectedSchool, setSelectedSchool] = useState("");
   const [selectedMajor, setSelectedMajor] = useState("all");
   const [courses, setCourses] = useState<Course[]>([]);
   const [showReviews, setShowReviews] = useState(false);
+  const [reviewText, setReviewText] = useState("");
+  const [reviewRating, setReviewRating] = useState(0);
+  const [schoolReviews, setSchoolReviews] = useState<{ name: string; rating: number; date: string; content: string; isUser?: boolean }[]>([]);
 
   useEffect(() => {
     if (location.state?.schoolId) {
       setSelectedSchool(location.state.schoolId);
     }
   }, [location.state]);
+
+  // Initialize school reviews based on selected school
+  useEffect(() => {
+    if (selectedSchool) {
+      const defaultReviews = [
+        { name: "Anonymous Student", rating: 5, date: "2025-01-15", content: "Amazing program with world-class faculty. Highly recommended!" },
+        { name: "Anonymous Student", rating: 4, date: "2025-01-10", content: "Great courses, but challenging workload. Prepare well!" },
+      ];
+      setSchoolReviews(defaultReviews);
+    }
+  }, [selectedSchool]);
 
   useEffect(() => {
     if (!selectedSchool) {
@@ -321,6 +339,26 @@ const SyllabusAutoMatcher = () => {
     total: courses.length,
     transferable: courses.filter(c => c.transferable).length,
     credits: `${courses.filter(c => c.transferable).reduce((sum, c) => sum + c.credits, 0)}/${courses.reduce((sum, c) => sum + c.credits, 0)}`,
+  };
+
+  const handlePostReview = () => {
+    if (!reviewText.trim() || reviewRating === 0) {
+      toast.error("Please provide both a rating and review text");
+      return;
+    }
+
+    const newReview = {
+      name: "You",
+      rating: reviewRating,
+      date: new Date().toISOString().split("T")[0],
+      content: reviewText,
+      isUser: true,
+    };
+
+    setSchoolReviews([newReview, ...schoolReviews]);
+    setReviewText("");
+    setReviewRating(0);
+    toast.success("Review posted successfully!");
   };
 
   const showInlineStats = Boolean(location.state?.schoolId && selectedSchool && selectedMajor);
@@ -370,7 +408,19 @@ const SyllabusAutoMatcher = () => {
     snu: "Seoul National University",
   };
 
+  const schoolShortNameMap: Record<string, string> = {
+    eth: "ETH Zurich",
+    tum: "TU Munich",
+    nus: "NUS",
+    mit: "MIT",
+    utokyo: "UTokyo",
+    melbourne: "UniMelb",
+    hec: "HEC Paris",
+    snu: "SNU",
+  };
+
   const schoolName = selectedSchool ? schoolNameMap[selectedSchool] ?? "Select a school" : "Select a school";
+  const schoolShortName = selectedSchool ? schoolShortNameMap[selectedSchool] ?? selectedSchool.toUpperCase() : "";
 
   const availableMajorOptions = getAvailableMajorOptions(selectedSchool);
 
@@ -378,7 +428,18 @@ const SyllabusAutoMatcher = () => {
     <div className="min-h-screen bg-background">
       <main className="container py-8">
         <div className="mb-12">
-          <h1 className="text-5xl md:text-6xl font-bold">Syllabus Auto-Matcher</h1>
+          <div className="flex items-center gap-4 mb-4">
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => navigate(-1)}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+          </div>
+          <h1 className="text-5xl md:text-6xl font-bold">Syllabus Matcher</h1>
           <p className="text-lg text-muted-foreground mt-4">
             Automatically match courses with your home institution
           </p>
@@ -390,8 +451,7 @@ const SyllabusAutoMatcher = () => {
             <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-4">
               <div className="space-y-4">
                 <div>
-                  <p className="text-sm text-muted-foreground uppercase tracking-wide">Selected School</p>
-                  <h2 className="text-3xl font-semibold text-foreground">{schoolName}</h2>
+                  <h2 className="text-4xl md:text-5xl font-semibold text-foreground">{schoolName}</h2>
                 </div>
                 <div className="w-full sm:w-[250px]">
                   <Select value={selectedMajor} onValueChange={setSelectedMajor}>
@@ -408,7 +468,21 @@ const SyllabusAutoMatcher = () => {
                   </Select>
                 </div>
               </div>
-              {showInlineStats && <div className="self-start">{statsSummaryContent}</div>}
+              {showInlineStats && (
+                <div className="self-start space-y-3">
+                  {statsSummaryContent}
+                  {/* View School Comments Button */}
+                  <Button 
+                    onClick={() => setShowReviews(true)} 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full bg-primary/10 hover:bg-primary hover:text-primary-foreground border-primary/20"
+                  >
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    View School Comments
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -455,14 +529,28 @@ const SyllabusAutoMatcher = () => {
           <>
             {/* Statistics Summary */}
             {!showInlineStats && (
-              <div className="flex justify-end mb-6">
-                {statsSummaryContent}
+              <div className="mb-6">
+                <div className="flex justify-end mb-4">
+                  {statsSummaryContent}
+                </div>
+                {/* View School Comments Button */}
+                <div className="flex justify-end">
+                  <Button 
+                    onClick={() => setShowReviews(true)} 
+                    variant="outline" 
+                    size="sm"
+                    className="bg-primary/10 hover:bg-primary hover:text-primary-foreground border-primary/20"
+                  >
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    View School Comments
+                  </Button>
+                </div>
               </div>
             )}
 
             {/* Course List Title */}
             <h2 className="text-2xl font-bold mb-6">
-              {(selectedMajor === "all" ? "All Majors" : majorLabelMap[selectedMajor] ?? selectedMajor)} Courses at {schoolName}
+              {(selectedMajor === "all" ? "All Majors" : majorLabelMap[selectedMajor] ?? selectedMajor)} Courses at {schoolShortName}
             </h2>
 
             {/* Course Cards */}
@@ -499,40 +587,81 @@ const SyllabusAutoMatcher = () => {
                 </Card>
               ))}
             </div>
-
-            {/* View School Comments Button */}
-            <div className="text-center">
-              <Button onClick={() => setShowReviews(true)} variant="outline" size="lg">
-                <MessageSquare className="h-5 w-5 mr-2" />
-                View School Comments
-              </Button>
-            </div>
           </>
         )}
       </main>
 
       {/* Reviews Modal */}
-      <Dialog open={showReviews} onOpenChange={setShowReviews}>
-        <DialogContent className="max-w-2xl">
+      <Dialog 
+        open={showReviews} 
+        onOpenChange={(open) => {
+          setShowReviews(open);
+          if (!open) {
+            setReviewText("");
+            setReviewRating(0);
+          }
+        }}
+      >
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{schoolName} - Student Reviews</DialogTitle>
           </DialogHeader>
           
-          <div className="space-y-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium">Anonymous Student</span>
-                  <div className="flex items-center gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-primary text-primary" />
-                    ))}
+          <div className="space-y-6">
+            {schoolReviews.map((review, idx) => (
+              <Card key={`${review.name}-${review.date}-${idx}`}>
+                <CardContent className="pt-6">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <span className="font-medium">{review.name}</span>
+                      <p className="text-sm text-muted-foreground">{review.date}</p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`h-4 w-4 ${i < review.rating ? "fill-primary text-primary" : "text-muted"}`}
+                        />
+                      ))}
+                    </div>
                   </div>
+                  <p className="text-sm mb-3">{review.content}</p>
+                </CardContent>
+              </Card>
+            ))}
+            
+            <div className="pt-4 border-t">
+              <h3 className="font-semibold mb-3">Share Your Experience</h3>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-muted-foreground">Your Rating</span>
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      className="transition-colors text-muted-foreground hover:text-primary"
+                      onClick={() => setReviewRating(value)}
+                      aria-label={`Rate ${value} star${value > 1 ? "s" : ""}`}
+                    >
+                      <Star
+                        className={`h-5 w-5 ${
+                          reviewRating >= value ? "fill-primary text-primary" : ""
+                        }`}
+                      />
+                    </button>
+                  ))}
                 </div>
-                <p className="text-sm text-muted-foreground mb-2">2025-01-15</p>
-                <p className="text-sm">Amazing program with world-class faculty. Highly recommended!</p>
-              </CardContent>
-            </Card>
+              </div>
+              <Textarea
+                placeholder="Write your review here..."
+                value={reviewText}
+                onChange={(e) => setReviewText(e.target.value)}
+                className="mb-3"
+              />
+              <Button onClick={handlePostReview} className="w-full">
+                Post Review
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
