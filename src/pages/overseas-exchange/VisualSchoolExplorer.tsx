@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Star, MessageSquare } from "lucide-react";
+import { Star, MessageSquare, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -204,6 +204,17 @@ const VisualSchoolExplorer = () => {
     <div className="min-h-screen bg-background">
       <main className="container py-8">
         <div className="mb-12">
+          <div className="flex items-center gap-4 mb-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/overseas-exchange')}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Overseas Exchange
+            </Button>
+          </div>
           <PageTitle as="h1" className="text-5xl md:text-6xl">
             School Explorer
           </PageTitle>
