@@ -27,7 +27,7 @@ const Navigation = () => {
     location.pathname === path || location.pathname.startsWith(`${path}/`);
   
   const navItems = [
-    { path: "/overseas-exchange", label: "Overseas Exchange", icon: Globe },
+    { path: "/overseas-exchange/visual-explorer", label: "Overseas Exchange", icon: Globe },
     { path: "/job-information", label: "Job Information", icon: Briefcase },
     { path: "/focus-learning", label: "Focus Learning", icon: Target },
     { path: "/community", label: "Community", icon: Users },
@@ -46,32 +46,21 @@ const Navigation = () => {
         
         <div className="hidden md:flex items-center gap-3">
           {navItems.map((item) => {
-            const Icon = item.icon;
             const active = isActive(item.path);
             return (
-              <Button
+              <Link
                 key={item.path}
-                asChild
-                variant="ghost"
+                to={item.path}
                 className={cn(
-                  "gap-2 border border-primary transition-smooth hover:-translate-y-0.5",
+                  "px-4 py-2 text-sm font-medium rounded-md transition-all duration-300 border",
                   active
-                    ? "h-14 px-7 bg-primary text-primary-foreground ring-2 ring-primary/50 shadow-md shadow-primary/40 !hover:bg-primary-hover !hover:text-primary-foreground"
-                    : "h-10 px-4 bg-primary text-primary-foreground !hover:bg-primary-hover !hover:text-primary-foreground"
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "text-foreground border-transparent hover:-translate-y-1 hover:shadow-md hover:border-primary"
                 )}
+                aria-current={active ? "page" : undefined}
               >
-                <Link to={item.path} aria-current={active ? "page" : undefined}>
-                  <Icon className="h-4 w-4" />
-                  <span
-                    className={cn(
-                      "transition-smooth",
-                      active ? "text-lg font-semibold" : "text-sm font-medium"
-                    )}
-                  >
-                    {item.label}
-                  </span>
-                </Link>
-              </Button>
+                {item.label}
+              </Link>
             );
           })}
         </div>

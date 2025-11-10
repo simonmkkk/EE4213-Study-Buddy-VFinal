@@ -34,8 +34,8 @@ const schools: School[] = [
     image: "/eth-zurich.jpg",
     rating: 4.8,
     reviews: [
-      { name: "Alex Chen", rating: 5, date: "2025-01-15", content: "Amazing program with world-class faculty. Highly recommended!" },
-      { name: "Sarah Kim", rating: 4, date: "2025-01-10", content: "Great courses, but challenging workload. Prepare well!" },
+      { name: "Anonymous Student", rating: 5, date: "2025-01-15", content: "Amazing program with world-class faculty. Highly recommended!" },
+      { name: "Anonymous Student", rating: 4, date: "2025-01-10", content: "Great courses, but challenging workload. Prepare well!" },
     ],
   },
   {
@@ -46,7 +46,7 @@ const schools: School[] = [
     image: "/tu-munich.jpg",
     rating: 4.7,
     reviews: [
-      { name: "John Mueller", rating: 5, date: "2025-01-12", content: "Excellent hands-on experience and industry connections." },
+      { name: "Anonymous Student", rating: 5, date: "2025-01-12", content: "Excellent hands-on experience and industry connections." },
     ],
   },
   {
@@ -57,7 +57,7 @@ const schools: School[] = [
     image: "/nus.jpg",
     rating: 4.9,
     reviews: [
-      { name: "Wei Zhang", rating: 5, date: "2025-01-08", content: "Top-tier business education in Asia. Amazing opportunities!" },
+      { name: "Anonymous Student", rating: 5, date: "2025-01-08", content: "Top-tier business education in Asia. Amazing opportunities!" },
     ],
   },
   {
@@ -68,7 +68,7 @@ const schools: School[] = [
     image: "/uoft.jpg",
     rating: 4.6,
     reviews: [
-      { name: "Emma Watson", rating: 4, date: "2025-01-05", content: "Rigorous medical program with excellent clinical training." },
+      { name: "Anonymous Student", rating: 4, date: "2025-01-05", content: "Rigorous medical program with excellent clinical training." },
     ],
   },
   {
@@ -79,7 +79,7 @@ const schools: School[] = [
     image: "/oxford.jpg",
     rating: 4.9,
     reviews: [
-      { name: "James Brown", rating: 5, date: "2025-01-01", content: "Prestigious program with incredible networking opportunities." },
+      { name: "Anonymous Student", rating: 5, date: "2025-01-01", content: "Prestigious program with incredible networking opportunities." },
     ],
   },
   {
@@ -90,8 +90,8 @@ const schools: School[] = [
     image: "/images/mit.jpg",
     rating: 4.9,
     reviews: [
-      { name: "Liam Johnson", rating: 5, date: "2025-02-02", content: "Cutting-edge research opportunities and inspiring faculty." },
-      { name: "Priya Desai", rating: 4, date: "2025-01-28", content: "Intense workload but unparalleled innovation culture." },
+      { name: "Anonymous Student", rating: 5, date: "2025-02-02", content: "Cutting-edge research opportunities and inspiring faculty." },
+      { name: "Anonymous Student", rating: 4, date: "2025-01-28", content: "Intense workload but unparalleled innovation culture." },
     ],
   },
   {
@@ -102,7 +102,7 @@ const schools: School[] = [
     image: "/images/_Tokyo_University_3.jpg",
     rating: 4.7,
     reviews: [
-      { name: "Haruka Sato", rating: 5, date: "2025-01-20", content: "Beautiful campus and supportive professors for exchange students." },
+      { name: "Anonymous Student", rating: 5, date: "2025-01-20", content: "Beautiful campus and supportive professors for exchange students." },
     ],
   },
   {
@@ -113,7 +113,7 @@ const schools: School[] = [
     image: "/images/Melbone.jpg",
     rating: 4.8,
     reviews: [
-      { name: "Olivia Harris", rating: 4, date: "2025-01-18", content: "Great student life with strong academic support services." },
+      { name: "Anonymous Student", rating: 4, date: "2025-01-18", content: "Great student life with strong academic support services." },
     ],
   },
   {
@@ -124,7 +124,7 @@ const schools: School[] = [
     image: "/images/HEC.png",
     rating: 4.6,
     reviews: [
-      { name: "Camille Dupont", rating: 5, date: "2025-02-05", content: "Fantastic networking opportunities and real-world projects." },
+      { name: "Anonymous Student", rating: 5, date: "2025-02-05", content: "Fantastic networking opportunities and real-world projects." },
     ],
   },
   {
@@ -135,7 +135,7 @@ const schools: School[] = [
     image: "/images/Souel.jpg",
     rating: 4.7,
     reviews: [
-      { name: "Minseo Park", rating: 4, date: "2025-01-30", content: "Rigorous academics with vibrant campus culture." },
+      { name: "Anonymous Student", rating: 4, date: "2025-01-30", content: "Rigorous academics with vibrant campus culture." },
     ],
   },
 ];

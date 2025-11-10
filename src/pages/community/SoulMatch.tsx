@@ -7,16 +7,32 @@ import { AlertCircle, Send, Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
-const emotions = [
-  { id: "calm", label: "Calm", icon: "" },
-  { id: "anxious", label: "Anxious", icon: "" },
-  { id: "excited", label: "Excited", icon: "" },
-  { id: "sad", label: "Sad", icon: "" },
-  { id: "confused", label: "Confused", icon: "" },
-];
-
 const topics = [
-  "Academics", "Relationships", "Future", "Love", "Family", "Career", "Health", "Hobbies"
+  "Sports",
+  "Music",
+  "Movies & TV",
+  "Gaming",
+  "Travel",
+  "Foodie Adventures",
+  "Books & Literature",
+  "Arts & Crafts",
+  "Tech & Gadgets",
+  "Photography",
+  "Fitness",
+  "Dance",
+  "Drama & Theatre",
+  "Volunteering",
+  "Entrepreneurship",
+  "Academic Projects",
+  "Science & Discovery",
+  "Outdoor Activities",
+  "Mindfulness",
+  "Esports",
+  "Pop Culture",
+  "Language Learning",
+  "Pets & Animals",
+  "Fashion & Style",
+  "Social Media Trends",
 ];
 
 interface Message {
@@ -28,7 +44,6 @@ interface Message {
 
 const SoulMatch = () => {
   const [stage, setStage] = useState<"select" | "matching" | "chatting">("select");
-  const [selectedEmotion, setSelectedEmotion] = useState<string>("");
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
@@ -45,10 +60,6 @@ const SoulMatch = () => {
   }, [messages]);
 
   const handleStartMatching = () => {
-    if (!selectedEmotion) {
-      toast.error("Please select an emotion");
-      return;
-    }
     if (selectedTopics.length === 0) {
       toast.error("Please select at least one topic");
       return;
@@ -135,7 +146,6 @@ const SoulMatch = () => {
   const handleNeverAgain = () => {
     toast.success("Chat ended. Thank you for using Soul Match!");
     setStage("select");
-    setSelectedEmotion("");
     setSelectedTopics([]);
     setMessages([]);
     setMatchedUser(null);
@@ -164,26 +174,6 @@ const SoulMatch = () => {
 
             <Card>
               <CardContent className="pt-6 space-y-6">
-                <div>
-                  <h3 className="font-semibold mb-4">Feeling</h3>
-                  <div className="grid grid-cols-5 gap-3">
-                    {emotions.map((emotion) => (
-                      <div
-                        key={emotion.id}
-                        className={`flex flex-col items-center p-4 rounded-lg border-2 cursor-pointer transition-smooth ${
-                          selectedEmotion === emotion.id
-                            ? "border-[rgba(34,139,34,0.6)] bg-[rgba(34,139,34,0.12)]"
-                            : "border-border hover:border-[rgba(34,139,34,0.35)]"
-                        }`}
-                        onClick={() => setSelectedEmotion(emotion.id)}
-                      >
-                        <span className="text-3xl mb-2">{emotion.icon}</span>
-                        <span className="text-xs font-medium">{emotion.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
                 <div>
                   <h3 className="font-semibold mb-4">Interested Topic</h3>
                   <div className="flex flex-wrap gap-2">
@@ -275,80 +265,80 @@ const SoulMatch = () => {
           <Button onClick={handleResumeChat}>Reopen Chat</Button>
         </div>
       ) : (
-        <div className="flex-1 relative bg-muted/30">
-          <div className="h-full overflow-y-auto">
-            <div className="container py-6 pb-32 space-y-4">
-              {messages.map((message) => (
-                <div key={message.id} className={`flex ${message.sender === "me" ? "justify-end" : "justify-start"}`}>
-                  <div className={`flex items-end gap-3 ${message.sender === "me" ? "flex-row-reverse" : ""}`}>
-                    <div
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
-                        message.sender === "me"
-                          ? "bg-primary/15 text-primary"
-                          : "bg-muted text-muted-foreground"
-                      }`}
-                    >
-                      {message.sender === "me" ? selfAvatarLabel : matchedUser?.icon ?? "🙂"}
+        <>
+          <div className="flex-1 relative bg-muted/30">
+            <div className="container h-full py-6">
+              <div className="mx-auto flex h-full max-w-3xl flex-col rounded-2xl border border-border bg-card shadow-lg">
+                <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 pb-24">
+                  {messages.map((message) => (
+                    <div key={message.id} className={`flex ${message.sender === "me" ? "justify-end" : "justify-start"}`}>
+                      <div className={`flex items-end gap-3 ${message.sender === "me" ? "flex-row-reverse" : ""}`}>
+                        <div
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
+                            message.sender === "me"
+                              ? "bg-primary/15 text-primary"
+                              : "bg-muted text-muted-foreground"
+                          }`}
+                        >
+                          {message.sender === "me" ? selfAvatarLabel : matchedUser?.icon ?? "🙂"}
+                        </div>
+                        <div
+                          className={`max-w-[70%] rounded-2xl px-4 py-3 ${
+                            message.sender === "me"
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-background"
+                          }`}
+                        >
+                          <p className="text-sm">{message.text}</p>
+                          <p
+                            className={`text-xs mt-1 ${
+                              message.sender === "me"
+                                ? "text-primary-foreground/70"
+                                : "text-muted-foreground"
+                            }`}
+                          >
+                            {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <div
-                      className={`max-w-[70%] rounded-2xl px-4 py-3 ${
-                        message.sender === "me"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-card"
-                      }`}
-                    >
-                      <p className="text-sm">{message.text}</p>
-                      <p
-                        className={`text-xs mt-1 ${
-                          message.sender === "me"
-                            ? "text-primary-foreground/70"
-                            : "text-muted-foreground"
-                        }`}
-                      >
-                        {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                  ))}
 
-              {isTyping && (
-                <div className="flex justify-start">
-                  <div className="flex items-end gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                      {matchedUser?.icon ?? "🙂"}
+                  {isTyping && (
+                    <div className="flex justify-start">
+                      <div className="flex items-end gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                          {matchedUser?.icon ?? "🙂"}
+                        </div>
+                        <div className="rounded-2xl border border-border bg-background px-4 py-3">
+                          <p className="text-sm text-muted-foreground">Typing...</p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="bg-card rounded-2xl px-4 py-3">
-                      <p className="text-sm text-muted-foreground">Typing...</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              <div ref={messagesEndRef} />
-            </div>
-          </div>
+                  )}
 
-          {/* Floating Input Bubble */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-6">
-            <div className="container flex justify-center px-4">
-              <div className="pointer-events-auto w-full max-w-3xl rounded-xl border border-border bg-card shadow-lg">
-                <div className="flex items-center gap-2 px-4 py-3">
-                  <Input
-                    placeholder="Type your message..."
-                    value={inputMessage}
-                    onChange={(e) => setInputMessage(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-                    className="flex-1 border-0 bg-transparent p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-                  />
-                  <Button size="icon" className="h-10 w-10 rounded-lg" onClick={handleSendMessage}>
-                    <Send className="h-4 w-4" />
-                  </Button>
+                  <div ref={messagesEndRef} />
                 </div>
               </div>
             </div>
           </div>
-        </div>
+          <div className="pointer-events-none fixed inset-x-0 bottom-0 bg-gradient-to-t from-background/95 via-background/80 to-transparent">
+            <div className="container flex justify-center px-4 pb-6">
+              <div className="pointer-events-auto flex w-full max-w-3xl items-center gap-2 rounded-full border border-border bg-card px-4 py-3 shadow-xl">
+                <Input
+                  placeholder="Type your message..."
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                  className="flex-1 border-0 bg-transparent p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                />
+                <Button size="icon" className="h-10 w-10 rounded-full" onClick={handleSendMessage}>
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
       )}
 
       {/* End Chat Modal */}

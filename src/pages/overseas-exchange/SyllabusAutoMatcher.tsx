@@ -522,7 +522,7 @@ const SyllabusAutoMatcher = () => {
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium">Alex Chen</span>
+                  <span className="font-medium">Anonymous Student</span>
                   <div className="flex items-center gap-1">
                     {[...Array(5)].map((_, i) => (
                       <Star key={i} className="h-4 w-4 fill-primary text-primary" />

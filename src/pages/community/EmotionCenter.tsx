@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -71,6 +71,20 @@ const mockPosts: Post[] = [
         content: "Try breaking tasks into 20-minute blocks. You got this!",
         timestamp: new Date(Date.now() - 1800000),
       },
+      {
+        id: "3",
+        author: "Soft Echo",
+        avatar: "💬",
+        content: "I keep a gratitude list to remind myself of small wins—maybe it could help?",
+        timestamp: new Date(Date.now() - 1200000),
+      },
+      {
+        id: "4",
+        author: "Bright Horizon",
+        avatar: "🌈",
+        content: "Deep breaths and stepping outside for a moment always reset my focus.",
+        timestamp: new Date(Date.now() - 600000),
+      },
     ],
     hasResonated: false,
     isSaved: false,
@@ -91,6 +105,27 @@ const mockPosts: Post[] = [
         avatar: "🌊",
         content: "Congratulations! Celebrate your win and enjoy the momentum.",
         timestamp: new Date(Date.now() - 3600000),
+      },
+      {
+        id: "2",
+        author: "Proud Summit",
+        avatar: "🏔️",
+        content: "Hearing this gives me courage for my own presentation—thanks for sharing!",
+        timestamp: new Date(Date.now() - 3000000),
+      },
+      {
+        id: "3",
+        author: "Cheerful Ember",
+        avatar: "🔥",
+        content: "Love the dedication—you earned it!",
+        timestamp: new Date(Date.now() - 2400000),
+      },
+      {
+        id: "4",
+        author: "Grateful River",
+        avatar: "🏞️",
+        content: "Thanks for reminding us to celebrate the small victories along the way.",
+        timestamp: new Date(Date.now() - 1800000),
       },
     ],
     hasResonated: false,
@@ -113,6 +148,27 @@ const mockPosts: Post[] = [
         content: "Sending you a virtual hug. Maybe call someone from home tonight?",
         timestamp: new Date(Date.now() - 5400000),
       },
+      {
+        id: "2",
+        author: "Kind Meadow",
+        avatar: "🌾",
+        content: "I schedule weekly video calls—it helps bridge the distance.",
+        timestamp: new Date(Date.now() - 4800000),
+      },
+      {
+        id: "3",
+        author: "Gentle Harbor",
+        avatar: "⚓",
+        content: "Maybe cook a favorite meal this weekend? Comfort food works wonders for me.",
+        timestamp: new Date(Date.now() - 4200000),
+      },
+      {
+        id: "4",
+        author: "Radiant Kite",
+        avatar: "🪁",
+        content: "You're doing amazing—don't forget to lean on friends nearby too!",
+        timestamp: new Date(Date.now() - 3600000),
+      },
     ],
     hasResonated: false,
     isSaved: false,
@@ -127,7 +183,6 @@ const EmotionCenter = () => {
   const [newPostImages, setNewPostImages] = useState<{ file: File; preview: string }[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [activeCommentPostId, setActiveCommentPostId] = useState<string | null>(null);
-  const [focusedPostId, setFocusedPostId] = useState<string | null>(null);
   const [newCommentContent, setNewCommentContent] = useState("");
 
   useEffect(() => {
@@ -225,37 +280,15 @@ const EmotionCenter = () => {
     });
   };
 
-  const exitThreadView = () => {
-    setFocusedPostId(null);
-    setActiveCommentPostId(null);
-    setNewCommentContent("");
-  };
-
   const handleOpenComments = (postId: string) => {
-    if (focusedPostId === postId) {
-      if (activeCommentPostId === postId) {
-        setActiveCommentPostId(null);
-        setNewCommentContent("");
-      } else {
-        setActiveCommentPostId(postId);
-        setNewCommentContent("");
-      }
+    if (activeCommentPostId === postId) {
+      setActiveCommentPostId(null);
+      setNewCommentContent("");
       return;
     }
 
-    setFocusedPostId(postId);
     setActiveCommentPostId(postId);
     setNewCommentContent("");
-  };
-
-  const handlePostFocus = (event: MouseEvent<HTMLDivElement>, postId: string) => {
-    const interactive = (event.target as HTMLElement).closest("button, textarea, input, a, label");
-    if (interactive) {
-      return;
-    }
-
-    setFocusedPostId(postId);
-    setActiveCommentPostId(postId);
   };
 
   const handleAddComment = () => {
@@ -309,13 +342,8 @@ const EmotionCenter = () => {
       setActiveCommentPostId(null);
       setNewCommentContent("");
     }
-    if (focusedPostId === postId) {
-      setFocusedPostId(null);
-    }
     toast.success("Post removed.");
   };
-
-  const visiblePosts = focusedPostId ? posts.filter((post) => post.id === focusedPostId) : posts;
 
   return (
     <div className="min-h-screen bg-background">
@@ -331,23 +359,13 @@ const EmotionCenter = () => {
             <Plus className="h-5 w-5 mr-2" />
             Post Anonymously
           </Button>
-          {focusedPostId && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="self-start border border-primary text-primary hover:bg-primary/10"
-              onClick={exitThreadView}
-            >
-              ← Back to community feed
-            </Button>
-          )}
         </div>
 
         {/* Posts Feed */}
         <div className="max-w-3xl mx-auto space-y-6">
-          {visiblePosts.map((post) => (
+          {posts.map((post) => (
             <Card key={post.id}>
-              <CardContent className="pt-6" onClick={(event) => handlePostFocus(event, post.id)}>
+              <CardContent className="pt-6">
                 <div className="flex items-start gap-4 mb-4">
                   <div className="text-3xl">{post.avatar}</div>
                   <div className="flex-1">
@@ -412,15 +430,18 @@ const EmotionCenter = () => {
                     <Heart className={`h-4 w-4 mr-1 ${post.hasResonated ? "fill-current" : ""}`} />
                     {post.resonates}
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={focusedPostId === post.id ? "text-primary" : ""}
-                    onClick={() => handleOpenComments(post.id)}
-                  >
-                    <MessageCircle className="h-4 w-4 mr-1" />
-                    {post.comments.length}
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Toggle comments"
+                      className={activeCommentPostId === post.id ? "text-primary" : ""}
+                      onClick={() => handleOpenComments(post.id)}
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm text-muted-foreground">{post.comments.length}</span>
+                  </div>
                   <Button variant="ghost" size="sm">
                     <Share2 className="h-4 w-4 mr-1" />
                     Share
@@ -436,7 +457,7 @@ const EmotionCenter = () => {
                   </Button>
                 </div>
 
-                {focusedPostId === post.id && (
+                {activeCommentPostId === post.id && (
                   <div className="mt-4 space-y-6 border-t pt-4">
                     <div className="space-y-4 pr-0 sm:pr-2">
                       <div>
@@ -446,9 +467,9 @@ const EmotionCenter = () => {
                             No comments yet. Be the first to respond!
                           </p>
                         ) : (
-                          <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
+                          <div className="space-y-3">
                             {post.comments.map((comment) => (
-                              <div key={comment.id} className="rounded-lg border p-3">
+                              <div key={comment.id} className="rounded-lg border border-border p-3">
                                 <div className="mb-2 flex items-center gap-2 text-sm">
                                   <span className="text-xl">{comment.avatar}</span>
                                   <span className="font-medium">{comment.author}</span>
@@ -478,33 +499,31 @@ const EmotionCenter = () => {
                       </div>
                     </div>
 
-                    {activeCommentPostId === post.id && (
-                      <div className="w-full rounded-2xl border border-primary/40 bg-background/95 shadow-lg">
-                        <div className="px-4 pt-4">
-                          <p className="text-sm font-medium mb-2">Share supportive words</p>
-                          <Textarea
-                            id={`comment-input-${post.id}`}
-                            placeholder="Write an encouraging comment..."
-                            value={newCommentContent}
-                            onChange={(event) => setNewCommentContent(event.target.value)}
-                            rows={3}
-                            className="resize-none border border-primary/50 bg-background focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40"
-                          />
-                        </div>
-                        <div className="flex justify-end gap-2 px-4 pb-4">
-                          <Button
-                            variant="outline"
-                            onClick={() => {
-                              setActiveCommentPostId(null);
-                              setNewCommentContent("");
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                          <Button onClick={handleAddComment}>Post Comment</Button>
-                        </div>
+                    <div className="w-full rounded-2xl border border-border bg-background/95 shadow-lg">
+                      <div className="px-4 pt-4">
+                        <p className="text-sm font-medium mb-2">Share supportive words</p>
+                        <Textarea
+                          id={`comment-input-${post.id}`}
+                          placeholder="Write an encouraging comment..."
+                          value={newCommentContent}
+                          onChange={(event) => setNewCommentContent(event.target.value)}
+                          rows={3}
+                          className="resize-none border border-primary/50 bg-background focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40"
+                        />
                       </div>
-                    )}
+                      <div className="flex flex-wrap justify-end gap-2 px-4 pb-4">
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setActiveCommentPostId(null);
+                            setNewCommentContent("");
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button onClick={handleAddComment}>Post Comment</Button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </CardContent>
@@ -512,7 +531,6 @@ const EmotionCenter = () => {
           ))}
 
           {posts.length === 0 && (
-            !focusedPostId &&
             <div className="text-center py-12 text-muted-foreground">
               <p>No posts in this category yet.</p>
               <p className="text-sm mt-2">Share your feelings to start connecting...</p>

@@ -3,7 +3,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Send, Lightbulb, MessageSquare, ArrowLeft } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BookOpen, Send, Lightbulb, MessageSquare, ArrowLeft, Search } from "lucide-react";
 import { toast } from "sonner";
 
 interface Course {
@@ -12,6 +14,14 @@ interface Course {
   name: string;
   description: string;
   activeStudents: number;
+  major: string;
+}
+
+interface QAComment {
+  id: string;
+  author: string;
+  content: string;
+  timestamp: Date;
 }
 
 interface QA {
@@ -20,6 +30,7 @@ interface QA {
   answer: string;
   timestamp: Date;
   author: string;
+  comments: QAComment[];
 }
 
 const courses: Course[] = [
@@ -29,6 +40,7 @@ const courses: Course[] = [
     name: "Introduction to Computer Science",
     description: "Fundamentals of programming, algorithms, and data structures.",
     activeStudents: 42,
+    major: "CS",
   },
   {
     id: "math201",
@@ -36,13 +48,15 @@ const courses: Course[] = [
     name: "Linear Algebra",
     description: "Vector spaces, matrices, eigenvalues, and linear transformations.",
     activeStudents: 35,
+    major: "MATH",
   },
   {
     id: "phys301",
-    code: "PHYS301",
+    code: "PHY301",
     name: "Quantum Mechanics",
     description: "Wave functions, Schrödinger equation, and quantum phenomena.",
     activeStudents: 28,
+    major: "PHY",
   },
   {
     id: "bus101",
@@ -50,21 +64,51 @@ const courses: Course[] = [
     name: "Business Strategy",
     description: "Strategic planning, competitive analysis, and business models.",
     activeStudents: 50,
+    major: "BUS",
+  },
+  {
+    id: "phy1202",
+    code: "PHY1202",
+    name: "General Physics II",
+    description: "Electricity, magnetism, and electromagnetic waves.",
+    activeStudents: 45,
+    major: "PHY",
+  },
+  {
+    id: "cs201",
+    code: "CS201",
+    name: "Data Structures",
+    description: "Advanced data structures and algorithm analysis.",
+    activeStudents: 38,
+    major: "CS",
+  },
+  {
+    id: "math301",
+    code: "MATH301",
+    name: "Calculus III",
+    description: "Multivariable calculus and vector analysis.",
+    activeStudents: 32,
+    major: "MATH",
   },
 ];
 
 const AcademicWall = () => {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [question, setQuestion] = useState("");
+  const [selectedMajor, setSelectedMajor] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [qas, setQas] = useState<QA[]>([
     {
       id: "1",
       question: "Can someone explain the difference between pointers and references?",
       answer: "Great question! Pointers store memory addresses and can be reassigned, while references are aliases to existing variables and cannot be changed after initialization. Pointers can be null, but references must always refer to a valid object.",
       timestamp: new Date(Date.now() - 3600000),
-      author: "Alex Chen",
+      author: "Anonymous Student",
+      comments: [],
     },
   ]);
+  const [activeCommentId, setActiveCommentId] = useState<string | null>(null);
+  const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
 
   const handleAskQuestion = () => {
     if (!question.trim()) {
@@ -81,12 +125,61 @@ const AcademicWall = () => {
       answer: aiAnswer,
       timestamp: new Date(),
       author: "You",
+      comments: [],
     };
 
     setQas([newQA, ...qas]);
     setQuestion("");
     toast.success("Your question has been posted with AI answer!");
   };
+
+  const handleToggleComment = (qaId: string) => {
+    setActiveCommentId((prev) => (prev === qaId ? null : qaId));
+    setCommentDrafts((prev) => ({ ...prev, [qaId]: prev[qaId] ?? "" }));
+  };
+
+  const handleCommentChange = (qaId: string, value: string) => {
+    setCommentDrafts((prev) => ({ ...prev, [qaId]: value }));
+  };
+
+  const handleSubmitComment = (qaId: string) => {
+    const draft = commentDrafts[qaId]?.trim();
+    if (!draft) {
+      toast.error("Please enter a comment before posting.");
+      return;
+    }
+
+    const anonymousNames = ["Supportive Scholar", "Encouraging Peer", "Kind Classmate", "Thoughtful Study Buddy"];
+    const randomName = anonymousNames[Math.floor(Math.random() * anonymousNames.length)];
+
+    const newComment: QAComment = {
+      id: Date.now().toString(),
+      author: randomName,
+      content: draft,
+      timestamp: new Date(),
+    };
+
+    setQas((prev) =>
+      prev.map((qa) =>
+        qa.id === qaId ? { ...qa, comments: [...qa.comments, newComment] } : qa,
+      ),
+    );
+
+    setCommentDrafts((prev) => ({ ...prev, [qaId]: "" }));
+    setActiveCommentId(null);
+    toast.success("Comment added anonymously.");
+  };
+
+  // Filter courses based on major and search query
+  const filteredCourses = courses.filter((course) => {
+    const matchesMajor = selectedMajor === "all" || course.major === selectedMajor;
+    const matchesSearch = searchQuery === "" || course.code.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesMajor && matchesSearch;
+  });
+
+  // Get unique majors for filter dropdown
+  const majors = ["all", ...Array.from(new Set(courses.map((c) => c.major)))];
+
 
   if (!selectedCourse) {
     return (
@@ -99,8 +192,38 @@ const AcademicWall = () => {
             </p>
           </div>
 
+          {/* Filter and Search Section */}
+          <div className="mb-6 flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by course code (e.g., PHY1202)..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <div className="w-full sm:w-48">
+              <Select value={selectedMajor} onValueChange={setSelectedMajor}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter by major" />
+                </SelectTrigger>
+                <SelectContent>
+                  {majors.map((major) => (
+                    <SelectItem key={major} value={major}>
+                      {major === "all" ? "All Majors" : major}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Course Cards */}
           <div className="grid md:grid-cols-2 gap-6">
-            {courses.map((course) => (
+            {filteredCourses.map((course) => (
               <Card
                 key={course.id}
                 className="transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer"
@@ -112,7 +235,10 @@ const AcademicWall = () => {
                       <BookOpen className="h-6 w-6 text-primary" />
                     </div>
                     <div className="flex-1">
-                      <Badge variant="secondary" className="mb-2">{course.code}</Badge>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="secondary">{course.code}</Badge>
+                        <Badge variant="outline">{course.major}</Badge>
+                      </div>
                       <h3 className="text-xl font-semibold mb-2">{course.name}</h3>
                       <p className="text-sm text-muted-foreground mb-3">{course.description}</p>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -125,6 +251,15 @@ const AcademicWall = () => {
               </Card>
             ))}
           </div>
+
+          {/* No Results Message */}
+          {filteredCourses.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">
+                No courses found. Try adjusting your filters or search query.
+              </p>
+            </div>
+          )}
         </main>
       </div>
     );
@@ -216,10 +351,55 @@ const AcademicWall = () => {
 
                   {/* Comment Section */}
                   <div className="ml-8">
-                    <Button variant="ghost" size="sm">
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                      Add Comment
-                    </Button>
+                    <div className="space-y-3">
+                      {qa.comments.length > 0 && (
+                        <div className="space-y-3">
+                          {qa.comments.map((comment) => (
+                            <div key={comment.id} className="rounded-lg border border-border p-3">
+                              <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
+                                <span className="font-medium text-foreground text-sm">{comment.author}</span>
+                                <span>{comment.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                              </div>
+                              <p className="text-sm text-foreground/90">{comment.content}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {activeCommentId === qa.id ? (
+                        <div className="rounded-xl border border-border bg-background/90 shadow-sm">
+                          <div className="p-4 space-y-3">
+                            <Textarea
+                              placeholder="Share a supportive comment..."
+                              value={commentDrafts[qa.id] ?? ""}
+                              onChange={(event) => handleCommentChange(qa.id, event.target.value)}
+                              rows={3}
+                              className="resize-none"
+                            />
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setActiveCommentId(null);
+                                  setCommentDrafts((prev) => ({ ...prev, [qa.id]: "" }));
+                                }}
+                              >
+                                Cancel
+                              </Button>
+                              <Button size="sm" onClick={() => handleSubmitComment(qa.id)}>
+                                Post Comment
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <Button variant="ghost" size="sm" onClick={() => handleToggleComment(qa.id)}>
+                          <MessageSquare className="h-4 w-4 mr-2" />
+                          Add Comment
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </CardContent>
