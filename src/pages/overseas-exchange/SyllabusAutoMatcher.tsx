@@ -12,7 +12,8 @@ import {
 } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { BookOpen, CheckCircle2, XCircle, Trophy, MessageSquare, Star, ArrowLeft } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { BookOpen, CheckCircle2, XCircle, Trophy, MessageSquare, Star, ArrowLeft, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -282,6 +283,7 @@ const SyllabusAutoMatcher = () => {
   const navigate = useNavigate();
   const [selectedSchool, setSelectedSchool] = useState("");
   const [selectedMajor, setSelectedMajor] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const [courses, setCourses] = useState<Course[]>([]);
   const [showReviews, setShowReviews] = useState(false);
   const [reviewText, setReviewText] = useState("");
@@ -553,9 +555,26 @@ const SyllabusAutoMatcher = () => {
               {(selectedMajor === "all" ? "All Majors" : majorLabelMap[selectedMajor] ?? selectedMajor)} Courses at {schoolShortName}
             </h2>
 
+            {/* Course Search Bar */}
+            <div className="relative mb-6">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by course code or name..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
             {/* Course Cards */}
             <div className="space-y-4 mb-8">
-              {courses.map((course) => (
+              {courses
+                .filter((course) =>
+                  searchTerm === "" ||
+                  course.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  course.name.toLowerCase().includes(searchTerm.toLowerCase())
+                )
+                .map((course) => (
                 <Card key={course.code} className={course.transferable ? "border-accent" : ""}>
                   <CardContent className="pt-6">
                     <div className="flex items-start justify-between mb-3">

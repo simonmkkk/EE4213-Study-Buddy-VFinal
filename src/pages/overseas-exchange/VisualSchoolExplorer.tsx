@@ -12,7 +12,8 @@ import {
 } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Star, MessageSquare, ArrowLeft } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Star, MessageSquare, ArrowLeft, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -149,6 +150,7 @@ const VisualSchoolExplorer = () => {
   const [schoolsData, setSchoolsData] = useState<School[]>(schools);
   const [countryFilter, setCountryFilter] = useState("all");
   const [programFilter, setProgramFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState(0);
@@ -157,7 +159,12 @@ const VisualSchoolExplorer = () => {
   const filteredSchools = schoolsData.filter((school) => {
     const countryMatch = countryFilter === "all" || school.country === countryFilter;
     const programMatch = programFilter === "all" || school.majors.includes(programFilter);
-    return countryMatch && programMatch;
+    const searchMatch = 
+      searchTerm === "" ||
+      school.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      school.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      school.majors.some((major) => major.toLowerCase().includes(searchTerm.toLowerCase()));
+    return countryMatch && programMatch && searchMatch;
   });
 
   const handleSchoolClick = (school: School) => {
@@ -213,34 +220,45 @@ const VisualSchoolExplorer = () => {
         </div>
 
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-8">
-          <Select value={countryFilter} onValueChange={setCountryFilter}>
-            <SelectTrigger className="w-full sm:w-[200px]">
-              <SelectValue placeholder="Select Country" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Countries</SelectItem>
-              {countryOptions.map((country) => (
-                <SelectItem key={country} value={country}>
-                  {country}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="mb-8">
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by school name, country, or program..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Select value={countryFilter} onValueChange={setCountryFilter}>
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue placeholder="Select Country" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Countries</SelectItem>
+                {countryOptions.map((country) => (
+                  <SelectItem key={country} value={country}>
+                    {country}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-          <Select value={programFilter} onValueChange={setProgramFilter}>
-            <SelectTrigger className="w-full sm:w-[200px]">
-              <SelectValue placeholder="Select Program" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Programs</SelectItem>
-              {majorOptions.map((major) => (
-                <SelectItem key={major} value={major}>
-                  {major}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            <Select value={programFilter} onValueChange={setProgramFilter}>
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue placeholder="Select Program" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Programs</SelectItem>
+                {majorOptions.map((major) => (
+                  <SelectItem key={major} value={major}>
+                    {major}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* School Cards Grid */}
