@@ -31,8 +31,8 @@ const Community = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <main className="container py-8">
+    <div className="h-[calc(100vh-4rem)] overflow-hidden bg-background flex items-start">
+      <main className="container py-8 w-full">
         <div className="mb-12 text-center max-w-3xl mx-auto">
           <h1 className="text-5xl font-bold mb-4">Community</h1>
         </div>

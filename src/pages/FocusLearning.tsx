@@ -19,6 +19,8 @@ import {
   Wind,
   Trash2,
   X,
+  Pencil,
+  Check,
   Undo2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -147,6 +149,8 @@ const FocusLearning = () => {
   const [completionHistory, setCompletionHistory] = useState<Record<string, number>>(defaultCompletionHistory);
   const [pastTasks, setPastTasks] = useState<MajorTask[]>([]);
   const [isTrackerCollapsed, setIsTrackerCollapsed] = useState(false);
+  const [editingMajorIds, setEditingMajorIds] = useState<Record<string, string>>({});
+  const [editingMinorIds, setEditingMinorIds] = useState<Record<string, Record<string, string>>>({});
 
   const ambientAudioRef = useRef<Record<string, HTMLAudioElement>>({});
 
@@ -172,10 +176,10 @@ const FocusLearning = () => {
   const seconds = remainingSeconds % 60;
   const displayTime = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 
-  const last14Days = useMemo(() => {
+  const last7Days = useMemo(() => {
     const days: { dateKey: string; label: string; weekday: string; dayNumber: number }[] = [];
     const today = new Date();
-    for (let offset = 13; offset >= 0; offset -= 1) {
+    for (let offset = 6; offset >= 0; offset -= 1) {
       const date = new Date();
       date.setDate(today.getDate() - offset);
       const dateKey = date.toISOString().slice(0, 10);
@@ -188,6 +192,8 @@ const FocusLearning = () => {
     }
     return days;
   }, []);
+
+  const todayKey = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
   const handlePresetSelect = (minutes: number) => {
     setSelectedDuration(minutes);
@@ -240,14 +246,13 @@ const FocusLearning = () => {
       return;
     }
 
-    setMajorTasks((prev) => [
-      ...prev,
-      {
-        id: createId(),
-        title,
-        minors: [],
-      },
-    ]);
+    const newTask: MajorTask = {
+      id: createId(),
+      title,
+      minors: [],
+    };
+
+    setMajorTasks((prev) => [newTask, ...prev]);
     setNewMajorTitle("");
   };
 
@@ -271,9 +276,49 @@ const FocusLearning = () => {
     setNewMinorInputs((prev) => ({ ...prev, [majorId]: "" }));
   };
 
+  const handleStartEditMajor = (majorId: string, currentTitle: string) => {
+    setEditingMajorIds((prev) => ({ ...prev, [majorId]: currentTitle }));
+  };
+
+  const handleEditMajorChange = (majorId: string, value: string) => {
+    setEditingMajorIds((prev) => ({ ...prev, [majorId]: value }));
+  };
+
+  const handleCancelEditMajor = (majorId: string) => {
+    setEditingMajorIds((prev) => {
+      const { [majorId]: _removed, ...rest } = prev;
+      return rest;
+    });
+    setEditingMinorIds((prev) => {
+      const { [majorId]: _removed, ...rest } = prev;
+      return rest;
+    });
+  };
+
+  const handleSaveMajorTitle = (majorId: string) => {
+    const nextTitle = (editingMajorIds[majorId] ?? "").trim();
+    if (!nextTitle) {
+      return;
+    }
+
+    setMajorTasks((prev) =>
+      prev.map((major) => (major.id === majorId ? { ...major, title: nextTitle } : major)),
+    );
+
+    handleCancelEditMajor(majorId);
+    setEditingMinorIds((prev) => {
+      const { [majorId]: _removed, ...rest } = prev;
+      return rest;
+    });
+  };
+
   const handleDeleteMajor = (majorId: string) => {
     setMajorTasks((prev) => prev.filter((major) => major.id !== majorId));
     setNewMinorInputs((prev) => {
+      const { [majorId]: _removed, ...rest } = prev;
+      return rest;
+    });
+    setEditingMajorIds((prev) => {
       const { [majorId]: _removed, ...rest } = prev;
       return rest;
     });
@@ -290,6 +335,81 @@ const FocusLearning = () => {
           : major,
       ),
     );
+    setEditingMinorIds((prev) => {
+      const minorEdits = prev[majorId];
+      if (!minorEdits) {
+        return prev;
+      }
+      const { [minorId]: _removed, ...restMinors } = minorEdits;
+      if (Object.keys(restMinors).length === 0) {
+        const { [majorId]: _majorRemoved, ...rest } = prev;
+        return rest;
+      }
+      return {
+        ...prev,
+        [majorId]: restMinors,
+      };
+    });
+  };
+
+  const handleStartEditMinor = (majorId: string, minorId: string, currentTitle: string) => {
+    setEditingMinorIds((prev) => ({
+      ...prev,
+      [majorId]: {
+        ...(prev[majorId] ?? {}),
+        [minorId]: currentTitle,
+      },
+    }));
+  };
+
+  const handleEditMinorChange = (majorId: string, minorId: string, value: string) => {
+    setEditingMinorIds((prev) => ({
+      ...prev,
+      [majorId]: {
+        ...(prev[majorId] ?? {}),
+        [minorId]: value,
+      },
+    }));
+  };
+
+  const handleCancelEditMinor = (majorId: string, minorId: string) => {
+    setEditingMinorIds((prev) => {
+      const minorEdits = prev[majorId];
+      if (!minorEdits) {
+        return prev;
+      }
+      const { [minorId]: _removed, ...restMinors } = minorEdits;
+      if (Object.keys(restMinors).length === 0) {
+        const { [majorId]: _majorRemoved, ...rest } = prev;
+        return rest;
+      }
+      return {
+        ...prev,
+        [majorId]: restMinors,
+      };
+    });
+  };
+
+  const handleSaveMinorTitle = (majorId: string, minorId: string) => {
+    const nextTitle = editingMinorIds[majorId]?.[minorId]?.trim();
+    if (!nextTitle) {
+      return;
+    }
+
+    setMajorTasks((prev) =>
+      prev.map((major) =>
+        major.id === majorId
+          ? {
+              ...major,
+              minors: major.minors.map((minor) =>
+                minor.id === minorId ? { ...minor, title: nextTitle } : minor,
+              ),
+            }
+          : major,
+      ),
+    );
+
+    handleCancelEditMinor(majorId, minorId);
   };
 
   const decrementCompletionHistory = (dateKey: string | undefined) => {
@@ -462,14 +582,14 @@ const FocusLearning = () => {
   return (
     <div
       className={cn(
-        "relative h-screen overflow-hidden transition-colors",
+        "relative h-[calc(100vh-4rem)] overflow-hidden transition-colors",
         isWallpaperActive ? "text-white" : "text-slate-900",
       )}
       style={backgroundStyle}
     >
       <div className={cn("absolute inset-0", isWallpaperActive ? "bg-transparent" : "bg-white")} />
-      <div className="relative z-10 flex h-full flex-col items-center px-4 py-6 sm:px-6 sm:py-8">
-        <header className="flex w-full max-w-6xl items-start justify-between">
+      <div className="relative z-10 flex h-full flex-col items-center px-4 sm:px-6">
+        <header className="flex w-full max-w-6xl items-start justify-between py-6 sm:py-8 shrink-0">
           <div className="space-y-1">
             <p
               className={cn(
@@ -494,7 +614,7 @@ const FocusLearning = () => {
           </div>
         </header>
 
-        <main className="flex w-full max-w-4xl flex-1 flex-col items-center justify-center gap-8 text-center">
+        <main className="flex w-full max-w-4xl flex-1 flex-col items-center justify-center gap-8 text-center min-h-0 py-6 sm:py-8">
           <div className="space-y-6">
             <div
               className={cn(
@@ -568,12 +688,12 @@ const FocusLearning = () => {
                     onClick={() => handlePresetSelect(minutes)}
                     className={cn(
                       "rounded-full px-5 text-sm font-medium transition-colors duration-200",
-                      isWallpaperActive
-                        ? isSelected
-                          ? "border-white bg-white text-slate-900"
-                          : "border-white text-white hover:bg-white/85 hover:text-slate-900"
-                        : isSelected
-                          ? "border-primary bg-primary text-primary-foreground"
+                      isSelected
+                        ? isWallpaperActive
+                          ? "border-white bg-white text-slate-900 hover:bg-white hover:text-slate-900"
+                          : "border-primary bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
+                        : isWallpaperActive
+                          ? "border-white/70 bg-white/12 text-white hover:bg-white/20 hover:text-white"
                           : "border-primary text-primary hover:bg-primary hover:text-primary-foreground",
                     )}
                   >
@@ -594,7 +714,7 @@ const FocusLearning = () => {
           </blockquote>
         </main>
 
-        <aside className="absolute top-4 right-4 flex w-[clamp(18rem,28vw,30rem)] flex-col items-stretch gap-4 sm:top-8 sm:right-8">
+        <aside className="absolute top-4 right-4 bottom-4 flex w-[clamp(22rem,34vw,36rem)] flex-col items-stretch gap-4 sm:top-8 sm:right-8 sm:bottom-8">
           <div className="flex flex-wrap items-center justify-end gap-10">
             <div className="flex items-center gap-3">
               <Button
@@ -616,7 +736,7 @@ const FocusLearning = () => {
                   setIsWallpaperPanelOpen(false);
                 }}
               >
-                {isTrackerCollapsed ? "Show Micro Goal Study Tracker" : "Hide Micro Goal Study Tracker"}
+                Micro Goal Study Tracker
               </Button>
               <Button
                 size="icon"
@@ -696,7 +816,7 @@ const FocusLearning = () => {
                 "rounded-2xl p-4",
                 isWallpaperActive
                   ? "bg-black/35 text-white backdrop-blur"
-                  : "border border-slate-200 bg-white text-slate-700 shadow-sm",
+                  : "border border-slate-300 bg-white text-slate-700 shadow-sm",
               )}
             >
               <div className="mb-3 flex items-center justify-between text-sm font-semibold">
@@ -728,11 +848,11 @@ const FocusLearning = () => {
                         "flex w-full items-center justify-between rounded-xl border px-3 py-2 text-left text-sm transition",
                         isActive
                           ? isWallpaperActive
-                            ? "border-white/60 bg-white/20 text-white"
+                            ? "border-white/75 bg-white/35 text-white"
                             : "border-primary/60 bg-primary/10 text-primary"
                           : isWallpaperActive
-                            ? "border-white/10 bg-white/5 text-white/70 hover:bg-white/15"
-                            : "border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100",
+                            ? "border-white/35 bg-white/18 text-white/80 hover:bg-white/28"
+                            : "border-slate-300 bg-slate-50 text-slate-600 hover:bg-slate-100",
                       )}
                     >
                       <span className="flex items-center gap-2">
@@ -772,10 +892,10 @@ const FocusLearning = () => {
                       "w-full rounded-xl border px-3 py-2 text-left text-sm transition",
                       selectedWallpaper === option.value
                         ? isWallpaperActive
-                          ? "border-white/60 bg-white/20 text-white"
+                          ? "border-white/75 bg-white/35 text-white"
                           : "border-primary/60 bg-primary/10 text-primary"
                         : isWallpaperActive
-                          ? "border-white/10 bg-white/5 text-white/70 hover:bg-white/15"
+                          ? "border-white/35 bg-white/18 text-white/80 hover:bg-white/28"
                           : "border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100",
                     )}
                   >
@@ -789,16 +909,21 @@ const FocusLearning = () => {
           {!isTrackerCollapsed && (
             <div
               className={cn(
-                "rounded-3xl border border-slate-200 bg-white p-6 text-slate-700 shadow-lg overflow-hidden",
-                isWallpaperActive ? "border-white/20 bg-black/40 text-white backdrop-blur" : ""
+                "flex flex-1 flex-col rounded-3xl border border-slate-300 bg-white text-slate-700 shadow-lg overflow-hidden min-h-[38rem] md:min-h-[42rem]",
+                isWallpaperActive ? "border-white/30 bg-black/65 text-white backdrop-blur" : ""
               )}
             >
-              <div className="mb-6 space-y-2">
-                <p className="text-2xl font-bold tracking-tight">Micro Goal Study Tracker</p>
-                <p className={cn("text-base leading-relaxed", isWallpaperActive ? "text-white/75" : "text-slate-500")}>Break larger study goals into actionable steps.</p>
-              </div>
+              {/* Section 1: Header + Create */}
+              <div className={cn("px-5 py-4 sm:px-6 sm:py-5 border-b", isWallpaperActive ? "border-white/20" : "border-slate-300")}> 
+                <div className="mb-1">
+                  <p className="text-2xl font-bold tracking-tight">Micro Goal Study Tracker</p>
+                </div>
 
-              <div className="flex items-center gap-3">
+                <div className={cn("mb-2 rounded-lg px-3 py-1 text-sm font-medium", isWallpaperActive ? "bg-white/15 text-white/90" : "bg-slate-100 text-slate-600")}> 
+                  Today: {completionHistory[new Date().toISOString().slice(0, 10)] ?? 0} major task(s) completed
+                </div>
+
+                <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
                 <Input
                   value={newMajorTitle}
                   onChange={(event) => setNewMajorTitle(event.target.value)}
@@ -806,7 +931,7 @@ const FocusLearning = () => {
                   className={cn(
                     "flex-1 h-11 text-base",
                     isWallpaperActive
-                      ? "border-white/30 bg-white/10 text-white placeholder:text-white/50"
+                      ? "border-white/50 bg-white/20 text-white placeholder:text-white/65"
                       : "",
                   )}
                 />
@@ -828,13 +953,13 @@ const FocusLearning = () => {
                 >
                   Create
                 </Button>
+                </div>
               </div>
 
-              <div className="max-h-[40vh] space-y-4 overflow-y-auto pr-1">
-                {majorTasks.length === 0 ? (
-                  <p className={cn("text-sm", isWallpaperActive ? "text-white/70" : "text-slate-500")}>Add your first major task to get started.</p>
-                ) : (
-                  majorTasks.map((major) => {
+              {/* Section 2: Tasks (Scrollable) */}
+              <div className="flex-1 overflow-y-auto p-4 sm:p-5 min-h-0">
+                <div className="space-y-5">
+                  {majorTasks.map((major) => {
                     const totalMinors = major.minors.length;
                     const completedMinors = major.minors.filter((minor) => minor.completed).length;
                     const progress = totalMinors === 0 ? 0 : Math.round((completedMinors / totalMinors) * 100);
@@ -845,33 +970,94 @@ const FocusLearning = () => {
                         className={cn(
                           "rounded-2xl border p-4",
                           isWallpaperActive
-                            ? "border-white/20 bg-white/10"
-                            : "border-slate-200 bg-slate-50",
+                            ? "border-white/40 bg-white/15"
+                            : "border-slate-300 bg-slate-50",
                         )}
                       >
                         <div className="flex items-start gap-2">
                           <div className="flex-1">
                             <div className="flex items-start justify-between gap-4">
-                              <p className="text-lg font-semibold leading-snug">{major.title}</p>
+                              {editingMajorIds[major.id] !== undefined ? (
+                                <Input
+                                  value={editingMajorIds[major.id] ?? ""}
+                                  onChange={(event) => handleEditMajorChange(major.id, event.target.value)}
+                                  className={cn(
+                                    "h-9 text-base",
+                                    isWallpaperActive
+                                      ? "border-white/50 bg-white/20 text-white placeholder:text-white/70"
+                                      : "",
+                                  )}
+                                  autoFocus
+                                />
+                              ) : (
+                                <p className="text-lg font-semibold leading-snug">{major.title}</p>
+                              )}
                               <span className={cn("text-sm", isWallpaperActive ? "text-white/70" : "text-slate-500")}>{completedMinors}/{totalMinors || 0}</span>
                             </div>
                           </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDeleteMajor(major.id)}
-                            className={cn(
-                              "h-8 w-8 text-muted-foreground hover:text-destructive",
-                              isWallpaperActive ? "hover:bg-white/20" : "",
+                          <div className="flex items-center gap-1">
+                            {editingMajorIds[major.id] !== undefined ? (
+                              <>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleSaveMajorTitle(major.id)}
+                                  className={cn(
+                                    "h-8 w-8 text-emerald-600 hover:text-emerald-700",
+                                    isWallpaperActive ? "hover:bg-white/20" : "",
+                                  )}
+                                  disabled={!editingMajorIds[major.id]?.trim()}
+                                >
+                                  <Check className="h-4 w-4" />
+                                  <span className="sr-only">Save major task title</span>
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleCancelEditMajor(major.id)}
+                                  className={cn(
+                                    "h-8 w-8 text-muted-foreground hover:text-destructive",
+                                    isWallpaperActive ? "hover:bg-white/20" : "",
+                                  )}
+                                >
+                                  <X className="h-4 w-4" />
+                                  <span className="sr-only">Cancel editing major task</span>
+                                </Button>
+                              </>
+                            ) : (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleStartEditMajor(major.id, major.title)}
+                                className={cn(
+                                  "h-8 w-8 text-muted-foreground hover:text-primary",
+                                  isWallpaperActive ? "hover:bg-white/20" : "",
+                                )}
+                              >
+                                <Pencil className="h-4 w-4" />
+                                <span className="sr-only">Edit major task title</span>
+                              </Button>
                             )}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Delete major task</span>
-                          </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteMajor(major.id)}
+                              className={cn(
+                                "h-8 w-8 text-muted-foreground hover:text-destructive",
+                                isWallpaperActive ? "hover:bg-white/20" : "",
+                              )}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              <span className="sr-only">Delete major task</span>
+                            </Button>
+                          </div>
                         </div>
 
-                        <div className="mt-2 space-y-2">
+                        <div className="mt-2 space-y-1.5">
                           <div className={cn("h-2 overflow-hidden rounded-full", isWallpaperActive ? "bg-white/10" : "bg-slate-200")}
                           >
                             <div
@@ -879,58 +1065,123 @@ const FocusLearning = () => {
                               style={{ width: `${progress}%` }}
                             />
                           </div>
-                          {major.minors.length === 0 ? (
-                            <p className={cn("text-xs italic", isWallpaperActive ? "text-white/70" : "text-slate-500")}>Add minor tasks to build momentum.</p>
-                          ) : (
-                            <div className="space-y-2">
-                              {major.minors.map((minor) => (
-                                <div key={minor.id} className="flex items-start gap-2 text-sm">
-                                  <label className="flex flex-1 items-start gap-2">
-                                    <Checkbox
-                                      checked={minor.completed}
-                                      onCheckedChange={() => handleToggleMinor(major.id, minor.id)}
-                                      className={cn(
-                                        "mt-0.5",
-                                        isWallpaperActive
-                                          ? "border-white/40 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-slate-900"
-                                          : "",
+                          {major.minors.length > 0 && (
+                            <div className="space-y-1.5">
+                              {major.minors.map((minor) => {
+                                const editingMinorValue = editingMinorIds[major.id]?.[minor.id];
+                                const isEditingMinor = editingMinorValue !== undefined;
+
+                                return (
+                                  <div key={minor.id} className="flex items-start gap-2 text-sm">
+                                    <label className="flex flex-1 items-start gap-2">
+                                      <Checkbox
+                                        checked={minor.completed}
+                                        onCheckedChange={() => handleToggleMinor(major.id, minor.id)}
+                                        className={cn(
+                                          "mt-0.5",
+                                          isWallpaperActive
+                                            ? "border-white/50 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-slate-900"
+                                            : "",
+                                        )}
+                                        disabled={isEditingMinor}
+                                      />
+                                      {isEditingMinor ? (
+                                        <Input
+                                          value={editingMinorValue ?? ""}
+                                          onChange={(event) => handleEditMinorChange(major.id, minor.id, event.target.value)}
+                                          className={cn(
+                                            "h-8 text-sm",
+                                            isWallpaperActive
+                                              ? "border-white/40 bg-white/10 text-white placeholder:text-white/50"
+                                              : "",
+                                          )}
+                                          autoFocus
+                                        />
+                                      ) : (
+                                        <span
+                                          className={cn(
+                                            "flex-1 leading-relaxed",
+                                            minor.completed
+                                              ? isWallpaperActive
+                                                ? "text-white/60 line-through"
+                                                : "text-slate-500 line-through"
+                                              : isWallpaperActive
+                                                ? "text-white"
+                                                : "text-slate-700",
+                                          )}
+                                        >
+                                          {minor.title}
+                                        </span>
                                       )}
-                                    />
-                                    <span
-                                      className={cn(
-                                        "flex-1 leading-relaxed",
-                                        minor.completed
-                                          ? isWallpaperActive
-                                            ? "text-white/60 line-through"
-                                            : "text-slate-500 line-through"
-                                          : isWallpaperActive
-                                            ? "text-white"
-                                            : "text-slate-700",
+                                    </label>
+                                    <div className="flex items-center gap-1">
+                                      {isEditingMinor ? (
+                                        <>
+                                          <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => handleSaveMinorTitle(major.id, minor.id)}
+                                            className={cn(
+                                              "h-7 w-7 text-emerald-600 hover:text-emerald-700",
+                                              isWallpaperActive ? "hover:bg-white/20" : "",
+                                            )}
+                                            disabled={!editingMinorValue?.trim()}
+                                          >
+                                            <Check className="h-4 w-4" />
+                                            <span className="sr-only">Save mini task title</span>
+                                          </Button>
+                                          <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => handleCancelEditMinor(major.id, minor.id)}
+                                            className={cn(
+                                              "h-7 w-7 text-muted-foreground hover:text-destructive",
+                                              isWallpaperActive ? "hover:bg-white/20" : "",
+                                            )}
+                                          >
+                                            <X className="h-4 w-4" />
+                                            <span className="sr-only">Cancel editing mini task</span>
+                                          </Button>
+                                        </>
+                                      ) : (
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="icon"
+                                          onClick={() => handleStartEditMinor(major.id, minor.id, minor.title)}
+                                          className={cn(
+                                            "h-7 w-7 text-muted-foreground hover:text-primary",
+                                            isWallpaperActive ? "hover:bg-white/20" : "",
+                                          )}
+                                        >
+                                          <Pencil className="h-4 w-4" />
+                                          <span className="sr-only">Edit mini task title</span>
+                                        </Button>
                                       )}
-                                    >
-                                      {minor.title}
-                                    </span>
-                                  </label>
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => handleDeleteMinor(major.id, minor.id)}
-                                    className={cn(
-                                      "h-8 w-8 text-muted-foreground hover:text-destructive",
-                                      isWallpaperActive ? "hover:bg-white/20" : "",
-                                    )}
-                                  >
-                                    <X className="h-4 w-4" />
-                                    <span className="sr-only">Remove minor task</span>
-                                  </Button>
-                                </div>
-                              ))}
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => handleDeleteMinor(major.id, minor.id)}
+                                        className={cn(
+                                          "h-7 w-7 text-muted-foreground hover:text-destructive",
+                                          isWallpaperActive ? "hover:bg-white/20" : "",
+                                        )}
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                        <span className="sr-only">Remove mini task</span>
+                                      </Button>
+                                    </div>
+                                  </div>
+                                );
+                              })}
                             </div>
                           )}
                         </div>
 
-                        <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                        <div className="mt-5 flex flex-col gap-4 sm:flex-row">
                           <Input
                             value={newMinorInputs[major.id] ?? ""}
                             onChange={(event) =>
@@ -961,99 +1212,133 @@ const FocusLearning = () => {
                         </div>
                       </div>
                     );
-                  })
+                  })}
+                </div>
+
+                {pastTasks.length > 0 && (
+                  <div className="space-y-5 border-t pt-6">
+                    <div className="flex items-center justify-between text-sm font-semibold uppercase tracking-wider">
+                      <span>Past Major Tasks</span>
+                      <span className={cn(isWallpaperActive ? "text-white/65" : "text-slate-400")}>Completed</span>
+                    </div>
+                    <div className="space-y-4">
+                      {pastTasks.map((task) => (
+                        <div
+                          key={task.id}
+                          className={cn(
+                            "rounded-2xl border px-5 py-4 text-base",
+                            isWallpaperActive ? "border-white/15 bg-white/5" : "border-slate-300 bg-slate-50",
+                          )}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between gap-3">
+                                <p className="text-lg font-semibold">{task.title}</p>
+                                <span className={cn("text-sm", isWallpaperActive ? "text-emerald-200" : "text-emerald-600")}>Done</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleReopenPastMajor(task.id)}
+                                className={cn(
+                                  "h-8 w-8 text-muted-foreground hover:text-primary",
+                                  isWallpaperActive ? "hover:bg-white/20" : "",
+                                )}
+                              >
+                                <Undo2 className="h-4 w-4" />
+                                <span className="sr-only">Reopen task</span>
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDeletePastMajor(task.id)}
+                                className={cn(
+                                  "h-8 w-8 text-muted-foreground hover:text-destructive",
+                                  isWallpaperActive ? "hover:bg-white/20" : "",
+                                )}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                                <span className="sr-only">Remove past task</span>
+                              </Button>
+                            </div>
+                          </div>
+                          <p className={cn("text-xs uppercase tracking-wide", isWallpaperActive ? "text-white/55" : "text-slate-400")}>Finished {task.completedAt}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
 
-              {pastTasks.length > 0 && (
-                <div className="space-y-4 border-t pt-5">
-                  <div className="flex items-center justify-between text-sm font-semibold uppercase tracking-wider">
-                    <span>Past Major Tasks</span>
-                    <span className={cn(isWallpaperActive ? "text-white/65" : "text-slate-400")}>Completed</span>
+              {/* Section 3: Last 7 Days (Fixed at Bottom) */}
+              <div className={cn("border-t px-4 py-2 sm:px-5 sm:py-2.5", isWallpaperActive ? "border-white/35 bg-white/12" : "border-slate-300 bg-slate-50/50")}> 
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider">
+                    <span>Last 7 Days</span>
+                    <span className={cn(isWallpaperActive ? "text-white/60" : "text-slate-400")}>Major tasks</span>
                   </div>
-                  <div className="space-y-3">
-                    {pastTasks.map((task) => (
-                      <div
-                        key={task.id}
-                        className={cn(
-                          "rounded-2xl border px-4 py-3 text-base",
-                          isWallpaperActive ? "border-white/15 bg-white/5" : "border-slate-200 bg-slate-50",
-                        )}
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between gap-3">
-                              <p className="text-lg font-semibold">{task.title}</p>
-                              <span className={cn("text-sm", isWallpaperActive ? "text-emerald-200" : "text-emerald-600")}>Done</span>
-                            </div>
+                  <div className="grid grid-cols-7 gap-1.5">
+                    {last7Days.map((day) => {
+                      const hasCompletion = Boolean(completionHistory[day.dateKey]);
+                      const isToday = day.dateKey === todayKey;
+                      return (
+                        <div key={day.dateKey} className="flex flex-col items-center gap-0.5 text-center">
+                          <span
+                            className={cn(
+                              "text-[10px] font-semibold uppercase tracking-wide",
+                              isToday
+                                ? isWallpaperActive
+                                  ? "text-emerald-200"
+                                  : "text-emerald-600"
+                                : "invisible",
+                            )}
+                            aria-hidden={!isToday}
+                          >
+                            Today
+                          </span>
+                          <div
+                            className={cn(
+                              "flex h-[1.75rem] w-[1.75rem] items-center justify-center rounded-full border text-[0.8125rem] font-semibold transition",
+                              hasCompletion
+                                ? "border-emerald-500 bg-emerald-500 text-white"
+                                : isToday
+                                  ? isWallpaperActive
+                                    ? "border-white/60 bg-white/10 text-white"
+                                    : "border-primary bg-primary/5 text-primary"
+                                  : isWallpaperActive
+                                    ? "border-white/20 text-white/70"
+                                    : "border-slate-300 text-slate-500",
+                              isToday
+                                ? isWallpaperActive
+                                  ? "ring-2 ring-white/60"
+                                  : "ring-2 ring-primary/50"
+                                : null,
+                            )}
+                          >
+                            {day.dayNumber}
                           </div>
-                          <div className="flex items-center gap-1">
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleReopenPastMajor(task.id)}
-                              className={cn(
-                                "h-8 w-8 text-muted-foreground hover:text-primary",
-                                isWallpaperActive ? "hover:bg-white/20" : "",
-                              )}
-                            >
-                              <Undo2 className="h-4 w-4" />
-                              <span className="sr-only">Reopen task</span>
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDeletePastMajor(task.id)}
-                              className={cn(
-                                "h-8 w-8 text-muted-foreground hover:text-destructive",
-                                isWallpaperActive ? "hover:bg-white/20" : "",
-                              )}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                              <span className="sr-only">Remove past task</span>
-                            </Button>
-                          </div>
+                          <span
+                            className={cn(
+                              "text-[11px] uppercase tracking-wide",
+                              isToday
+                                ? isWallpaperActive
+                                  ? "text-white"
+                                  : "text-primary"
+                                : isWallpaperActive
+                                  ? "text-white/50"
+                                  : "text-slate-400",
+                            )}
+                          >
+                            {day.weekday.slice(0, 2)}
+                          </span>
                         </div>
-                        <p className={cn("text-xs uppercase tracking-wide", isWallpaperActive ? "text-white/55" : "text-slate-400")}>Finished {task.completedAt}</p>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
-                </div>
-              )}
-
-              <div className="space-y-3">
-                <div className="flex items-center justify-between text-sm font-semibold uppercase tracking-wider">
-                  <span>Last 14 Days</span>
-                  <span className={cn(isWallpaperActive ? "text-white/60" : "text-slate-400")}>Major wins</span>
-                </div>
-                <div className="grid grid-cols-7 gap-3">
-                  {last14Days.map((day) => {
-                    const hasCompletion = Boolean(completionHistory[day.dateKey]);
-                    return (
-                      <div key={day.dateKey} className="flex flex-col items-center gap-1.5 text-center">
-                        <div
-                          className={cn(
-                            "flex h-9 w-9 items-center justify-center rounded-full border text-sm font-semibold",
-                            hasCompletion
-                              ? "border-emerald-500 bg-emerald-500 text-white"
-                              : isWallpaperActive
-                                ? "border-white/20 text-white/70"
-                                : "border-slate-200 text-slate-500",
-                          )}
-                        >
-                          {day.dayNumber}
-                        </div>
-                        <span className={cn("text-[11px] uppercase tracking-wide", isWallpaperActive ? "text-white/50" : "text-slate-400")}>{day.weekday.slice(0, 2)}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="rounded-xl border border-dashed px-4 py-3 text-sm">
-                  <span className={cn(isWallpaperActive ? "text-white/80" : "text-slate-600")}>
-                    Today: {completionHistory[new Date().toISOString().slice(0, 10)] ?? 0} major task(s) completed
-                  </span>
                 </div>
               </div>
             </div>

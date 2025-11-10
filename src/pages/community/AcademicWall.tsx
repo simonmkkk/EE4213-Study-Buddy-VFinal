@@ -222,7 +222,7 @@ const AcademicWall = () => {
           </div>
 
           {/* Course Cards */}
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             {filteredCourses.map((course) => (
               <Card
                 key={course.id}
