@@ -374,74 +374,78 @@ const VisualSchoolExplorer = () => {
           {filteredSchools.map((school) => {
             const commentDisplayCount = 2;
             return (
-              <Card 
-                key={school.id}
-                className="transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer group"
-              >
-                <CardContent className="p-6" onClick={() => handleSchoolClick(school)}>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm font-semibold text-foreground">{school.country}</span>
-                  </div>
-
-                  <div className="aspect-video bg-muted rounded-lg mb-4 flex items-center justify-center overflow-hidden">
-                    {brokenImages[school.id] ? (
-                      <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-center px-4">
-                        <p className="text-sm text-muted-foreground">Image unavailable for {school.name}</p>
-                      </div>
-                    ) : (
-                      <img
-                        src={school.image}
-                        alt={school.name}
-                        className="w-full h-full object-cover"
-                        onError={() => setBrokenImages((prev) => ({ ...prev, [school.id]: true }))}
-                        loading="lazy"
-                      />
-                    )}
-                  </div>
-
-                  <h3 className="text-xl font-semibold mb-3">{school.name}</h3>
-
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {school.majors.map((major) => (
-                      <Badge key={`${school.id}-${major}`} variant="secondary">{major}</Badge>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1 text-sm">
-                      <Star className="h-4 w-4 fill-primary text-primary" />
-                      <span className="font-medium">{school.rating}</span>
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedSchool(school);
-                      }}
-                      className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="flex items-center gap-2">
-                            <MessageSquare className="h-4 w-4" />
-                            <span>{commentDisplayCount} Reviews</span>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Student reviews count</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </button>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="w-full mt-4"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedSchool(school);
-                    }}
+              <Card key={school.id} className="overflow-hidden border-2 border-white shadow-none">
+                <CardContent className="p-4 space-y-3">
+                  {/* Main School Info Card */}
+                  <Card 
+                    className="transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer group border-slate-200"
+                    onClick={() => handleSchoolClick(school)}
                   >
-                    <MessageSquare className="h-4 w-4 mr-2" />
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-sm font-semibold text-foreground">{school.country}</span>
+                      </div>
+
+                      <div className="aspect-video bg-muted rounded-lg mb-4 flex items-center justify-center overflow-hidden">
+                        {brokenImages[school.id] ? (
+                          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-center px-4">
+                            <p className="text-sm text-muted-foreground">Image unavailable for {school.name}</p>
+                          </div>
+                        ) : (
+                          <img
+                            src={school.image}
+                            alt={school.name}
+                            className="w-full h-full object-cover"
+                            onError={() => setBrokenImages((prev) => ({ ...prev, [school.id]: true }))}
+                            loading="lazy"
+                          />
+                        )}
+                      </div>
+
+                      <h3 className="text-lg font-semibold mb-3 leading-tight">{school.name}</h3>
+
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {school.majors.map((major) => (
+                          <Badge key={`${school.id}-${major}`} variant="outline" className="bg-slate-50 border-slate-300 text-slate-700">{major}</Badge>
+                        ))}
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1 text-sm">
+                          <Star className="h-4 w-4 fill-primary text-primary" />
+                          <span className="font-medium">{school.rating}</span>
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedSchool(school);
+                          }}
+                          className="flex items-center gap-2 text-sm text-slate-700 hover:text-primary hover:border-primary border border-slate-300 rounded-md px-3 py-1.5 transition-all hover:shadow-sm bg-slate-50"
+                        >
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="flex items-center gap-2">
+                                <MessageSquare className="h-4 w-4" />
+                                <span>{commentDisplayCount} Reviews</span>
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Student reviews count</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Comment Button */}
+                  <Button 
+                    variant="default" 
+                    size="default" 
+                    className="w-full bg-primary hover:bg-primary/90 hover:-translate-y-1 text-primary-foreground font-semibold shadow-md hover:shadow-lg transition-all"
+                    onClick={() => setSelectedSchool(school)}
+                  >
+                    <MessageSquare className="h-5 w-5 mr-2" />
                     View Comments
                   </Button>
                 </CardContent>

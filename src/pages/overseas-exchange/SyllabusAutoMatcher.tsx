@@ -524,11 +524,11 @@ const SyllabusAutoMatcher = () => {
                   {/* View School Comments Button */}
                   <Button 
                     onClick={() => setShowReviews(true)} 
-                    variant="outline" 
-                    size="sm" 
-                    className="w-full bg-primary/10 hover:bg-primary hover:text-primary-foreground border-primary/20"
+                    variant="default" 
+                    size="default" 
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-md hover:shadow-lg transition-all"
                   >
-                    <MessageSquare className="h-4 w-4 mr-2" />
+                    <MessageSquare className="h-5 w-5 mr-2" />
                     View School Comments
                   </Button>
                 </div>
