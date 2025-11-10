@@ -639,13 +639,17 @@ const FocusLearning = () => {
   return (
     <div
       className={cn(
-        "relative h-screen overflow-hidden transition-colors",
+        "relative transition-colors",
         isWallpaperActive ? "text-white" : "text-slate-900",
       )}
-      style={backgroundStyle}
+      style={{
+        ...backgroundStyle,
+        height: 'calc(100vh - 4rem)',
+        overflow: 'hidden',
+      }}
     >
-      <div className="container py-8 h-full flex flex-col">
-        <div className="mb-12">
+      <div className="container py-8 h-full flex flex-col overflow-hidden">
+        <div className="mb-12 flex-shrink-0">
           <PageTitle
             as="h1"
             variant={isWallpaperActive ? "inverted" : "default"}
@@ -655,7 +659,7 @@ const FocusLearning = () => {
           </PageTitle>
         </div>
 
-        <main className="flex-1 flex items-center justify-center">
+        <main className="flex-1 flex items-center justify-center overflow-hidden">
           <div className="flex w-full flex-col gap-8 text-center">
         <div className="space-y-6">
           <div

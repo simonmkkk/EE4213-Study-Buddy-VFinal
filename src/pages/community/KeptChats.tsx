@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Trash2, ArrowLeft } from "lucide-react";
+import { MessageSquare, Trash2, ArrowLeft, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   AlertDialog,
@@ -31,6 +32,7 @@ interface KeptChat {
 const KeptChats = () => {
   const navigate = useNavigate();
   const [keptChats, setKeptChats] = useState<KeptChat[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [chatToDelete, setChatToDelete] = useState<string | null>(null);
 
   useEffect(() => {
@@ -46,6 +48,14 @@ const KeptChats = () => {
       setKeptChats(parsedChats);
     }
   }, []);
+
+  const filteredChats = keptChats.filter((chat) => {
+    const matchesSearch = searchTerm === "" ||
+      chat.matchedUser.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      chat.lastMessage.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      chat.topics.some(topic => topic.toLowerCase().includes(searchTerm.toLowerCase()));
+    return matchesSearch;
+  });
 
   const handleDeleteChat = (chatId: string) => {
     const updatedChats = keptChats.filter((chat) => chat.id !== chatId);
@@ -83,6 +93,18 @@ const KeptChats = () => {
           </div>
         </div>
 
+        <div className="mb-6">
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by name, message, or topics..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+
         {keptChats.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-16">
@@ -97,8 +119,8 @@ const KeptChats = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {keptChats.map((chat) => (
+          <div className="space-y-4">
+            {filteredChats.map((chat) => (
               <Card
                 key={chat.id}
                 className="transition-all hover:shadow-lg cursor-pointer"

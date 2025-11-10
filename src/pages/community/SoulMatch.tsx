@@ -245,7 +245,7 @@ const SoulMatch = () => {
               </p>
             </div>
             <Button
-              variant="outline"
+              variant="default"
               onClick={() => navigate("/community/kept-chats")}
               className="gap-2"
             >

@@ -78,22 +78,33 @@ const FocusModeDashboard = () => {
   const TimerIcon = isRunning ? Pause : Play;
   const currentQuote = motivationalQuotes[quoteIndex];
 
+  useEffect(() => {
+    // 禁用頁面滾動
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    
+    return () => {
+      // 清理：恢復滾動
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, []);
+
   return (
     <div
-        className="relative min-h-screen overflow-hidden text-white"
+        className="fixed inset-0 overflow-hidden text-white"
         style={{
           backgroundImage:
             "linear-gradient(180deg, rgba(8,18,38,0.88) 0%, rgba(8,18,38,0.75) 40%, rgba(6,14,27,0.92) 100%), url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2000&q=80')",
           backgroundSize: "cover",
           backgroundPosition: "center",
-          backgroundAttachment: "fixed",
         }}
       >
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(100,149,237,0.22),_transparent_58%)]" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-[linear-gradient(180deg,rgba(12,19,33,0)_0%,rgba(12,19,33,0.65)_45%,rgba(12,19,33,0.92)_100%)]" />
 
-      <div className="relative z-10 flex min-h-screen flex-col pb-12">
-        <header className="flex items-center justify-between px-6 py-8">
+      <div className="absolute inset-0 z-10 flex flex-col overflow-hidden">
+        <header className="flex items-center justify-between px-6 py-4 flex-shrink-0">
           <div>
             <Button variant="ghost" size="sm" onClick={() => navigate('/focus-learning')} className="gap-2 text-white/90">
               <ArrowLeft className="h-4 w-4" />
@@ -105,42 +116,42 @@ const FocusModeDashboard = () => {
           </div>
         </header>
 
-        <main className="flex flex-1 items-center justify-center px-6">
-          <div className="w-full max-w-xl space-y-12 text-center">
-            <div className="space-y-4">
-              <p className="text-sm uppercase tracking-[0.35em] text-white/60">Focus Session</p>
-              <div className="text-[6.5rem] font-semibold leading-none tracking-tight drop-shadow-[0_6px_18px_rgba(0,0,0,0.35)]">
+        <main className="flex flex-1 items-center justify-center px-6 overflow-hidden">
+          <div className="w-full max-w-xl space-y-4 text-center">
+            <div className="space-y-2">
+              <p className="text-xs uppercase tracking-[0.35em] text-white/60">Focus Session</p>
+              <div className="text-[4.5rem] font-semibold leading-none tracking-tight drop-shadow-[0_6px_18px_rgba(0,0,0,0.35)]">
                 {formattedTime}
               </div>
-              <div className="flex flex-wrap items-center justify-center gap-4">
+              <div className="flex flex-wrap items-center justify-center gap-3">
                 <Button
-                  size="lg"
+                  size="default"
                   onClick={handleToggle}
-                  className="flex items-center gap-2 rounded-full bg-white/20 px-10 text-lg font-semibold text-white backdrop-blur hover:bg-white/30"
+                  className="flex items-center gap-2 rounded-full bg-white/20 px-8 text-base font-semibold text-white backdrop-blur hover:bg-white/30"
                 >
-                  <TimerIcon className="h-5 w-5" />
+                  <TimerIcon className="h-4 w-4" />
                   {isRunning ? "Pause" : "Start"}
                 </Button>
                 <Button
-                  size="lg"
+                  size="default"
                   variant="outline"
                   onClick={handleReset}
-                  className="flex items-center gap-2 rounded-full border-white/40 bg-white/10 px-10 text-lg font-semibold text-white hover:bg-white/20 hover:text-white"
+                  className="flex items-center gap-2 rounded-full border-white/40 bg-white/10 px-8 text-base font-semibold text-white hover:bg-white/20 hover:text-white"
                 >
-                  <RefreshCw className="h-5 w-5" />
+                  <RefreshCw className="h-4 w-4" />
                   Reset
                 </Button>
               </div>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-3">
+            <div className="flex flex-wrap justify-center gap-2">
               {presetDurations.map((minutes) => (
                 <Button
                   key={minutes}
                   variant={selectedTime === minutes ? "default" : "ghost"}
                   size="sm"
                   onClick={() => handlePresetChange(minutes)}
-                  className={`rounded-full border border-white/30 px-5 text-sm font-medium backdrop-blur transition ${
+                  className={`rounded-full border border-white/30 px-4 text-sm font-medium backdrop-blur transition ${
                     selectedTime === minutes
                       ? "bg-white text-slate-900 hover:bg-white"
                       : "bg-white/10 text-white hover:bg-white/25"
@@ -151,24 +162,24 @@ const FocusModeDashboard = () => {
               ))}
             </div>
 
-            <div className="space-y-3">
-              <p className="text-lg font-medium text-white/90">“{currentQuote}”</p>
+            <div className="space-y-2">
+              <p className="text-base font-medium text-white/90">"{currentQuote}"</p>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleCycleQuote}
-                className="text-sm text-white/70 hover:text-white"
+                className="text-xs text-white/70 hover:text-white"
               >
                 Refresh quote
               </Button>
             </div>
 
-            <div className="inline-flex items-center gap-3 rounded-full bg-black/20 px-4 py-2 text-sm text-white/80 backdrop-blur">
-              <span className="h-2 w-2 rounded-full bg-emerald-300" />
+            <div className="inline-flex items-center gap-2 rounded-full bg-black/20 px-3 py-1.5 text-xs text-white/80 backdrop-blur">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
               <span className="flex items-center gap-2">
                 <span>Is your device in</span>
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs font-semibold text-white/90">
-                  <BellOff className="h-3.5 w-3.5" />
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-2 py-0.5 text-xs font-semibold text-white/90">
+                  <BellOff className="h-3 w-3" />
                   Do Not Disturb Mode
                 </span>
                 <span>?</span>

@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Heart, MessageCircle, Share2, Bookmark, Plus, Image as ImageIcon, X, ArrowLeft } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, Plus, Image as ImageIcon, X, ArrowLeft, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -179,6 +180,7 @@ const mockPosts: Post[] = [
 const EmotionCenter = () => {
   const navigate = useNavigate();
   const [posts, setPosts] = useState<Post[]>(mockPosts);
+  const [searchTerm, setSearchTerm] = useState("");
   const [showPostModal, setShowPostModal] = useState(false);
   const [newPostContent, setNewPostContent] = useState("");
   const [newPostTags, setNewPostTags] = useState<string[]>([]);
@@ -186,6 +188,14 @@ const EmotionCenter = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [activeCommentPostId, setActiveCommentPostId] = useState<string | null>(null);
   const [newCommentContent, setNewCommentContent] = useState("");
+
+  const filteredPosts = posts.filter((post) => {
+    const matchesSearch = searchTerm === "" || 
+      post.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+    return matchesSearch;
+  });
 
   useEffect(() => {
     return () => {
@@ -362,20 +372,29 @@ const EmotionCenter = () => {
             A safe space to share your feelings anonymously
           </p>
         </div>
-        <div className="flex gap-4 mb-6 items-center">
-          <div className="flex-1">
-          </div>
-          <div>
-            <Button onClick={() => setShowPostModal(true)} size="lg" className="self-start">
-              <Plus className="h-5 w-5 mr-2" />
-              Post Anonymously
-            </Button>
+        
+        <div className="mb-6 flex justify-start">
+          <Button onClick={() => setShowPostModal(true)} size="lg">
+            <Plus className="h-5 w-5 mr-2" />
+            Post Anonymously
+          </Button>
+        </div>
+
+        <div className="mb-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search posts by content, author, or tags..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
           </div>
         </div>
 
         {/* Posts Feed */}
-        <div className="max-w-3xl mx-auto space-y-6">
-          {posts.map((post) => (
+        <div className="space-y-4">
+          {filteredPosts.map((post) => (
             <Card key={post.id}>
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4 mb-4">
