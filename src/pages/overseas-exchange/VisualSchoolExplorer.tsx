@@ -18,7 +18,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Star, MessageSquare, ArrowLeft, Search } from "lucide-react";
+import { Star, MessageSquare, ArrowLeft, Search, Edit2, Trash2, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -160,6 +160,9 @@ const VisualSchoolExplorer = () => {
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState(0);
   const [brokenImages, setBrokenImages] = useState<Record<string, boolean>>({});
+  const [editingReviewIndex, setEditingReviewIndex] = useState<number | null>(null);
+  const [editingReviewText, setEditingReviewText] = useState("");
+  const [editingReviewRating, setEditingReviewRating] = useState(0);
 
   const filteredSchools = schoolsData.filter((school) => {
     const countryMatch = countryFilter === "all" || school.country === countryFilter;
@@ -210,6 +213,106 @@ const VisualSchoolExplorer = () => {
     toast.success("Review posted successfully!");
     setReviewText("");
     setReviewRating(0);
+  };
+
+  const handleEditReview = (index: number) => {
+    if (!selectedSchool) return;
+    const review = selectedSchool.reviews[index];
+    setEditingReviewIndex(index);
+    setEditingReviewText(review.content);
+    setEditingReviewRating(review.rating);
+  };
+
+  const handleSaveEdit = (index: number) => {
+    if (!selectedSchool) return;
+
+    if (!editingReviewRating) {
+      toast.error("Please select a rating before updating your review.");
+      return;
+    }
+
+    if (!editingReviewText.trim()) {
+      toast.error("Please share some feedback before updating.");
+      return;
+    }
+
+    const updatedReviews = [...selectedSchool.reviews];
+    updatedReviews[index] = {
+      ...updatedReviews[index],
+      rating: editingReviewRating,
+      content: editingReviewText.trim(),
+      date: new Date().toISOString().split("T")[0],
+    };
+
+    const updatedSchools = schoolsData.map((school) =>
+      school.id === selectedSchool.id
+        ? { ...school, reviews: updatedReviews }
+        : school,
+    );
+
+    setSchoolsData(updatedSchools);
+    setSelectedSchool(updatedSchools.find((school) => school.id === selectedSchool.id) ?? null);
+    toast.success("Review updated successfully!");
+    setEditingReviewIndex(null);
+    setEditingReviewText("");
+    setEditingReviewRating(0);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingReviewIndex(null);
+    setEditingReviewText("");
+    setEditingReviewRating(0);
+  };
+
+  const handleUpdateReview = () => {
+    if (!selectedSchool || editingReviewIndex === null) return;
+
+    if (!reviewRating) {
+      toast.error("Please select a rating before updating your review.");
+      return;
+    }
+
+    if (!reviewText.trim()) {
+      toast.error("Please share some feedback before updating.");
+      return;
+    }
+
+    const updatedReviews = [...selectedSchool.reviews];
+    updatedReviews[editingReviewIndex] = {
+      ...updatedReviews[editingReviewIndex],
+      rating: reviewRating,
+      content: reviewText.trim(),
+      date: new Date().toISOString().split("T")[0],
+    };
+
+    const updatedSchools = schoolsData.map((school) =>
+      school.id === selectedSchool.id
+        ? { ...school, reviews: updatedReviews }
+        : school,
+    );
+
+    setSchoolsData(updatedSchools);
+    setSelectedSchool(updatedSchools.find((school) => school.id === selectedSchool.id) ?? null);
+    toast.success("Review updated successfully!");
+    setReviewText("");
+    setReviewRating(0);
+    setEditingReviewIndex(null);
+  };
+
+  const handleDeleteReview = (index: number) => {
+    if (!selectedSchool) return;
+
+    const updatedReviews = selectedSchool.reviews.filter((_, i) => i !== index);
+
+    const updatedSchools = schoolsData.map((school) =>
+      school.id === selectedSchool.id
+        ? { ...school, reviews: updatedReviews }
+        : school,
+    );
+
+    setSchoolsData(updatedSchools);
+    setSelectedSchool(updatedSchools.find((school) => school.id === selectedSchool.id) ?? null);
+    toast.success("Review deleted successfully!");
   };
 
   return (
@@ -374,27 +477,120 @@ const VisualSchoolExplorer = () => {
             {selectedSchool?.reviews.map((review, idx) => (
               <Card key={`${review.name}-${review.date}-${idx}`}>
                 <CardContent className="pt-6">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <span className="font-medium">{review.name}</span>
-                      <p className="text-sm text-muted-foreground">{review.date}</p>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`h-4 w-4 ${i < review.rating ? "fill-primary text-primary" : "text-muted"}`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <p className="text-sm mb-3">{review.content}</p>
+                  {editingReviewIndex === idx ? (
+                    // 編輯模式
+                    <>
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <span className="font-medium">{review.name}</span>
+                          <p className="text-sm text-muted-foreground">{review.date}</p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {[1, 2, 3, 4, 5].map((value) => (
+                            <button
+                              key={value}
+                              type="button"
+                              className="transition-colors text-muted-foreground hover:text-primary"
+                              onClick={() => setEditingReviewRating(value)}
+                              aria-label={`Rate ${value} star${value > 1 ? "s" : ""}`}
+                            >
+                              <Star
+                                className={`h-4 w-4 ${
+                                  editingReviewRating >= value ? "fill-primary text-primary" : ""
+                                }`}
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <Textarea
+                        value={editingReviewText}
+                        onChange={(e) => setEditingReviewText(e.target.value)}
+                        className="mb-3 min-h-[80px]"
+                      />
+                      <div className="flex items-center justify-end gap-2 pt-2 border-t">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1"
+                          onClick={handleCancelEdit}
+                        >
+                          <X className="h-4 w-4" />
+                          Cancel
+                        </Button>
+                        <Button
+                          variant="default"
+                          size="sm"
+                          className="gap-1 bg-green-600 hover:bg-green-700"
+                          onClick={() => handleSaveEdit(idx)}
+                        >
+                          Save
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    // 顯示模式
+                    <>
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <span className="font-medium">{review.name}</span>
+                          <p className="text-sm text-muted-foreground">{review.date}</p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-4 w-4 ${i < review.rating ? "fill-primary text-primary" : "text-muted"}`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-sm mb-3">{review.content}</p>
+                      {review.isUser && (
+                        <div className="flex items-center justify-end gap-2 pt-2 border-t">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1 hover:bg-green-600 hover:text-white hover:border-green-600"
+                            onClick={() => handleEditReview(idx)}
+                          >
+                            <Edit2 className="h-4 w-4" />
+                            Edit
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1 text-destructive hover:bg-destructive hover:text-white"
+                            onClick={() => handleDeleteReview(idx)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete
+                          </Button>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </CardContent>
               </Card>
             ))}
             
             <div className="pt-4 border-t">
-              <h3 className="font-semibold mb-3">Share Your Experience</h3>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold">
+                  {editingReviewIndex !== null ? "Edit Your Review" : "Share Your Experience"}
+                </h3>
+                {editingReviewIndex !== null && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCancelEdit}
+                    className="gap-1"
+                  >
+                    <X className="h-4 w-4" />
+                    Cancel
+                  </Button>
+                )}
+              </div>
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-muted-foreground">Your Rating</span>
                 <div className="flex items-center gap-1">
@@ -421,8 +617,11 @@ const VisualSchoolExplorer = () => {
                 onChange={(e) => setReviewText(e.target.value)}
                 className="mb-3"
               />
-              <Button onClick={handlePostReview} className="w-full">
-                Post Review
+              <Button 
+                onClick={editingReviewIndex !== null ? handleUpdateReview : handlePostReview} 
+                className="w-full"
+              >
+                {editingReviewIndex !== null ? "Update Review" : "Post Review"}
               </Button>
             </div>
           </div>

@@ -13,7 +13,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { BookOpen, CheckCircle2, XCircle, Trophy, MessageSquare, Star, ArrowLeft, Search } from "lucide-react";
+import { BookOpen, CheckCircle2, XCircle, Trophy, MessageSquare, Star, ArrowLeft, Search, Edit2, Trash2, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -289,6 +289,9 @@ const SyllabusAutoMatcher = () => {
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState(0);
   const [schoolReviews, setSchoolReviews] = useState<{ name: string; rating: number; date: string; content: string; isUser?: boolean }[]>([]);
+  const [editingReviewIndex, setEditingReviewIndex] = useState<number | null>(null);
+  const [editingReviewText, setEditingReviewText] = useState("");
+  const [editingReviewRating, setEditingReviewRating] = useState(0);
 
   useEffect(() => {
     if (location.state?.schoolId) {
@@ -357,10 +360,55 @@ const SyllabusAutoMatcher = () => {
       isUser: true,
     };
 
-    setSchoolReviews([newReview, ...schoolReviews]);
+    setSchoolReviews([...schoolReviews, newReview]);
     setReviewText("");
     setReviewRating(0);
     toast.success("Review posted successfully!");
+  };
+
+  const handleEditReview = (index: number) => {
+    const review = schoolReviews[index];
+    setEditingReviewIndex(index);
+    setEditingReviewText(review.content);
+    setEditingReviewRating(review.rating);
+  };
+
+  const handleSaveEdit = (index: number) => {
+    if (!editingReviewRating) {
+      toast.error("Please select a rating before updating your review.");
+      return;
+    }
+
+    if (!editingReviewText.trim()) {
+      toast.error("Please share some feedback before updating.");
+      return;
+    }
+
+    const updatedReviews = [...schoolReviews];
+    updatedReviews[index] = {
+      ...updatedReviews[index],
+      rating: editingReviewRating,
+      content: editingReviewText.trim(),
+      date: new Date().toISOString().split("T")[0],
+    };
+
+    setSchoolReviews(updatedReviews);
+    toast.success("Review updated successfully!");
+    setEditingReviewIndex(null);
+    setEditingReviewText("");
+    setEditingReviewRating(0);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingReviewIndex(null);
+    setEditingReviewText("");
+    setEditingReviewRating(0);
+  };
+
+  const handleDeleteReview = (index: number) => {
+    const updatedReviews = schoolReviews.filter((_, idx) => idx !== index);
+    setSchoolReviews(updatedReviews);
+    toast.success("Review deleted successfully!");
   };
 
   const showInlineStats = Boolean(location.state?.schoolId && selectedSchool && selectedMajor);
@@ -630,21 +678,99 @@ const SyllabusAutoMatcher = () => {
             {schoolReviews.map((review, idx) => (
               <Card key={`${review.name}-${review.date}-${idx}`}>
                 <CardContent className="pt-6">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <span className="font-medium">{review.name}</span>
-                      <p className="text-sm text-muted-foreground">{review.date}</p>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`h-4 w-4 ${i < review.rating ? "fill-primary text-primary" : "text-muted"}`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <p className="text-sm mb-3">{review.content}</p>
+                  {editingReviewIndex === idx ? (
+                    // 編輯模式
+                    <>
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <span className="font-medium">{review.name}</span>
+                          <p className="text-sm text-muted-foreground">{review.date}</p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {[1, 2, 3, 4, 5].map((value) => (
+                            <button
+                              key={value}
+                              type="button"
+                              className="transition-colors text-muted-foreground hover:text-primary"
+                              onClick={() => setEditingReviewRating(value)}
+                              aria-label={`Rate ${value} star${value > 1 ? "s" : ""}`}
+                            >
+                              <Star
+                                className={`h-4 w-4 ${
+                                  editingReviewRating >= value ? "fill-primary text-primary" : ""
+                                }`}
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <Textarea
+                        value={editingReviewText}
+                        onChange={(e) => setEditingReviewText(e.target.value)}
+                        className="mb-3 min-h-[80px]"
+                      />
+                      <div className="flex items-center justify-end gap-2 pt-2 border-t">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1"
+                          onClick={handleCancelEdit}
+                        >
+                          <X className="h-4 w-4" />
+                          Cancel
+                        </Button>
+                        <Button
+                          variant="default"
+                          size="sm"
+                          className="gap-1 bg-green-600 hover:bg-green-700"
+                          onClick={() => handleSaveEdit(idx)}
+                        >
+                          Save
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    // 顯示模式
+                    <>
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <span className="font-medium">{review.name}</span>
+                          <p className="text-sm text-muted-foreground">{review.date}</p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-4 w-4 ${i < review.rating ? "fill-primary text-primary" : "text-muted"}`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-sm mb-3">{review.content}</p>
+                      {review.isUser && (
+                        <div className="flex items-center justify-end gap-2 pt-2 border-t">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1 hover:bg-green-600 hover:text-white hover:border-green-600"
+                            onClick={() => handleEditReview(idx)}
+                          >
+                            <Edit2 className="h-4 w-4" />
+                            Edit
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1 text-destructive hover:bg-destructive hover:text-white"
+                            onClick={() => handleDeleteReview(idx)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete
+                          </Button>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </CardContent>
               </Card>
             ))}
