@@ -69,16 +69,25 @@ Study Buddy 首版原型以多模組網頁應用呈現完整的留學規劃、�
 
 ### 指揮中心（主頁）
 
-- Pomodoro 計時器支援開始／暫停／重設、倒數動畫、預設時間與互動動效，並搭配激勵語錄。@src/pages/FocusLearning.tsx#136-488
-- 環境音面板可同時播放多種自然聲、咖啡廳聲等，提供靜音與狀態標示。@src/pages/FocusLearning.tsx#213-570 @src/pages/FocusLearning.tsx#813-869
-- 壁紙面板切換多款背景並維持字體可讀性（加入漸層遮罩與景深效果）。@src/pages/FocusLearning.tsx#136-174 @src/pages/FocusLearning.tsx#872-907
-- 全螢幕切換、追蹤器收合等控制考慮多顯示器情境。@src/pages/FocusLearning.tsx#142-809
+- **沉浸式版面與氛圍**：頁面背景依據壁紙動態加上漸層遮罩，確保字體對比，同時以 `container` 置中計時器，將輔助面板放在側邊以便隨時操作。@src/pages/FocusLearning.tsx#209-220 @src/pages/FocusLearning.tsx#639-760
+- **Pomodoro 計時核心**：Start/Pause 透過單一 `isRunning` 狀態切換；倒數歸零時自動重置為目前預設時長。多組 `useEffect` 控制條件計時，避免空轉或重複觸發：閒置時切換預設長度會即時同步秒數；僅在運行時啟用 interval；一旦倒數完畢即停止。@src/pages/FocusLearning.tsx#146-257 @src/pages/FocusLearning.tsx#246-590
+- **主控制面操作**：開始／暫停、重設按鈕採大型圓角膠囊設計，會依壁紙模式變換配色；禁用狀態避免無效操作，並在倒數結束後再啟動時自動回填預設秒數。@src/pages/FocusLearning.tsx#672-709
+- **預設時段捷徑**：三顆膠囊按鈕瞬間切換 25／15／5 分鐘，顏色高亮顯示當前選擇，並且在切換時關閉運行中的計時，確保時段精準。@src/pages/FocusLearning.tsx#712-747 @src/pages/FocusLearning.tsx#246-255
+- **激勵訊息**：計時器下方固定顯示名言，提供持續專注的情緒支持。@src/pages/FocusLearning.tsx#749-756
+- **環境音協奏**：
+  - 音源面板提供六種場景音，按下即在 `ambientAudioRef` 中緩存 `HTMLAudioElement`，避免重複下載。@src/pages/FocusLearning.tsx#165-291 @src/pages/FocusLearning.tsx#854-915
+  - 全域靜音按鈕會暫停並重設目前聲道；相關 `useEffect` 監聽確保切換或靜音時音訊同步，避免殘留播放。@src/pages/FocusLearning.tsx#285-288 @src/pages/FocusLearning.tsx#609-628
+  - 面板按鈕顯示「Playing／Paused／Add」等狀態文字，即使使用者關靜音也能判斷背景音是否啟用。@src/pages/FocusLearning.tsx#904-911
+- **壁紙個人化**：側邊面板列出多款 Unsplash 圖片與預設純色，點選後更新帶漸層的 `backgroundStyle`，並與環境音開關共享一致的按鈕語彙強化可發現性。@src/pages/FocusLearning.tsx#204-220 @src/pages/FocusLearning.tsx#919-957
+- **視窗掌控工具**：全螢幕切換透過原生 API 並綁定監聽器以更新圖示狀態；追蹤器收闔按鈕可在單螢幕上釋出空間。開啟任一面板會自動收起其他面板，降低介面雜訊。@src/pages/FocusLearning.tsx#252-258 @src/pages/FocusLearning.tsx#630-850
 
 ### 微型目標追蹤器
 
-- 允許建立主要任務與子任務，支援內嵌編輯、刪除、復原與即時驗證，輸入框自動聚焦。@src/pages/FocusLearning.tsx#243-395 @src/pages/FocusLearning.tsx#959-1181
-- 核取方塊進度會將完成任務轉入「過往任務」並紀錄時間，可再次開啟或永久刪除，並以圖表顯示近七天完成度。@src/pages/FocusLearning.tsx#463-488 @src/pages/FocusLearning.tsx#1218-1343
-- 近七日熱度圖以色彩／描邊標示今日與完成情形，快速掌握習慣趨勢。@src/pages/FocusLearning.tsx#1277-1343
+- **引導式啟用**：若從其他模組帶著 `highlightId` 進入，系統會自動展開追蹤器並亮起脈衝動畫，引導使用者於測試中立即看到關鍵功能。@src/pages/FocusLearning.tsx#170-202 @src/pages/FocusLearning.tsx#961-1450
+- **主要任務管理**：新增主要任務會去除多餘空白並禁用無效送出；列表支援即時重新命名與刪除，且會同步清理相關的暫存輸入值，避免殘留資料。@src/pages/FocusLearning.tsx#294-376 @src/pages/FocusLearning.tsx#1007-1099
+- **次任務編輯流程**：子任務沿用同樣的驗證規則，當行內編輯啟動時會鎖定核取方塊，防止狀態衝突；支援完成、重新命名與刪除。@src/pages/FocusLearning.tsx#310-463 @src/pages/FocusLearning.tsx#1163-1239
+- **完成旅程與歷史記錄**：當所有子任務勾選完成，系統會將主要任務移入「過往任務」，記錄 `completedAt` 日期並更新 7 日完成統計。被移除或重新開啟時會同步調整統計資料。@src/pages/FocusLearning.tsx#520-559 @src/pages/FocusLearning.tsx#1290-1376
+- **近七日熱度圖**：底部顯示 7 日日期圓點，以顏色與描邊突顯「Today」與已完成的日子，提供習慣追蹤者快速回饋。@src/pages/FocusLearning.tsx#1383-1444
 
 ### 專注模式儀表板
 

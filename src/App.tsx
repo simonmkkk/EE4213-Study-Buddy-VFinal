@@ -21,6 +21,7 @@ import Community from "./pages/Community";
 import AcademicWall from "./pages/community/AcademicWall";
 import EmotionCenter from "./pages/community/EmotionCenter";
 import SoulMatch from "./pages/community/SoulMatch";
+import KeptChats from "./pages/community/KeptChats";
 import NotFound from "./pages/NotFound";
 import Navigation from "@/components/Navigation";
 import { SavedJobsProvider } from "@/context/SavedJobsContext";
@@ -197,6 +198,15 @@ const App = () => (
               <>
                 <BackToTop />
                 <SoulMatch />
+              </>
+            }
+          />
+          <Route
+            path="/community/kept-chats"
+            element={
+              <>
+                <BackToTop />
+                <KeptChats />
               </>
             }
           />

@@ -75,15 +75,23 @@ The first version of the Study Buddy prototype is a multi-module web application
 
 ### Focus Learning Command Center
 
-- Pomodoro-style timer supports start/pause/reset, preset durations, and live countdown text, with motivational quotes and wallpaper overlays creating ambience.@src/pages/FocusLearning.tsx#136-715
-- Ambient sound panel manages multiple looped audio tracks (rain, forest, etc.), with mute toggles and state-aware labels (“Playing”, “Paused”).@src/pages/FocusLearning.tsx#213-570 @src/pages/FocusLearning.tsx#813-869
-- Wallpaper selector toggles immersive backgrounds while maintaining readability via gradient overlays.@src/pages/FocusLearning.tsx#136-174 @src/pages/FocusLearning.tsx#872-907
-- Fullscreen toggle, tracker collapse, and layout adjustments consider multi-monitor study setups.@src/pages/FocusLearning.tsx#142-809
-- Integrated Micro Goal Study Tracker:
-  - Create/edit/delete major and minor tasks with inline validation, input resets, and keyboard focus management.@src/pages/FocusLearning.tsx#243-395 @src/pages/FocusLearning.tsx#959-1181
-  - Checkbox-driven progress cascades tasks to a “past tasks” archive, logging completion dates and providing reopen/delete controls with history adjustments.@src/pages/FocusLearning.tsx#463-488 @src/pages/FocusLearning.tsx#1218-1273
-  - Last 7 days heatmap highlights daily completions, delivering lightweight analytics without leaving the page.@src/pages/FocusLearning.tsx#1277-1343
-  - Toast-compatible patterns (disabled buttons, optimistic UI) ready the component for persistence.
+- **Immersive layout and ambience**: Page-level gradient overlays preserve legibility when wallpapers are active, while a `container`-centric layout keeps the timer centered and pushes utilities into an aside column for constant reach.@src/pages/FocusLearning.tsx#209-220 @src/pages/FocusLearning.tsx#639-760
+- **Pomodoro timer engine**: Start/pause actions toggle a single `isRunning` state and reset to the selected preset when the countdown reaches zero. Multiple `useEffect` hooks guard against drift by: (1) re-syncing remaining seconds whenever a new preset is chosen while idle, (2) running an interval tick only when the timer is active, and (3) auto-stopping when the countdown hits zero.@src/pages/FocusLearning.tsx#146-257 @src/pages/FocusLearning.tsx#246-590
+- **Control surface ergonomics**: Primary controls (Start/Pause, Reset) use large pill buttons with contextual variants for light/dark wallpaper states. Disabled guards prevent invalid submissions (e.g., reset is no-op while running) and the Start button reinstates preset duration if a cycle finished before restarting.@src/pages/FocusLearning.tsx#672-709
+- **Preset duration shortcuts**: Three capsule buttons instantly reconfigure the session length, visually communicating selection via contrasting fills that adapt to wallpaper mode. Selecting a preset also collapses the active timer run to maintain predictable durations.@src/pages/FocusLearning.tsx#712-747 @src/pages/FocusLearning.tsx#246-255
+- **Motivational cues**: A prominent quote block below the timer sustains focus reinforcement without requiring additional navigation.@src/pages/FocusLearning.tsx#749-756
+- **Ambient sound orchestration**:
+  - Tapping the sound control reveals a panel with six soundscapes. Each button stores a looped `HTMLAudioElement` in a ref map, ensuring instant replay without reinvoking network requests.@src/pages/FocusLearning.tsx#165-291 @src/pages/FocusLearning.tsx#854-915
+  - Global mute toggles pause and reset the active audio track, while `useEffect` listeners keep audio state in sync if the user mutes or switches tracks mid-loop.@src/pages/FocusLearning.tsx#285-288 @src/pages/FocusLearning.tsx#609-628
+  - Buttons announce their state (“Playing”, “Paused”, “Add”) so testers know whether ambience is live even when sound is muted.@src/pages/FocusLearning.tsx#904-911
+- **Wallpaper personalization**: A dedicated panel swaps between curated Unsplash backdrops and a neutral default. Selection updates the gradient-backed `backgroundStyle`, and button styling mirrors ambient controls to reinforce discoverability.@src/pages/FocusLearning.tsx#204-220 @src/pages/FocusLearning.tsx#919-957
+- **Viewport mastery tools**: Fullscreen toggling leans on native APIs with listeners to keep UI icons accurate, while the tracker collapse button reclaims horizontal space for single-monitor users. Panel toggles auto-collapse siblings to reduce clutter.@src/pages/FocusLearning.tsx#252-258 @src/pages/FocusLearning.tsx#630-850
+- **Integrated Micro Goal Study Tracker**:
+  - Landing via routed state can auto-expand the tracker and pulse-highlight it, guiding workshop participants straight to the goal planner during user studies.@src/pages/FocusLearning.tsx#170-202 @src/pages/FocusLearning.tsx#961-1450
+  - Major task creation trims whitespace, disables empty submissions, and resets the input after creation. Inline editing respects focus, and destructive actions remove associated draft states to avoid orphaned inputs.@src/pages/FocusLearning.tsx#294-376 @src/pages/FocusLearning.tsx#1007-1099
+  - Minor tasks inherit the same validation, locking checkboxes while a line is being edited to prevent conflicting states.@src/pages/FocusLearning.tsx#310-463 @src/pages/FocusLearning.tsx#1163-1239
+  - Completion logic calculates progress percentages, moves finished majors into a past archive, and increments a per-day completion history that powers lightweight analytics.@src/pages/FocusLearning.tsx#520-559 @src/pages/FocusLearning.tsx#1290-1376
+  - A bottom analytics strip renders a seven-day heatmap with “Today” callouts, providing immediate behavioural feedback without extra navigation.@src/pages/FocusLearning.tsx#1383-1444
 
 ### Focus Mode Dashboard
 

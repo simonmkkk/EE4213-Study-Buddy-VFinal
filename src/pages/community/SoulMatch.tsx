@@ -3,9 +3,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Send, Search } from "lucide-react";
+import { AlertCircle, Send, Search, MessageSquare } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const topics = [
   "Sports",
@@ -43,6 +44,10 @@ interface Message {
 }
 
 const SoulMatch = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const loadChatId = searchParams.get("chat");
+  
   const [stage, setStage] = useState<"select" | "matching" | "chatting">("select");
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -51,9 +56,40 @@ const SoulMatch = () => {
   const [showEndModal, setShowEndModal] = useState(false);
   const [matchedUser, setMatchedUser] = useState<{ name: string; icon: string } | null>(null);
   const [isChatMinimized, setIsChatMinimized] = useState(false);
+  const [chatId, setChatId] = useState<string>(() => `chat-${Date.now()}`);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const selfAvatarLabel = "You";
+
+  // Load saved chat if chat ID is provided in URL
+  useEffect(() => {
+    if (loadChatId) {
+      const keptChats = JSON.parse(localStorage.getItem("keptChats") || "[]");
+      const savedChat = keptChats.find((chat: any) => chat.id === loadChatId);
+      
+      if (savedChat) {
+        // Load the saved chat data
+        setChatId(savedChat.id);
+        setMatchedUser(savedChat.matchedUser);
+        setSelectedTopics(savedChat.topics);
+        
+        // Load saved messages from localStorage
+        const savedMessages = localStorage.getItem(`chat-messages-${loadChatId}`);
+        if (savedMessages) {
+          const parsedMessages = JSON.parse(savedMessages);
+          // Convert timestamp strings back to Date objects
+          const messagesWithDates = parsedMessages.map((msg: any) => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp),
+          }));
+          setMessages(messagesWithDates);
+        }
+        
+        setStage("chatting");
+        toast.success("Chat loaded successfully!");
+      }
+    }
+  }, [loadChatId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -135,8 +171,39 @@ const SoulMatch = () => {
   };
 
   const handleKeepChat = () => {
-    setIsChatMinimized(true);
+    // Save chat to localStorage
+    const keptChats = JSON.parse(localStorage.getItem("keptChats") || "[]");
+    
+    const newChat = {
+      id: chatId,
+      matchedUser: matchedUser,
+      topics: selectedTopics,
+      lastMessage: messages.length > 0 ? messages[messages.length - 1].text : "No messages yet",
+      timestamp: new Date(),
+      messageCount: messages.length,
+    };
+    
+    // Check if chat already exists
+    const existingIndex = keptChats.findIndex((chat: any) => chat.id === chatId);
+    if (existingIndex !== -1) {
+      keptChats[existingIndex] = newChat;
+    } else {
+      keptChats.push(newChat);
+    }
+    
+    localStorage.setItem("keptChats", JSON.stringify(keptChats));
+    
+    // Also save the messages separately for this chat
+    localStorage.setItem(`chat-messages-${chatId}`, JSON.stringify(messages));
+    
+    // Exit the chat and return to topic selection
+    toast.success("Chat saved! You can find it in Kept Chats.");
+    setStage("select");
+    setSelectedTopics([]);
+    setMessages([]);
+    setMatchedUser(null);
     setShowEndModal(false);
+    setIsChatMinimized(false);
   };
 
   const handleResumeChat = () => {
@@ -164,11 +231,21 @@ const SoulMatch = () => {
     return (
       <div className="min-h-screen bg-background">
         <main className="container py-8">
-          <div className="mb-12">
-            <h1 className="text-5xl md:text-6xl font-bold">Soul Match</h1>
-            <p className="text-lg text-muted-foreground mt-4">
-              Find a soul companion for anonymous, meaningful conversation
-            </p>
+          <div className="mb-12 flex items-center justify-between">
+            <div>
+              <h1 className="text-5xl md:text-6xl font-bold">Soul Match</h1>
+              <p className="text-lg text-muted-foreground mt-4">
+                Find a soul companion for anonymous, meaningful conversation
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/community/kept-chats")}
+              className="gap-2"
+            >
+              <MessageSquare className="h-4 w-4" />
+              Kept Chats
+            </Button>
           </div>
 
           <Card>
@@ -224,7 +301,7 @@ const SoulMatch = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="h-[calc(100vh-4rem)] bg-background flex flex-col overflow-hidden">
       {/* Chat Header */}
       <div className="border-b border-border bg-card">
         <div className="container py-4">
@@ -264,10 +341,10 @@ const SoulMatch = () => {
         </div>
       ) : (
         <>
-          <div className="flex-1 relative bg-muted/30">
+          <div className="flex-1 relative bg-muted/30 overflow-hidden">
             <div className="container h-full py-6">
-              <div className="mx-auto flex h-full max-w-3xl flex-col rounded-2xl border border-border bg-card shadow-lg">
-                <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 pb-24">
+              <div className="mx-auto flex h-[calc(100%-7rem)] max-w-3xl flex-col rounded-2xl border border-border bg-card shadow-lg overflow-hidden">
+                <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
                   {messages.map((message) => (
                     <div key={message.id} className={`flex ${message.sender === "me" ? "justify-end" : "justify-start"}`}>
                       <div className={`flex items-end gap-3 ${message.sender === "me" ? "flex-row-reverse" : ""}`}>
@@ -320,9 +397,9 @@ const SoulMatch = () => {
               </div>
             </div>
           </div>
-          <div className="pointer-events-none fixed inset-x-0 bottom-0 bg-gradient-to-t from-background/95 via-background/80 to-transparent">
-            <div className="container flex justify-center px-4 pb-6">
-              <div className="pointer-events-auto flex w-full max-w-3xl items-center gap-2 rounded-full border border-border bg-card px-4 py-3 shadow-xl">
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background via-background/95 to-transparent pt-8 pb-6">
+            <div className="container flex justify-center px-4">
+              <div className="flex w-full max-w-3xl items-center gap-2 rounded-full border border-border bg-card px-4 py-3 shadow-2xl">
                 <Input
                   placeholder="Type your message..."
                   value={inputMessage}
