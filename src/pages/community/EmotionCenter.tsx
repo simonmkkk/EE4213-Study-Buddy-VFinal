@@ -175,6 +175,160 @@ const mockPosts: Post[] = [
     hasResonated: false,
     isSaved: false,
   },
+  {
+    id: "4",
+    author: "Bright Star",
+    avatar: "⭐",
+    content: "Finally found a study routine that works for me! Early mornings + coffee + library = productivity magic ☕📚",
+    tags: ["Achievement", "Motivation"],
+    status: "approved",
+    timestamp: new Date(Date.now() - 28800000),
+    resonates: 35,
+    comments: [
+      {
+        id: "1",
+        author: "Morning Glory",
+        avatar: "🌻",
+        content: "Morning routine is key! What time do you wake up?",
+        timestamp: new Date(Date.now() - 7200000),
+      },
+      {
+        id: "2",
+        author: "Cozy Corner",
+        avatar: "🛋️",
+        content: "I need to try this—my night owl habits aren't working anymore.",
+        timestamp: new Date(Date.now() - 6600000),
+      },
+    ],
+    hasResonated: false,
+    isSaved: false,
+  },
+  {
+    id: "5",
+    author: "Calm Lake",
+    avatar: "🏞️",
+    content: "Took a mental health day today and went for a long walk. Feeling guilty but also knowing I needed it. How do you all deal with burnout?",
+    tags: ["Wellness", "Stress"],
+    status: "approved",
+    timestamp: new Date(Date.now() - 36000000),
+    resonates: 52,
+    comments: [
+      {
+        id: "1",
+        author: "Healing Wind",
+        avatar: "🍃",
+        content: "Don't feel guilty! Rest is productive too. You can't pour from an empty cup.",
+        timestamp: new Date(Date.now() - 10800000),
+      },
+      {
+        id: "2",
+        author: "Peaceful Rain",
+        avatar: "🌧️",
+        content: "I schedule 'me time' every week now—it's non-negotiable.",
+        timestamp: new Date(Date.now() - 9600000),
+      },
+      {
+        id: "3",
+        author: "Gentle Breeze",
+        avatar: "🌬️",
+        content: "Walking helps so much! Nature is the best therapist.",
+        timestamp: new Date(Date.now() - 8400000),
+      },
+    ],
+    hasResonated: false,
+    isSaved: false,
+  },
+  {
+    id: "6",
+    author: "Thunder Cloud",
+    avatar: "⚡",
+    content: "Group project drama is real... Feeling frustrated when not everyone pulls their weight. Anyone else experiencing this?",
+    tags: ["Stress", "Academics"],
+    status: "approved",
+    timestamp: new Date(Date.now() - 43200000),
+    resonates: 67,
+    comments: [
+      {
+        id: "1",
+        author: "Wise Oak",
+        avatar: "🌳",
+        content: "Try having a team meeting to clarify roles and deadlines?",
+        timestamp: new Date(Date.now() - 14400000),
+      },
+      {
+        id: "2",
+        author: "Diplomatic Dove",
+        avatar: "🕊️",
+        content: "I've been there. Sometimes a honest conversation is all it takes.",
+        timestamp: new Date(Date.now() - 12600000),
+      },
+    ],
+    hasResonated: false,
+    isSaved: false,
+  },
+  {
+    id: "7",
+    author: "Golden Hour",
+    avatar: "🌇",
+    content: "Just got accepted to my dream internship! Still can't believe it. To everyone applying: don't give up, your time will come! 🎉",
+    tags: ["Achievement", "Career", "Celebration"],
+    status: "approved",
+    timestamp: new Date(Date.now() - 50400000),
+    resonates: 89,
+    comments: [
+      {
+        id: "1",
+        author: "Proud Mountain",
+        avatar: "⛰️",
+        content: "Congratulations!!! You deserve this!",
+        timestamp: new Date(Date.now() - 18000000),
+      },
+      {
+        id: "2",
+        author: "Inspired Spark",
+        avatar: "✨",
+        content: "This gives me hope for my own applications. Thanks for sharing!",
+        timestamp: new Date(Date.now() - 16200000),
+      },
+      {
+        id: "3",
+        author: "Cheering Squad",
+        avatar: "📣",
+        content: "AMAZING! Celebrate this win!",
+        timestamp: new Date(Date.now() - 14400000),
+      },
+    ],
+    hasResonated: false,
+    isSaved: false,
+  },
+  {
+    id: "8",
+    author: "Midnight Moon",
+    avatar: "🌙",
+    content: "3am thoughts: Is anyone else questioning their major choice? Feeling lost about what I really want to do after graduation...",
+    tags: ["Anxiety", "Career"],
+    status: "approved",
+    timestamp: new Date(Date.now() - 57600000),
+    resonates: 43,
+    comments: [
+      {
+        id: "1",
+        author: "Compass Rose",
+        avatar: "🧭",
+        content: "It's okay to not have it all figured out! Talk to career counseling?",
+        timestamp: new Date(Date.now() - 21600000),
+      },
+      {
+        id: "2",
+        author: "Wandering Path",
+        avatar: "🛤️",
+        content: "Many people switch careers multiple times. You're not alone in this feeling.",
+        timestamp: new Date(Date.now() - 19800000),
+      },
+    ],
+    hasResonated: false,
+    isSaved: false,
+  },
 ];
 
 const EmotionCenter = () => {
@@ -186,8 +340,6 @@ const EmotionCenter = () => {
   const [newPostTags, setNewPostTags] = useState<string[]>([]);
   const [newPostImages, setNewPostImages] = useState<{ file: File; preview: string }[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [activeCommentPostId, setActiveCommentPostId] = useState<string | null>(null);
-  const [newCommentContent, setNewCommentContent] = useState("");
 
   const filteredPosts = posts.filter((post) => {
     const matchesSearch = searchTerm === "" || 
@@ -293,67 +445,21 @@ const EmotionCenter = () => {
   };
 
   const handleOpenComments = (postId: string) => {
-    if (activeCommentPostId === postId) {
-      setActiveCommentPostId(null);
-      setNewCommentContent("");
-      return;
+    const post = posts.find((p) => p.id === postId);
+    if (post) {
+      navigate("/community/emotion-center/comments", { state: { post, showInput: true } });
     }
-
-    setActiveCommentPostId(postId);
-    setNewCommentContent("");
   };
 
-  const handleAddComment = () => {
-    if (!newCommentContent.trim() || !activeCommentPostId) {
-      toast.error("Please enter a comment before posting.");
-      return;
+  const handleOpenPost = (postId: string) => {
+    const post = posts.find((p) => p.id === postId);
+    if (post) {
+      navigate("/community/emotion-center/comments", { state: { post, showInput: false } });
     }
-
-    const targetPostId = activeCommentPostId;
-
-    const anonymousNames = ["Friendly Horizon", "Calm Meadow", "Bright Ember", "Gentle Brook"];
-    const anonymousAvatars = ["🌄", "🌱", "🔥", "💧"];
-    const randomIndex = Math.floor(Math.random() * anonymousNames.length);
-
-    const newComment: PostComment = {
-      id: Date.now().toString(),
-      author: anonymousNames[randomIndex],
-      avatar: anonymousAvatars[randomIndex],
-      content: newCommentContent,
-      timestamp: new Date(),
-      isSelf: true,
-    };
-
-    setActiveCommentPostId(null);
-    setNewCommentContent("");
-
-    setPosts((prev) =>
-      prev.map((post) =>
-        post.id === targetPostId
-          ? { ...post, comments: [...post.comments, { ...newComment, isSelf: true }] }
-          : post,
-      ),
-    );
-    toast.success("Comment added anonymously.");
-  };
-
-  const handleDeleteComment = (postId: string, commentId: string) => {
-    setPosts((prev) =>
-      prev.map((post) =>
-        post.id === postId
-          ? { ...post, comments: post.comments.filter((comment) => comment.id !== commentId) }
-          : post,
-      ),
-    );
-    toast.success("Comment removed.");
   };
 
   const handleDeletePost = (postId: string) => {
     setPosts((prev) => prev.filter((post) => post.id !== postId));
-    if (activeCommentPostId === postId) {
-      setActiveCommentPostId(null);
-      setNewCommentContent("");
-    }
     toast.success("Post removed.");
   };
 
@@ -362,7 +468,7 @@ const EmotionCenter = () => {
       <main className="container py-8">
         <div className="mb-12">
           <div className="flex items-center gap-4 mb-4">
-            <Button variant="default" size="sm" onClick={() => navigate(-1)} className="gap-2">
+            <Button variant="default" size="sm" onClick={() => navigate("/community")} className="gap-2">
               <ArrowLeft className="h-4 w-4" />
               Back
             </Button>
@@ -395,63 +501,68 @@ const EmotionCenter = () => {
         {/* Posts Feed */}
         <div className="space-y-4">
           {filteredPosts.map((post) => (
-            <Card key={post.id}>
+            <Card key={post.id} className="transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
               <CardContent className="pt-6">
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="text-3xl">{post.avatar}</div>
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between gap-2 mb-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{post.author}</span>
-                        <span className="text-sm text-muted-foreground">
-                          {post.timestamp.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
-                        </span>
+                <div 
+                  className="cursor-pointer" 
+                  onClick={() => handleOpenPost(post.id)}
+                >
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="text-3xl">{post.avatar}</div>
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{post.author}</span>
+                          <span className="text-sm text-muted-foreground">
+                            {post.timestamp.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                          {post.status === "pending" && (
+                            <Badge variant="outline" className="text-xs sm:text-sm border-warning text-warning px-3 py-1">
+                              Pending review
+                            </Badge>
+                          )}
+                          {post.status === "pending" && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="h-7 px-3 text-xs border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                              onClick={() => handleDeletePost(post.id)}
+                            >
+                              Delete post
+                            </Button>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {post.status === "pending" && (
-                          <Badge variant="outline" className="text-xs sm:text-sm border-warning text-warning px-3 py-1">
-                            Pending review
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {post.tags.map((tag) => (
+                          <Badge key={tag} variant="secondary" className="text-xs">
+                            {tag}
                           </Badge>
-                        )}
-                        {post.status === "pending" && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            className="h-7 px-3 text-xs border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                            onClick={() => handleDeletePost(post.id)}
-                          >
-                            Delete post
-                          </Button>
-                        )}
+                        ))}
                       </div>
                     </div>
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {post.tags.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
-                          {tag}
-                        </Badge>
+                  </div>
+
+                  <p className="text-sm mb-4 whitespace-pre-wrap break-words">{post.content}</p>
+
+                  {post.images && post.images.length > 0 && (
+                    <div className="mb-4 grid gap-3 sm:grid-cols-2">
+                      {post.images.map((image, index) => (
+                        <img
+                          key={`${post.id}-image-${index}`}
+                          src={image}
+                          alt="Shared attachment"
+                          className="h-48 w-full rounded-lg object-cover"
+                        />
                       ))}
                     </div>
-                  </div>
+                  )}
                 </div>
 
-                <p className="text-sm mb-4 whitespace-pre-wrap break-words">{post.content}</p>
-
-                {post.images && post.images.length > 0 && (
-                  <div className="mb-4 grid gap-3 sm:grid-cols-2">
-                    {post.images.map((image, index) => (
-                      <img
-                        key={`${post.id}-image-${index}`}
-                        src={image}
-                        alt="Shared attachment"
-                        className="h-48 w-full rounded-lg object-cover"
-                      />
-                    ))}
-                  </div>
-                )}
-
-                <div className="flex items-center gap-4 pt-4 border-t">
+                <div className="flex items-center gap-4 pt-4 border-t" onClick={(e) => e.stopPropagation()}>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -461,18 +572,14 @@ const EmotionCenter = () => {
                     <Heart className={`h-4 w-4 mr-1 ${post.hasResonated ? "fill-current" : ""}`} />
                     {post.resonates}
                   </Button>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      aria-label="Toggle comments"
-                      className={activeCommentPostId === post.id ? "text-primary" : ""}
-                      onClick={() => handleOpenComments(post.id)}
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                    </Button>
-                    <span className="text-sm text-muted-foreground">{post.comments.length}</span>
-                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleOpenComments(post.id)}
+                  >
+                    <MessageCircle className="h-4 w-4 mr-1" />
+                    {post.comments.length} Comments
+                  </Button>
                   <Button variant="ghost" size="sm">
                     <Share2 className="h-4 w-4 mr-1" />
                     Share
@@ -487,76 +594,6 @@ const EmotionCenter = () => {
                     {post.isSaved ? "Saved" : "Save"}
                   </Button>
                 </div>
-
-                {activeCommentPostId === post.id && (
-                  <div className="mt-4 space-y-6 border-t pt-4">
-                    <div className="space-y-4 pr-0 sm:pr-2">
-                      <div>
-                        <p className="text-sm font-medium mb-2">Recent Comments</p>
-                        {post.comments.length === 0 ? (
-                          <p className="text-sm text-muted-foreground">
-                            No comments yet. Be the first to respond!
-                          </p>
-                        ) : (
-                          <div className="space-y-3">
-                            {post.comments.map((comment) => (
-                              <div key={comment.id} className="rounded-lg border border-border p-3">
-                                <div className="mb-2 flex items-center gap-2 text-sm">
-                                  <span className="text-xl">{comment.avatar}</span>
-                                  <span className="font-medium">{comment.author}</span>
-                                  <span className="text-xs text-muted-foreground">
-                                    {comment.timestamp.toLocaleTimeString("en-US", {
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    })}
-                                  </span>
-                                  {comment.isSelf && (
-                                    <Button
-                                      type="button"
-                                      variant="outline"
-                                      size="sm"
-                                      className="ml-auto h-7 px-3 text-xs border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                                      onClick={() => handleDeleteComment(post.id, comment.id)}
-                                    >
-                                      Delete
-                                    </Button>
-                                  )}
-                                </div>
-                                <p className="text-sm whitespace-pre-wrap break-words">{comment.content}</p>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="w-full rounded-2xl border border-border bg-background/95 shadow-lg">
-                      <div className="px-4 pt-4">
-                        <p className="text-sm font-medium mb-2">Share supportive words</p>
-                        <Textarea
-                          id={`comment-input-${post.id}`}
-                          placeholder="Write an encouraging comment..."
-                          value={newCommentContent}
-                          onChange={(event) => setNewCommentContent(event.target.value)}
-                          rows={3}
-                          className="resize-none border border-primary/50 bg-background focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40"
-                        />
-                      </div>
-                      <div className="flex flex-wrap justify-end gap-2 px-4 pb-4">
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            setActiveCommentPostId(null);
-                            setNewCommentContent("");
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                        <Button onClick={handleAddComment}>Post Comment</Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </CardContent>
             </Card>
           ))}

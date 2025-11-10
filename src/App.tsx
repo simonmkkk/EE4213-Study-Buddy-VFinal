@@ -21,6 +21,7 @@ import MicroGoalTracker from "./pages/focus-learning/MicroGoalTracker";
 import Community from "./pages/Community";
 import AcademicWall from "./pages/community/AcademicWall";
 import EmotionCenter from "./pages/community/EmotionCenter";
+import EmotionCenterComments from "./pages/community/EmotionCenterComments";
 import SoulMatch from "./pages/community/SoulMatch";
 import KeptChats from "./pages/community/KeptChats";
 import NotFound from "./pages/NotFound";
@@ -191,6 +192,15 @@ const App = () => (
               <>
                 <BackToTop />
                 <EmotionCenter />
+              </>
+            }
+          />
+          <Route
+            path="/community/emotion-center/comments"
+            element={
+              <>
+                <BackToTop />
+                <EmotionCenterComments />
               </>
             }
           />
