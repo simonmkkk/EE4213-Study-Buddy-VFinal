@@ -13,6 +13,11 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Star, MessageSquare, ArrowLeft, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -305,15 +310,23 @@ const VisualSchoolExplorer = () => {
                       <span className="font-medium">{school.rating}</span>
                     </div>
                     <button
-                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedSchool(school);
                       }}
-                      className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
+                      className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
                     >
-                      <span role="img" aria-label="people">👤</span>
-                      <span>{commentDisplayCount}</span>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center gap-2">
+                            <MessageSquare className="h-4 w-4" />
+                            <span>{commentDisplayCount} Reviews</span>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Student reviews count</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </button>
                   </div>
                   <Button 
