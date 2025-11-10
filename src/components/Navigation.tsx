@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { GraduationCap, Users, Target, Briefcase, Globe, Palette } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +18,17 @@ import { useColorVision, ColorVisionMode } from "@/context/ColorVisionContext";
 const Navigation = () => {
   const location = useLocation();
   const { mode, setMode } = useColorVision();
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
   const colorVisionOptions: { value: ColorVisionMode; label: string }[] = [
     { value: "default", label: "Default" },
     { value: "red-green", label: "Red-Green" },
@@ -26,12 +38,27 @@ const Navigation = () => {
   const isActive = (path: string) =>
     location.pathname === path || location.pathname.startsWith(`${path}/`);
   
-  const navItems = [
-    { path: "/overseas-exchange/visual-explorer", label: "Overseas Exchange", icon: Globe },
-    { path: "/job-information", label: "Job Information", icon: Briefcase },
+  const navItems: {
+    path: string;
+    label: string;
+    icon: typeof Globe;
+    activeRoot?: string;
+  }[] = [
+    { path: "/overseas-exchange/visual-explorer", activeRoot: "/overseas-exchange", label: "Overseas Exchange", icon: Globe },
+    {
+      path: "/job-information/dashboard",
+      activeRoot: "/job-information",
+      label: "Career Information",
+      icon: Briefcase,
+    },
     { path: "/focus-learning", label: "Focus Learning", icon: Target },
     { path: "/community", label: "Community", icon: Users },
   ];
+  
+  // Hide navigation when in fullscreen mode
+  if (isFullscreen) {
+    return null;
+  }
   
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -46,7 +73,7 @@ const Navigation = () => {
         
         <div className="hidden md:flex items-center gap-3">
           {navItems.map((item) => {
-            const active = isActive(item.path);
+            const active = isActive(item.activeRoot ?? item.path);
             return (
               <Link
                 key={item.path}
@@ -67,7 +94,10 @@ const Navigation = () => {
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="hidden sm:inline-flex items-center gap-2">
+            <Button
+              variant="ghost"
+              className="hidden sm:inline-flex items-center gap-2 border border-transparent transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-primary hover:bg-transparent hover:text-foreground"
+            >
               <Palette className="h-5 w-5" />
               <span className="text-sm">Color Vision</span>
             </Button>

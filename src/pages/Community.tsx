@@ -1,3 +1,4 @@
+import { PageTitle } from "@/components/PageTitle";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,11 +34,13 @@ const Community = () => {
   return (
     <div className="h-[calc(100vh-4rem)] overflow-hidden bg-background flex items-start">
       <main className="container py-8 w-full">
-        <div className="mb-12 text-center max-w-3xl mx-auto">
-          <h1 className="text-5xl font-bold mb-4">Community</h1>
+        <div className="mb-12">
+          <PageTitle as="h1" className="text-5xl md:text-6xl">
+            Community
+          </PageTitle>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-6">
           {features.map((feature) => {
             const Icon = feature.icon;
             return (

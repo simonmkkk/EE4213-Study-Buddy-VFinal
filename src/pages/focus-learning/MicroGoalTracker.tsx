@@ -83,9 +83,9 @@ const MicroGoalTracker = () => {
   return (
     <div className="min-h-screen bg-background">
       <main className="container py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Micro-Goal Study Tracker</h1>
-          <p className="text-lg text-muted-foreground">
+        <div className="mb-12">
+          <h1 className="text-5xl md:text-6xl font-bold">Micro-Goal Study Tracker</h1>
+          <p className="text-lg text-muted-foreground mt-4">
             Break down your tasks into achievable micro-goals
           </p>
         </div>

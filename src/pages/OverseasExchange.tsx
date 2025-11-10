@@ -8,7 +8,7 @@ const OverseasExchange = () => {
 
   const features = [
     {
-      title: "Visual School Explorer",
+      title: "School Explorer",
       icon: Globe,
       path: "/overseas-exchange/visual-explorer",
       color: "text-primary",
@@ -19,11 +19,11 @@ const OverseasExchange = () => {
   return (
     <div className="min-h-screen bg-background">
       <main className="container py-8">
-        <div className="mb-12 text-center max-w-3xl mx-auto">
-          <h1 className="text-5xl font-bold mb-4">Overseas Exchange</h1>
+        <div className="mb-12">
+          <h1 className="text-5xl md:text-6xl font-bold">Overseas Exchange</h1>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-8 max-w-5xl mx-auto">
+        <div className="flex flex-wrap justify-center gap-8">
           {features.map((feature) => {
             const Icon = feature.icon;
             return (

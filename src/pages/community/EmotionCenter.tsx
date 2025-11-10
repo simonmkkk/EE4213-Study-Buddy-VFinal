@@ -348,13 +348,13 @@ const EmotionCenter = () => {
   return (
     <div className="min-h-screen bg-background">
       <main className="container py-8">
-        <div className="mb-8 flex flex-col gap-4">
-          <div>
-            <h1 className="text-4xl font-bold mb-2">Emotion Center</h1>
-            <p className="text-lg text-muted-foreground">
-              A safe space to share your feelings anonymously
-            </p>
-          </div>
+        <div className="mb-12">
+          <h1 className="text-5xl md:text-6xl font-bold">Emotion Center</h1>
+          <p className="text-lg text-muted-foreground mt-4">
+            A safe space to share your feelings anonymously
+          </p>
+        </div>
+        <div className="flex gap-4 mb-6">
           <Button onClick={() => setShowPostModal(true)} size="lg" className="self-start">
             <Plus className="h-5 w-5 mr-2" />
             Post Anonymously

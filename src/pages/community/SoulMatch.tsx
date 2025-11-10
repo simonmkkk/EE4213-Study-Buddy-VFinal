@@ -164,15 +164,14 @@ const SoulMatch = () => {
     return (
       <div className="min-h-screen bg-background">
         <main className="container py-8">
-          <div className="max-w-2xl mx-auto">
-            <div className="mb-8 text-center">
-              <h1 className="text-4xl font-bold mb-2">Soul Match</h1>
-              <p className="text-lg text-muted-foreground">
-                Find a soul companion for anonymous, meaningful conversation
-              </p>
-            </div>
+          <div className="mb-12">
+            <h1 className="text-5xl md:text-6xl font-bold">Soul Match</h1>
+            <p className="text-lg text-muted-foreground mt-4">
+              Find a soul companion for anonymous, meaningful conversation
+            </p>
+          </div>
 
-            <Card>
+          <Card>
               <CardContent className="pt-6 space-y-6">
                 <div>
                   <h3 className="font-semibold mb-4">Interested Topic</h3>
@@ -205,7 +204,6 @@ const SoulMatch = () => {
                 </Button>
               </CardContent>
             </Card>
-          </div>
         </main>
       </div>
     );

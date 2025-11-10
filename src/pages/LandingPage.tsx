@@ -17,8 +17,8 @@ const LandingPage = () => {
       bgColor: "bg-primary-light",
     },
     {
-      title: "Job Information",
-      description: "Discover career opportunities, track applications, analyze skill gaps, and boost your professional development.",
+      title: "Dashboard",
+      description: "Discover career opportunities, track applications, and boost your professional development.",
       icon: Briefcase,
       path: "/job-information",
       color: "text-secondary",

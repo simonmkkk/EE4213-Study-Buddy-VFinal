@@ -2,15 +2,18 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import BackToTop from "@/components/BackToTop";
-import OverseasExchange from "./pages/OverseasExchange";
 import VisualSchoolExplorer from "./pages/overseas-exchange/VisualSchoolExplorer";
 import SyllabusAutoMatcher from "./pages/overseas-exchange/SyllabusAutoMatcher";
 import JobInformation from "./pages/JobInformation";
 import CareerDashboard from "./pages/job-information/CareerDashboard";
 import JobOpportunityHub from "./pages/job-information/JobOpportunityHub";
+import SavedJobs from "./pages/job-information/SavedJobs";
+import AppliedJobs from "./pages/job-information/AppliedJobs";
+import Resources from "./pages/job-information/Resources";
+import SavedResources from "./pages/job-information/SavedResources";
 import FocusLearning from "./pages/FocusLearning";
 import FocusModeDashboard from "./pages/focus-learning/FocusModeDashboard";
 import MicroGoalTracker from "./pages/focus-learning/MicroGoalTracker";
@@ -20,6 +23,8 @@ import EmotionCenter from "./pages/community/EmotionCenter";
 import SoulMatch from "./pages/community/SoulMatch";
 import NotFound from "./pages/NotFound";
 import Navigation from "@/components/Navigation";
+import { SavedJobsProvider } from "@/context/SavedJobsContext";
+import { SavedResourcesProvider } from "@/context/SavedResourcesContext";
 
 const queryClient = new QueryClient();
 
@@ -28,9 +33,11 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Navigation />
-        <Routes>
+      <SavedJobsProvider>
+        <SavedResourcesProvider>
+          <BrowserRouter>
+            <Navigation />
+          <Routes>
           <Route
             path="/"
             element={
@@ -42,15 +49,7 @@ const App = () => (
           />
           
           {/* Overseas Exchange Module */}
-          <Route
-            path="/overseas-exchange"
-            element={
-              <>
-                <BackToTop />
-                <OverseasExchange />
-              </>
-            }
-          />
+          <Route path="/overseas-exchange" element={<Navigate to="/overseas-exchange/visual-explorer" replace />} />
           <Route
             path="/overseas-exchange/visual-explorer"
             element={
@@ -95,6 +94,42 @@ const App = () => (
               <>
                 <BackToTop />
                 <JobOpportunityHub />
+              </>
+            }
+          />
+          <Route
+            path="/job-information/saved-jobs"
+            element={
+              <>
+                <BackToTop />
+                <SavedJobs />
+              </>
+            }
+          />
+          <Route
+            path="/job-information/applied-jobs"
+            element={
+              <>
+                <BackToTop />
+                <AppliedJobs />
+              </>
+            }
+          />
+          <Route
+            path="/job-information/resources"
+            element={
+              <>
+                <BackToTop />
+                <Resources />
+              </>
+            }
+          />
+          <Route
+            path="/job-information/saved-resources"
+            element={
+              <>
+                <BackToTop />
+                <SavedResources />
               </>
             }
           />
@@ -176,8 +211,10 @@ const App = () => (
               </>
             }
           />
-        </Routes>
-      </BrowserRouter>
+          </Routes>
+        </BrowserRouter>
+        </SavedResourcesProvider>
+      </SavedJobsProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

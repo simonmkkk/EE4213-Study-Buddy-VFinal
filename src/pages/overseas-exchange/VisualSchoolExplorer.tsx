@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PageTitle } from "@/components/PageTitle";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -217,9 +218,11 @@ const VisualSchoolExplorer = () => {
   return (
     <div className="min-h-screen bg-background">
       <main className="container py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Visual School Explorer</h1>
-          <p className="text-lg text-muted-foreground">
+        <div className="mb-12">
+          <PageTitle as="h1" className="text-5xl md:text-6xl">
+            School Explorer
+          </PageTitle>
+          <p className="text-lg text-muted-foreground mt-4">
             Discover exchange schools and explore transferable courses
           </p>
         </div>
