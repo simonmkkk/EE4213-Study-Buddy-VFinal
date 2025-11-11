@@ -10,30 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Star, MessageSquare, ArrowLeft, Search, Edit2, Trash2, X, Check, ChevronsUpDown } from "lucide-react";
+import { Star, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 
 interface School {
   id: string;
@@ -168,28 +149,15 @@ const VisualSchoolExplorer = () => {
   const [schoolsData, setSchoolsData] = useState<School[]>(schools);
   const [countryFilter, setCountryFilter] = useState("all");
   const [programFilter, setProgramFilter] = useState("all");
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState(0);
   const [brokenImages, setBrokenImages] = useState<Record<string, boolean>>({});
-  const [editingReviewIndex, setEditingReviewIndex] = useState<number | null>(null);
-  const [editingReviewText, setEditingReviewText] = useState("");
-  const [editingReviewRating, setEditingReviewRating] = useState(0);
-  const [openCountry, setOpenCountry] = useState(false);
-  const [openProgram, setOpenProgram] = useState(false);
-  const [countrySearchTerm, setCountrySearchTerm] = useState("");
-  const [programSearchTerm, setProgramSearchTerm] = useState("");
 
   const filteredSchools = schoolsData.filter((school) => {
     const countryMatch = countryFilter === "all" || school.country === countryFilter;
     const programMatch = programFilter === "all" || school.majors.includes(programFilter);
-    const searchMatch = 
-      searchTerm === "" ||
-      school.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      school.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      school.majors.some((major) => major.toLowerCase().includes(searchTerm.toLowerCase()));
-    return countryMatch && programMatch && searchMatch;
+    return countryMatch && programMatch;
   });
 
   const handleSchoolClick = (school: School) => {
@@ -232,106 +200,6 @@ const VisualSchoolExplorer = () => {
     setReviewRating(0);
   };
 
-  const handleEditReview = (index: number) => {
-    if (!selectedSchool) return;
-    const review = selectedSchool.reviews[index];
-    setEditingReviewIndex(index);
-    setEditingReviewText(review.content);
-    setEditingReviewRating(review.rating);
-  };
-
-  const handleSaveEdit = (index: number) => {
-    if (!selectedSchool) return;
-
-    if (!editingReviewRating) {
-      toast.error("Please select a rating before updating your review.");
-      return;
-    }
-
-    if (!editingReviewText.trim()) {
-      toast.error("Please share some feedback before updating.");
-      return;
-    }
-
-    const updatedReviews = [...selectedSchool.reviews];
-    updatedReviews[index] = {
-      ...updatedReviews[index],
-      rating: editingReviewRating,
-      content: editingReviewText.trim(),
-      date: new Date().toISOString().split("T")[0],
-    };
-
-    const updatedSchools = schoolsData.map((school) =>
-      school.id === selectedSchool.id
-        ? { ...school, reviews: updatedReviews }
-        : school,
-    );
-
-    setSchoolsData(updatedSchools);
-    setSelectedSchool(updatedSchools.find((school) => school.id === selectedSchool.id) ?? null);
-    toast.success("Review updated successfully!");
-    setEditingReviewIndex(null);
-    setEditingReviewText("");
-    setEditingReviewRating(0);
-  };
-
-  const handleCancelEdit = () => {
-    setEditingReviewIndex(null);
-    setEditingReviewText("");
-    setEditingReviewRating(0);
-  };
-
-  const handleUpdateReview = () => {
-    if (!selectedSchool || editingReviewIndex === null) return;
-
-    if (!reviewRating) {
-      toast.error("Please select a rating before updating your review.");
-      return;
-    }
-
-    if (!reviewText.trim()) {
-      toast.error("Please share some feedback before updating.");
-      return;
-    }
-
-    const updatedReviews = [...selectedSchool.reviews];
-    updatedReviews[editingReviewIndex] = {
-      ...updatedReviews[editingReviewIndex],
-      rating: reviewRating,
-      content: reviewText.trim(),
-      date: new Date().toISOString().split("T")[0],
-    };
-
-    const updatedSchools = schoolsData.map((school) =>
-      school.id === selectedSchool.id
-        ? { ...school, reviews: updatedReviews }
-        : school,
-    );
-
-    setSchoolsData(updatedSchools);
-    setSelectedSchool(updatedSchools.find((school) => school.id === selectedSchool.id) ?? null);
-    toast.success("Review updated successfully!");
-    setReviewText("");
-    setReviewRating(0);
-    setEditingReviewIndex(null);
-  };
-
-  const handleDeleteReview = (index: number) => {
-    if (!selectedSchool) return;
-
-    const updatedReviews = selectedSchool.reviews.filter((_, i) => i !== index);
-
-    const updatedSchools = schoolsData.map((school) =>
-      school.id === selectedSchool.id
-        ? { ...school, reviews: updatedReviews }
-        : school,
-    );
-
-    setSchoolsData(updatedSchools);
-    setSelectedSchool(updatedSchools.find((school) => school.id === selectedSchool.id) ?? null);
-    toast.success("Review deleted successfully!");
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <main className="container py-8">
@@ -345,132 +213,34 @@ const VisualSchoolExplorer = () => {
         </div>
 
         {/* Filters */}
-        <div className="mb-8">
-          <div className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search by school name, country, or major (e.g., Computer Science, Business)..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <h3 className="text-sm font-semibold text-muted-foreground mb-3">Filter by Country & Program</h3>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Popover open={openCountry} onOpenChange={setOpenCountry}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={openCountry}
-                  className="w-full sm:w-[200px] justify-between"
-                >
-                  {countryFilter === "all"
-                    ? "All Countries"
-                    : countryOptions.find((country) => country === countryFilter) || "Select Country"}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[200px] p-0">
-                <Command>
-                  <CommandInput placeholder="Search country..." />
-                  <CommandEmpty>No country found.</CommandEmpty>
-                  <CommandGroup>
-                    <CommandItem
-                      value="all"
-                      onSelect={() => {
-                        setCountryFilter("all");
-                        setOpenCountry(false);
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          countryFilter === "all" ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                      All Countries
-                    </CommandItem>
-                    {countryOptions.map((country) => (
-                      <CommandItem
-                        key={country}
-                        value={country}
-                        onSelect={() => {
-                          setCountryFilter(country);
-                          setOpenCountry(false);
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            countryFilter === country ? "opacity-100" : "opacity-0"
-                          )}
-                        />
-                        {country}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </Command>
-              </PopoverContent>
-            </Popover>
+        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+          <Select value={countryFilter} onValueChange={setCountryFilter}>
+            <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectValue placeholder="Select Country" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Countries</SelectItem>
+              {countryOptions.map((country) => (
+                <SelectItem key={country} value={country}>
+                  {country}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-            <Popover open={openProgram} onOpenChange={setOpenProgram}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={openProgram}
-                  className="w-full sm:w-[200px] justify-between"
-                >
-                  {programFilter === "all"
-                    ? "All Programs"
-                    : majorOptions.find((major) => major === programFilter) || "Select Program"}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[200px] p-0">
-                <Command>
-                  <CommandInput placeholder="Search program..." />
-                  <CommandEmpty>No program found.</CommandEmpty>
-                  <CommandGroup>
-                    <CommandItem
-                      value="all"
-                      onSelect={() => {
-                        setProgramFilter("all");
-                        setOpenProgram(false);
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          programFilter === "all" ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                      All Programs
-                    </CommandItem>
-                    {majorOptions.map((major) => (
-                      <CommandItem
-                        key={major}
-                        value={major}
-                        onSelect={() => {
-                          setProgramFilter(major);
-                          setOpenProgram(false);
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            programFilter === major ? "opacity-100" : "opacity-0"
-                          )}
-                        />
-                        {major}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </Command>
-              </PopoverContent>
-            </Popover>
-          </div>
+          <Select value={programFilter} onValueChange={setProgramFilter}>
+            <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectValue placeholder="Select Program" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Programs</SelectItem>
+              {majorOptions.map((major) => (
+                <SelectItem key={major} value={major}>
+                  {major}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* School Cards Grid */}
@@ -478,78 +248,66 @@ const VisualSchoolExplorer = () => {
           {filteredSchools.map((school) => {
             const commentDisplayCount = 2;
             return (
-              <Card key={school.id} className="overflow-hidden border-2 border-white shadow-none">
-                <CardContent className="p-4 space-y-3">
-                  {/* Main School Info Card */}
-                  <Card 
-                    className="transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer group border-slate-200"
-                    onClick={() => handleSchoolClick(school)}
-                  >
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="text-sm font-semibold text-foreground">{school.country}</span>
+              <Card 
+                key={school.id}
+                className="transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer group"
+              >
+                <CardContent className="p-6" onClick={() => handleSchoolClick(school)}>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm font-semibold text-foreground">{school.country}</span>
+                  </div>
+
+                  <div className="aspect-video bg-muted rounded-lg mb-4 flex items-center justify-center overflow-hidden">
+                    {brokenImages[school.id] ? (
+                      <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-center px-4">
+                        <p className="text-sm text-muted-foreground">Image unavailable for {school.name}</p>
                       </div>
+                    ) : (
+                      <img
+                        src={school.image}
+                        alt={school.name}
+                        className="w-full h-full object-cover"
+                        onError={() => setBrokenImages((prev) => ({ ...prev, [school.id]: true }))}
+                        loading="lazy"
+                      />
+                    )}
+                  </div>
 
-                      <div className="aspect-video bg-muted rounded-lg mb-4 flex items-center justify-center overflow-hidden">
-                        {brokenImages[school.id] ? (
-                          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-center px-4">
-                            <p className="text-sm text-muted-foreground">Image unavailable for {school.name}</p>
-                          </div>
-                        ) : (
-                          <img
-                            src={school.image}
-                            alt={school.name}
-                            className="w-full h-full object-cover"
-                            onError={() => setBrokenImages((prev) => ({ ...prev, [school.id]: true }))}
-                            loading="lazy"
-                          />
-                        )}
-                      </div>
+                  <h3 className="text-xl font-semibold mb-3">{school.name}</h3>
 
-                      <h3 className="text-lg font-semibold mb-3 leading-tight">{school.name}</h3>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {school.majors.map((major) => (
+                      <Badge key={`${school.id}-${major}`} variant="secondary">{major}</Badge>
+                    ))}
+                  </div>
 
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {school.majors.map((major) => (
-                          <Badge key={`${school.id}-${major}`} variant="outline" className="bg-slate-200 border-slate-600 text-slate-900 font-semibold">{major}</Badge>
-                        ))}
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1 text-sm">
-                          <Star className="h-4 w-4 fill-primary text-primary" />
-                          <span className="font-medium">{school.rating}</span>
-                        </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedSchool(school);
-                          }}
-                          className="flex items-center gap-2 text-sm text-slate-700 hover:text-primary hover:border-primary border border-slate-300 rounded-md px-3 py-1.5 transition-all hover:shadow-sm bg-slate-50"
-                        >
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className="flex items-center gap-2">
-                                <MessageSquare className="h-4 w-4" />
-                                <span>{commentDisplayCount} Reviews</span>
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Student reviews count</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </button>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Comment Button */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1 text-sm">
+                      <Star className="h-4 w-4 fill-primary text-primary" />
+                      <span className="font-medium">{school.rating}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedSchool(school);
+                      }}
+                      className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      <span role="img" aria-label="people">👤</span>
+                      <span>{commentDisplayCount}</span>
+                    </button>
+                  </div>
                   <Button 
-                    variant="default" 
-                    size="default" 
-                    className="w-full bg-primary hover:bg-primary/90 hover:-translate-y-1 text-primary-foreground font-semibold shadow-md hover:shadow-lg transition-all"
-                    onClick={() => setSelectedSchool(school)}
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full mt-4"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedSchool(school);
+                    }}
                   >
-                    <MessageSquare className="h-5 w-5 mr-2" />
+                    <MessageSquare className="h-4 w-4 mr-2" />
                     View Comments
                   </Button>
                 </CardContent>
@@ -585,120 +343,27 @@ const VisualSchoolExplorer = () => {
             {selectedSchool?.reviews.map((review, idx) => (
               <Card key={`${review.name}-${review.date}-${idx}`}>
                 <CardContent className="pt-6">
-                  {editingReviewIndex === idx ? (
-                    // 編輯模式
-                    <>
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <span className="font-medium">{review.name}</span>
-                          <p className="text-sm text-muted-foreground">{review.date}</p>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          {[1, 2, 3, 4, 5].map((value) => (
-                            <button
-                              key={value}
-                              type="button"
-                              className="transition-colors text-muted-foreground hover:text-primary"
-                              onClick={() => setEditingReviewRating(value)}
-                              aria-label={`Rate ${value} star${value > 1 ? "s" : ""}`}
-                            >
-                              <Star
-                                className={`h-4 w-4 ${
-                                  editingReviewRating >= value ? "fill-primary text-primary" : ""
-                                }`}
-                              />
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      <Textarea
-                        value={editingReviewText}
-                        onChange={(e) => setEditingReviewText(e.target.value)}
-                        className="mb-3 min-h-[80px]"
-                      />
-                      <div className="flex items-center justify-end gap-2 pt-2 border-t">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-1"
-                          onClick={handleCancelEdit}
-                        >
-                          <X className="h-4 w-4" />
-                          Cancel
-                        </Button>
-                        <Button
-                          variant="default"
-                          size="sm"
-                          className="gap-1 bg-green-600 hover:bg-green-700"
-                          onClick={() => handleSaveEdit(idx)}
-                        >
-                          Save
-                        </Button>
-                      </div>
-                    </>
-                  ) : (
-                    // 顯示模式
-                    <>
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <span className="font-medium">{review.name}</span>
-                          <p className="text-sm text-muted-foreground">{review.date}</p>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`h-4 w-4 ${i < review.rating ? "fill-primary text-primary" : "text-muted"}`}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      <p className="text-sm mb-3">{review.content}</p>
-                      {review.isUser && (
-                        <div className="flex items-center justify-end gap-2 pt-2 border-t">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="gap-1 hover:bg-green-600 hover:text-white hover:border-green-600"
-                            onClick={() => handleEditReview(idx)}
-                          >
-                            <Edit2 className="h-4 w-4" />
-                            Edit
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="gap-1 text-destructive hover:bg-destructive hover:text-white"
-                            onClick={() => handleDeleteReview(idx)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            Delete
-                          </Button>
-                        </div>
-                      )}
-                    </>
-                  )}
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <span className="font-medium">{review.name}</span>
+                      <p className="text-sm text-muted-foreground">{review.date}</p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`h-4 w-4 ${i < review.rating ? "fill-primary text-primary" : "text-muted"}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-sm mb-3">{review.content}</p>
                 </CardContent>
               </Card>
             ))}
             
             <div className="pt-4 border-t">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold">
-                  {editingReviewIndex !== null ? "Edit Your Review" : "Share Your Experience"}
-                </h3>
-                {editingReviewIndex !== null && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleCancelEdit}
-                    className="gap-1"
-                  >
-                    <X className="h-4 w-4" />
-                    Cancel
-                  </Button>
-                )}
-              </div>
+              <h3 className="font-semibold mb-3">Share Your Experience</h3>
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-muted-foreground">Your Rating</span>
                 <div className="flex items-center gap-1">
@@ -725,11 +390,8 @@ const VisualSchoolExplorer = () => {
                 onChange={(e) => setReviewText(e.target.value)}
                 className="mb-3"
               />
-              <Button 
-                onClick={editingReviewIndex !== null ? handleUpdateReview : handlePostReview} 
-                className="w-full"
-              >
-                {editingReviewIndex !== null ? "Update Review" : "Post Review"}
+              <Button onClick={handlePostReview} className="w-full">
+                Post Review
               </Button>
             </div>
           </div>

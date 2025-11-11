@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BookOpen, ExternalLink, Bookmark, Calendar, ArrowLeft, Search } from "lucide-react";
+import { BookOpen, ExternalLink, Bookmark, Calendar } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { PageTitle } from "@/components/PageTitle";
 import { useSavedResources } from "@/context/SavedResourcesContext";
@@ -191,103 +191,84 @@ const Resources = () => {
     <div className="min-h-screen bg-background">
       <main className="container py-8">
         <div className="mb-12">
-          <div className="flex items-center gap-4 mb-4">
-            <Button
-              variant="default"
-              size="sm"
-              onClick={() => navigate(-1)}
-              className="gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-          </div>
           <PageTitle as="h1" className="text-5xl md:text-6xl">
             Resource List
           </PageTitle>
         </div>
 
-        {/* Filters and Search */}
-        <div className="mb-6 space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        {/* Filters */}
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
             <Input
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Search by resource title, category, or tags (e.g., Career, Resume, Interview)..."
-              className="pl-10"
+              placeholder="Search resources"
+              className="w-full sm:w-[260px]"
             />
-          </div>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-full sm:w-[200px]">
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="Event">Event</SelectItem>
-                  <SelectItem value="Workshop">Workshop</SelectItem>
-                  <SelectItem value="Seminar">Seminar</SelectItem>
-                  <SelectItem value="Meetup">Meetup</SelectItem>
-                  <SelectItem value="Conference">Conference</SelectItem>
-                </SelectContent>
-              </Select>
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="Event">Event</SelectItem>
+                <SelectItem value="Workshop">Workshop</SelectItem>
+                <SelectItem value="Seminar">Seminar</SelectItem>
+                <SelectItem value="Meetup">Meetup</SelectItem>
+                <SelectItem value="Conference">Conference</SelectItem>
+              </SelectContent>
+            </Select>
 
-              <Select value={locationFilter} onValueChange={setLocationFilter}>
-                <SelectTrigger className="w-full sm:w-[200px]">
-                  <SelectValue placeholder="Location" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Locations</SelectItem>
-                  <SelectItem value="Online">Online</SelectItem>
-                  <SelectItem value="Hybrid">Hybrid</SelectItem>
-                  <SelectItem value="Singapore">Singapore</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button
-              variant="default"
-              className="self-start sm:self-auto sm:ml-auto"
-              onClick={() => navigate("/job-information/saved-resources")}
-            >
-              Saved Resources
-            </Button>
+            <Select value={locationFilter} onValueChange={setLocationFilter}>
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue placeholder="Location" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Locations</SelectItem>
+                <SelectItem value="Online">Online</SelectItem>
+                <SelectItem value="Hybrid">Hybrid</SelectItem>
+                <SelectItem value="Singapore">Singapore</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+          <Button
+            variant="default"
+            className="self-start sm:self-auto sm:ml-auto"
+            onClick={() => navigate("/job-information/saved-resources")}
+          >
+            Saved Resources
+          </Button>
         </div>
 
         {/* Tag Filters */}
-        <div className="mb-8">
-          <h3 className="text-sm font-semibold text-muted-foreground mb-3">Filter by Tags</h3>
-          <div className="flex flex-wrap gap-2">
+        <div className="mb-8 flex flex-wrap gap-2">
+          <Button
+            size="sm"
+            onClick={() => setSelectedTag("all")}
+            className={cn(
+              "border-gray-300 text-foreground hover:bg-gray-50 rounded-full",
+              "bg-background",
+              selectedTag === "all" &&
+                "bg-primary text-white border-primary hover:bg-primary/90 hover:text-white"
+            )}
+          >
+            All Tags
+          </Button>
+          {allTags.map((tag) => (
             <Button
+              key={tag}
               size="sm"
-              onClick={() => setSelectedTag("all")}
+              onClick={() => setSelectedTag(tag)}
               className={cn(
                 "border-gray-300 text-foreground hover:bg-gray-50 rounded-full",
                 "bg-background",
-                selectedTag === "all" &&
+                selectedTag === tag &&
                   "bg-primary text-white border-primary hover:bg-primary/90 hover:text-white"
               )}
             >
-              All Tags
+              {tag}
             </Button>
-            {allTags.map((tag) => (
-              <Button
-                key={tag}
-                size="sm"
-                onClick={() => setSelectedTag(tag)}
-                className={cn(
-                  "border-gray-300 text-foreground hover:bg-gray-50 rounded-full",
-                  "bg-background",
-                  selectedTag === tag &&
-                    "bg-primary text-white border-primary hover:bg-primary/90 hover:text-white"
-                )}
-              >
-                {tag}
-              </Button>
-            ))}
-          </div>
+          ))}
         </div>
 
         <div className="space-y-4">

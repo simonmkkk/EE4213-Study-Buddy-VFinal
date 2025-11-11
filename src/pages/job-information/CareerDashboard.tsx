@@ -11,7 +11,7 @@ const CareerDashboard = () => {
   const { savedJobs } = useSavedJobs();
   const [dismissedNotifications, setDismissedNotifications] = useState<Set<string>>(new Set());
   const savedJobsCount = savedJobs.length;
-  const savedJobsPreview = savedJobs.slice(0, 2);
+  const savedJobsPreview = savedJobs.slice(0, 3);
   const additionalSavedJobs = Math.max(savedJobsCount - savedJobsPreview.length, 0);
   const savedResourcesCount = 8;
   const resourceHighlights = [
@@ -22,6 +22,7 @@ const CareerDashboard = () => {
   const savedResourcesPreview = [
     "UX Portfolio Playbook",
     "Tech Interview Prep Checklist",
+    "Graduate Program Tracker",
   ];
   const jobOpportunityHighlights = [
     { label: "New roles this week", value: "12" },
@@ -121,10 +122,7 @@ const CareerDashboard = () => {
           </div>
 
           <div className="grid gap-6 md:grid-cols-[7fr_3fr] md:auto-rows-fr">
-            <Card 
-              className="h-full transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer"
-              onClick={() => navigate("/job-information/job-hub")}
-            >
+            <Card className="h-full transition-smooth hover:shadow-lg hover:-translate-y-1">
               <CardContent className="p-6 flex flex-col h-full">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="rounded-full bg-primary-light p-3">
@@ -132,34 +130,29 @@ const CareerDashboard = () => {
                   </div>
                   <h2 className="text-2xl font-semibold mb-0">Job List</h2>
                 </div>
-                <div className="space-y-3 mb-6 flex-1">
+                <div className="space-y-2 mb-6 flex-1">
                   {jobOpportunityHighlights.map((item) => (
-                    <div key={item.label} className="flex items-center gap-2 text-base text-muted-foreground">
+                    <div key={item.label} className="flex items-center gap-2 text-sm text-muted-foreground">
                       <span className="font-semibold text-foreground">{item.value}</span>
                       <span>{item.label}</span>
                     </div>
                   ))}
                 </div>
-                <Button className="w-full" onClick={(e) => { e.stopPropagation(); navigate("/job-information/job-hub"); }}>Browse Job List</Button>
+                <Button className="self-start" onClick={() => navigate("/job-information/job-hub")}>Browse Job List</Button>
               </CardContent>
             </Card>
 
-            <Card 
-              className="h-full transition-smooth hover:shadow-lg hover:-translate-y-1 flex flex-col cursor-pointer"
-              onClick={() => navigate("/job-information/saved-jobs")}
-            >
+            <Card className="h-full transition-smooth hover:shadow-lg hover:-translate-y-1 flex flex-col">
               <CardContent className="p-6 flex-1 flex flex-col">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-4">
-                    <div className="rounded-full bg-secondary-light p-3">
-                      <Bookmark className="h-6 w-6 text-secondary" />
-                    </div>
-                    <h2 className="text-2xl font-semibold mb-0">Job Saved</h2>
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="rounded-full bg-secondary-light p-3">
+                    <Bookmark className="h-6 w-6 text-secondary" />
                   </div>
-                  <p className="text-3xl font-bold">{savedJobsCount}</p>
+                  <h2 className="text-2xl font-semibold mb-0">Job Saved</h2>
                 </div>
+                <p className="text-3xl font-bold mb-4">{savedJobsCount}</p>
                 {savedJobsPreview.length > 0 ? (
-                  <ul className="space-y-3 text-base text-muted-foreground mb-6 flex-1">
+                  <ul className="space-y-2 text-sm text-muted-foreground mb-6 flex-1">
                     {savedJobsPreview.map((job) => (
                       <li key={job.id} className="flex items-start justify-between gap-4">
                         <span className="truncate font-medium text-foreground">{job.title}</span>
@@ -167,18 +160,18 @@ const CareerDashboard = () => {
                       </li>
                     ))}
                     {additionalSavedJobs > 0 && (
-                      <li className="text-sm text-muted-foreground mt-2">+{additionalSavedJobs} more saved roles</li>
+                      <li className="text-xs text-muted-foreground">+{additionalSavedJobs} more saved roles</li>
                     )}
                   </ul>
                 ) : (
-                  <p className="text-base text-muted-foreground mb-6 flex-1">
+                  <p className="text-sm text-muted-foreground mb-6 flex-1">
                     You have not saved any jobs yet. Browse the Job Hub to get started.
                   </p>
                 )}
                 <Button
                   variant="outline"
-                  className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
-                  onClick={(e) => { e.stopPropagation(); navigate("/job-information/saved-jobs"); }}
+                  className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors self-start"
+                  onClick={() => navigate("/job-information/saved-jobs")}
                 >
                   Manage Saved Jobs
                 </Button>
@@ -187,72 +180,62 @@ const CareerDashboard = () => {
           </div>
         </section>
 
-        <section className="mt-12">
+        <section className="mb-12 mt-7">
           <div className="mb-6">
             <PageTitle as="h2">Resources</PageTitle>
           </div>
           <div className="grid gap-6 md:grid-cols-[7fr_3fr] md:auto-rows-fr">
-            <Card 
-              className="h-full transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer"
-              onClick={() => navigate("/job-information/resources", { state: { highlightId: "resources" } })}
-            >
+            <Card className="h-full transition-smooth hover:shadow-lg hover:-translate-y-1">
               <CardContent className="p-6 flex flex-col h-full">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-4">
-                    <div className="rounded-full bg-accent-light p-3">
-                      <BookOpen className="h-6 w-6 text-accent" />
-                    </div>
-                    <h3 className="text-2xl font-semibold mb-0">Resource List</h3>
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="rounded-full bg-accent-light p-3">
+                    <BookOpen className="h-6 w-6 text-accent" />
                   </div>
+                  <h3 className="text-2xl font-semibold mb-0">Resource List</h3>
                 </div>
-                <div className="space-y-3 mb-6 flex-1">
+                <div className="space-y-2 mb-6 flex-1">
                   {resourceHighlights.map((highlight) => (
-                    <div key={highlight} className="flex items-center gap-2 text-base text-muted-foreground">
+                    <div key={highlight} className="flex items-center gap-2 text-sm text-muted-foreground">
                       <span>•</span>
                       <span>{highlight}</span>
                     </div>
                   ))}
                 </div>
                 <Button
-                  className="w-full"
-                  onClick={(e) => { e.stopPropagation(); navigate("/job-information/resources", { state: { highlightId: "resources" } }); }}
+                  className="self-start"
+                  onClick={() => navigate("/job-information/resources", { state: { highlightId: "resources" } })}
                 >
                   Browse Resource List
                 </Button>
               </CardContent>
             </Card>
 
-            <Card 
-              className="h-full transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer"
-              onClick={() => navigate("/job-information/saved-resources")}
-            >
+            <Card className="h-full transition-smooth hover:shadow-lg hover:-translate-y-1">
               <CardContent className="p-6 flex flex-col h-full">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-4">
-                    <div className="rounded-full bg-secondary-light p-3">
-                      <Bookmark className="h-6 w-6 text-secondary" />
-                    </div>
-                    <h3 className="text-2xl font-semibold mb-0">Resources Saved</h3>
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="rounded-full bg-secondary-light p-3">
+                    <Bookmark className="h-6 w-6 text-secondary" />
                   </div>
-                  <p className="text-3xl font-bold">{savedResourcesCount}</p>
+                  <h3 className="text-2xl font-semibold mb-0">Resources Saved</h3>
                 </div>
-                <div className="space-y-3 mb-6 flex-1">
+                <p className="text-3xl font-bold mb-4">{savedResourcesCount}</p>
+                <div className="space-y-2 mb-6 flex-1">
                   {savedResourcesPreview.map((resource) => (
-                    <div key={resource} className="flex items-center gap-2 text-base text-muted-foreground">
+                    <div key={resource} className="flex items-center gap-2 text-sm text-muted-foreground">
                       <span>•</span>
                       <span>{resource}</span>
                     </div>
                   ))}
                   {Math.max(savedResourcesCount - savedResourcesPreview.length, 0) > 0 && (
-                    <div className="text-sm text-muted-foreground mt-2">
+                    <div className="text-xs text-muted-foreground">
                       +{Math.max(savedResourcesCount - savedResourcesPreview.length, 0)} more saved resources
                     </div>
                   )}
                 </div>
                 <Button
                   variant="outline"
-                  className="w-full border-primary text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
-                  onClick={(e) => { e.stopPropagation(); navigate("/job-information/saved-resources"); }}
+                  className="self-start border-primary text-primary transition-colors hover:bg-primary hover:text-primary-foreground w-full"
+                  onClick={() => navigate("/job-information/saved-resources")}
                 >
                   Manage Saved Resources
                 </Button>

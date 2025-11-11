@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Calendar, Bookmark, ArrowLeft, Search } from "lucide-react";
+import { Calendar, Bookmark } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSavedResources } from "@/context/SavedResourcesContext";
@@ -12,7 +11,6 @@ const SavedResources = () => {
   const { savedResources, removeResource } = useSavedResources();
   const location = useLocation();
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const state = location.state as { highlightId?: string; priority?: number } | null;
@@ -54,12 +52,6 @@ const SavedResources = () => {
     <div className="min-h-screen bg-background">
       <main className="container py-8">
         <div className="mb-12">
-          <div className="flex items-center gap-4 mb-4">
-            <Button variant="default" size="sm" onClick={() => navigate(-1)} className="gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-          </div>
           <h1 className="text-5xl md:text-6xl font-bold">Saved Resources</h1>
         </div>
 
@@ -74,28 +66,8 @@ const SavedResources = () => {
             </CardContent>
           </Card>
         ) : (
-          <>
-            {/* Search Bar */}
-            <div className="mb-6">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by resource title or category..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              {savedResources
-                .filter((resource) =>
-                  searchTerm === "" ||
-                  resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                  resource.category.toLowerCase().includes(searchTerm.toLowerCase())
-                )
-                .map((resource) => (
+          <div className="space-y-4">
+            {savedResources.map((resource) => (
               <Card key={resource.id} className="transition-smooth hover:shadow-md" data-highlight-id={resource.highlightId}>
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between gap-4 mb-4">
@@ -136,8 +108,7 @@ const SavedResources = () => {
                 </CardContent>
               </Card>
             ))}
-            </div>
-          </>
+          </div>
         )}
       </main>
     </div>

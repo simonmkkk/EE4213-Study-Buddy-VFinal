@@ -14,7 +14,7 @@ const LandingPage = () => {
       icon: Globe,
       path: "/overseas-exchange",
       color: "text-primary",
-      bgColor: "bg-primary/10",
+      bgColor: "bg-primary-light",
     },
     {
       title: "Career Information",
@@ -22,23 +22,23 @@ const LandingPage = () => {
       icon: Briefcase,
       path: "/job-information/dashboard",
       color: "text-secondary",
-      bgColor: "bg-secondary/10",
+      bgColor: "bg-secondary-light",
     },
     {
       title: "Focus Learning",
       description: "Enhance your productivity with Pomodoro timers, micro-goal tracking, and focused study sessions.",
       icon: Target,
       path: "/focus-learning",
-      color: "text-blue-600",
-      bgColor: "bg-blue-600/10",
+      color: "text-accent",
+      bgColor: "bg-accent-light",
     },
     {
       title: "Community",
       description: "Connect with peers through course discussions, emotional support, and meaningful conversations.",
       icon: Users,
       path: "/community",
-      color: "text-rose-500",
-      bgColor: "bg-rose-500/10",
+      color: "text-info",
+      bgColor: "bg-info-light",
     },
   ];
 
@@ -77,7 +77,7 @@ const LandingPage = () => {
               <div className="flex justify-between items-start w-full pt-16">
                 <div className="text-center space-y-4 flex-1">
                   <div className="flex items-center justify-center mb-4">
-                    <Globe className="h-12 w-12 text-primary" />
+                    <GraduationCap className="h-12 w-12 text-primary" />
                   </div>
                   <div className="text-5xl font-bold text-foreground">100+</div>
                   <div className="text-base text-muted-foreground whitespace-nowrap">Exchange Universities</div>
@@ -91,17 +91,17 @@ const LandingPage = () => {
                 </div>
                 <div className="text-center space-y-4 flex-1">
                   <div className="flex items-center justify-center mb-4">
-                    <Target className="h-12 w-12 text-blue-600" />
-                  </div>
-                  <div className="text-5xl font-bold text-foreground">85%</div>
-                  <div className="text-base text-muted-foreground whitespace-nowrap">Productivity Boost</div>
-                </div>
-                <div className="text-center space-y-4 flex-1">
-                  <div className="flex items-center justify-center mb-4">
-                    <Users className="h-12 w-12 text-rose-500" />
+                    <Heart className="h-12 w-12 text-rose-500" />
                   </div>
                   <div className="text-5xl font-bold text-foreground">1000+</div>
                   <div className="text-base text-muted-foreground whitespace-nowrap">Community Members</div>
+                </div>
+                <div className="text-center space-y-4 flex-1">
+                  <div className="flex items-center justify-center mb-4">
+                    <TrendingUp className="h-12 w-12 text-accent" />
+                  </div>
+                  <div className="text-5xl font-bold text-foreground">85%</div>
+                  <div className="text-base text-muted-foreground whitespace-nowrap">Productivity Boost</div>
                 </div>
               </div>
             </div>
@@ -110,29 +110,31 @@ const LandingPage = () => {
 
       {/* Modules Section */}
       <section className="container pb-32 pt-8 md:pt-12" ref={modulesRef}>
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-6xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-3">Modules</h2>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 gap-6">
             {modules.map((module) => {
               const Icon = module.icon;
               return (
                 <Card 
                   key={module.path}
-                  className="transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer group aspect-square flex flex-col"
+                  className="transition-smooth hover:shadow-lg hover:-translate-y-1 cursor-pointer group"
                   onClick={() => window.location.href = module.path}
                 >
-                  <CardHeader className="flex flex-col items-center justify-center flex-1">
-                    <Icon className={`h-24 w-24 mb-8 ${module.color}`} />
-                    <CardTitle className="text-2xl text-center">{module.title}</CardTitle>
+                  <CardHeader>
+                    <div className={`w-14 h-14 rounded-lg ${module.bgColor} flex items-center justify-center mb-4 transition-smooth group-hover:scale-110`}>
+                      <Icon className={`h-7 w-7 ${module.color}`} />
+                    </div>
+                    <CardTitle className="text-2xl">{module.title}</CardTitle>
                   </CardHeader>
-                  <CardContent className="flex justify-center pb-8">
-                    <Button variant="ghost" className="gap-2 group-hover:gap-3 transition-smooth text-base" asChild>
+                  <CardContent>
+                    <Button variant="ghost" className="gap-2 group-hover:gap-3 transition-smooth" asChild>
                       <Link to={module.path}>
                         Learn More
-                        <ArrowRight className="h-5 w-5" />
+                        <ArrowRight className="h-4 w-4" />
                       </Link>
                     </Button>
                   </CardContent>

@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Building2, MapPin, Calendar, Bookmark, ExternalLink, ArrowLeft, Search } from "lucide-react";
+import { Building2, MapPin, Calendar, Bookmark, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSavedJobs } from "@/context/SavedJobsContext";
@@ -78,7 +78,6 @@ const JobOpportunityHub = () => {
   const [typeFilter, setTypeFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
   const [selectedTag, setSelectedTag] = useState("all");
-  const [searchTerm, setSearchTerm] = useState("");
   const { addJob, removeJob, isJobSaved } = useSavedJobs();
   const location = useLocation();
   const navigate = useNavigate();
@@ -121,12 +120,7 @@ const JobOpportunityHub = () => {
     const typeMatch = typeFilter === "all" || job.type === typeFilter;
     const locationMatch = locationFilter === "all" || job.location.includes(locationFilter);
     const tagMatch = selectedTag === "all" || job.tags.includes(selectedTag);
-    const searchMatch =
-      searchTerm === "" ||
-      job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      job.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-    return typeMatch && locationMatch && tagMatch && searchMatch;
+    return typeMatch && locationMatch && tagMatch;
   });
 
   const handleSave = (job: Job) => {
@@ -153,100 +147,75 @@ const JobOpportunityHub = () => {
     <div className="min-h-screen bg-background">
       <main className="container py-8">
         <div className="mb-12">
-          <div className="flex items-center gap-4 mb-4">
-            <Button
-              variant="default"
-              size="sm"
-              onClick={() => navigate(-1)}
-              className="gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-          </div>
           <PageTitle as="h1" className="text-5xl md:text-6xl">
             Job List
           </PageTitle>
         </div>
 
-        {/* Filters and Search */}
-        <div className="mb-6 space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search by job title, company, or tags (e.g., AI, Cloud, Finance)..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-full sm:w-[200px]">
-                  <SelectValue placeholder="Position Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="Internship">Internship</SelectItem>
-                  <SelectItem value="Graduate">Graduate</SelectItem>
-                </SelectContent>
-              </Select>
+        {/* Filters */}
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue placeholder="Position Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="Internship">Internship</SelectItem>
+                <SelectItem value="Graduate">Graduate</SelectItem>
+              </SelectContent>
+            </Select>
 
-              <Select value={locationFilter} onValueChange={setLocationFilter}>
-                <SelectTrigger className="w-full sm:w-[200px]">
-                  <SelectValue placeholder="Location" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Locations</SelectItem>
-                  <SelectItem value="CA">California</SelectItem>
-                  <SelectItem value="NY">New York</SelectItem>
-                  <SelectItem value="WA">Washington</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button
-              asChild
-              variant="default"
-              className="self-start sm:self-auto sm:ml-auto"
-            >
-              <Link to="/job-information/saved-jobs">Saved Jobs</Link>
-            </Button>
+            <Select value={locationFilter} onValueChange={setLocationFilter}>
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue placeholder="Location" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Locations</SelectItem>
+                <SelectItem value="CA">California</SelectItem>
+                <SelectItem value="NY">New York</SelectItem>
+                <SelectItem value="WA">Washington</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+          <Button
+            asChild
+            variant="default"
+            className="self-start sm:self-auto sm:ml-auto"
+          >
+            <Link to="/job-information/saved-jobs">Saved Jobs</Link>
+          </Button>
         </div>
 
         {/* Category Filters */}
-        <div className="mb-8">
-          <h3 className="text-sm font-semibold text-muted-foreground mb-3">Filter by Tags</h3>
-          <div className="flex flex-wrap gap-2">
+        <div className="mb-8 flex flex-wrap gap-2">
+          <Button
+            size="sm"
+            onClick={() => setSelectedTag("all")}
+            className={cn(
+              "border-primary/30 text-foreground hover:bg-primary/10 rounded-full",
+              "bg-background",
+              selectedTag === "all" &&
+                "bg-primary text-white border-primary hover:bg-primary/90 hover:text-white"
+            )}
+          >
+            All Categories
+          </Button>
+          {categories.map((category) => (
             <Button
+              key={category}
               size="sm"
-              onClick={() => setSelectedTag("all")}
+              onClick={() => setSelectedTag(category)}
               className={cn(
                 "border-primary/30 text-foreground hover:bg-primary/10 rounded-full",
                 "bg-background",
-                selectedTag === "all" &&
+                selectedTag === category &&
                   "bg-primary text-white border-primary hover:bg-primary/90 hover:text-white"
               )}
             >
-              All Categories
+              {category}
             </Button>
-            {categories.map((category) => (
-              <Button
-                key={category}
-                size="sm"
-                onClick={() => setSelectedTag(category)}
-                className={cn(
-                  "border-primary/30 text-foreground hover:bg-primary/10 rounded-full",
-                  "bg-background",
-                  selectedTag === category &&
-                    "bg-primary text-white border-primary hover:bg-primary/90 hover:text-white"
-                )}
-              >
-                {category}
-              </Button>
-            ))}
-          </div>
+          ))}
         </div>
 
         {/* Job Cards */}
@@ -297,22 +266,23 @@ const JobOpportunityHub = () => {
                         </div>
                       </div>
 
-                      {/* Position Type */}
-                      <div className="mb-3">
-                        <Badge 
-                          variant="outline" 
-                          className="bg-slate-200 border-slate-600 text-slate-900 font-semibold"
-                        >
-                          {job.type}
-                        </Badge>
-                      </div>
-
                       {/* Tags and Buttons */}
                       <div className="flex flex-wrap items-center gap-3 mb-6">
-                        {/* Job Field Tags */}
+                        {/* Tags */}
                         <div className="flex flex-wrap gap-2">
+                          <Badge 
+                            variant="outline" 
+                            className={cn(
+                              "bg-background border-gray-300 hover:bg-gray-50",
+                              job.type === "Internship" || job.type === "Graduate"
+                                ? "text-orange-600"
+                                : "text-foreground"
+                            )}
+                          >
+                            {job.type}
+                          </Badge>
                           {job.tags.map((tag) => (
-                            <Badge key={tag} variant="outline" className="bg-slate-200 border-slate-600 text-slate-900 font-medium">
+                            <Badge key={tag} variant="outline" className="bg-background text-foreground border-gray-300 hover:bg-gray-50">
                               {tag}
                             </Badge>
                           ))}

@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Users, Target, Briefcase, Globe, Palette, Home } from "lucide-react";
+import { GraduationCap, Users, Target, Briefcase, Globe, Palette } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import {
@@ -35,12 +35,8 @@ const Navigation = () => {
     { value: "blue-yellow", label: "Blue-Yellow" },
   ];
   
-  const isActive = (path: string) => {
-    if (path === "/") {
-      return location.pathname === "/";
-    }
-    return location.pathname === path || location.pathname.startsWith(`${path}/`);
-  };
+  const isActive = (path: string) =>
+    location.pathname === path || location.pathname.startsWith(`${path}/`);
   
   const navItems: {
     path: string;
@@ -48,7 +44,6 @@ const Navigation = () => {
     icon: typeof Globe;
     activeRoot?: string;
   }[] = [
-    { path: "/", label: "Home", icon: Home },
     { path: "/overseas-exchange/visual-explorer", activeRoot: "/overseas-exchange", label: "Overseas Exchange", icon: Globe },
     {
       path: "/job-information/dashboard",
@@ -67,7 +62,7 @@ const Navigation = () => {
   
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center gap-12">
+      <div className="container flex h-16 items-center justify-between">
         <Link
           to="/"
           className="flex items-center gap-3 transition-smooth hover:-translate-y-0.5 hover:opacity-80"
@@ -76,70 +71,66 @@ const Navigation = () => {
           <span className="text-2xl font-bold">Study Buddy</span>
         </Link>
         
-        <div className="hidden md:flex items-center gap-2 flex-1 justify-center">
+        <div className="hidden md:flex items-center gap-3">
           {navItems.map((item) => {
             const active = isActive(item.activeRoot ?? item.path);
-            const Icon = item.icon;
             return (
               <Link
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  "px-4 py-2 text-sm font-medium rounded-md transition-all duration-300 border flex items-center gap-2",
+                  "px-4 py-2 text-sm font-medium rounded-md transition-all duration-300 border",
                   active
                     ? "bg-primary text-primary-foreground border-primary"
                     : "text-foreground border-transparent hover:-translate-y-1 hover:shadow-md hover:border-primary"
                 )}
                 aria-current={active ? "page" : undefined}
               >
-                <Icon className="h-4 w-4" />
                 {item.label}
               </Link>
             );
           })}
         </div>
         
-        <div className="flex items-center gap-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="hidden sm:inline-flex items-center gap-2 border border-transparent transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-primary hover:bg-transparent hover:text-foreground"
-              >
-                <Palette className="h-5 w-5" />
-                <span className="text-sm">Color Blind Mode</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Assistance</DropdownMenuLabel>
-              <DropdownMenuRadioGroup
-                value={mode}
-                onValueChange={(value) => setMode(value as ColorVisionMode)}
-              >
-                {colorVisionOptions.map((option) => (
-                  <DropdownMenuRadioItem key={option.value} value={option.value}>
-                    {option.label}
-                  </DropdownMenuRadioItem>
-                ))}
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="hidden sm:inline-flex items-center gap-2 border border-transparent transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-primary hover:bg-transparent hover:text-foreground"
+            >
+              <Palette className="h-5 w-5" />
+              <span className="text-sm">Color Blind Mode</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>Assistance</DropdownMenuLabel>
+            <DropdownMenuRadioGroup
+              value={mode}
+              onValueChange={(value) => setMode(value as ColorVisionMode)}
+            >
+              {colorVisionOptions.map((option) => (
+                <DropdownMenuRadioItem key={option.value} value={option.value}>
+                  {option.label}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                <Avatar className="h-10 w-10">
-                  <AvatarFallback className="bg-primary text-primary-foreground">SB</AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Logout</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+              <Avatar className="h-10 w-10">
+                <AvatarFallback className="bg-primary text-primary-foreground">SB</AvatarFallback>
+              </Avatar>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem>Profile</DropdownMenuItem>
+            <DropdownMenuItem>Settings</DropdownMenuItem>
+            <DropdownMenuItem>Logout</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </nav>
   );

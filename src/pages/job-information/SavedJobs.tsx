@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Building2, MapPin, Calendar, Bookmark, ExternalLink, ArrowLeft, Search } from "lucide-react";
+import { Building2, MapPin, Calendar, Bookmark, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSavedJobs } from "@/context/SavedJobsContext";
@@ -12,7 +11,6 @@ const SavedJobs = () => {
   const { savedJobs, removeJob } = useSavedJobs();
   const location = useLocation();
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const state = location.state as { highlightId?: string; priority?: number } | null;
@@ -54,12 +52,6 @@ const SavedJobs = () => {
     <div className="min-h-screen bg-background">
       <main className="container py-8">
         <div className="mb-12">
-          <div className="flex items-center gap-4 mb-4">
-            <Button variant="default" size="sm" onClick={() => navigate(-1)} className="gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-          </div>
           <h1 className="text-5xl md:text-6xl font-bold">Saved Jobs</h1>
         </div>
 
@@ -74,37 +66,18 @@ const SavedJobs = () => {
             </CardContent>
           </Card>
         ) : (
-          <>
-            {/* Search Bar */}
-            <div className="mb-6">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by job title or company..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              {savedJobs
-                .filter((job) =>
-                  searchTerm === "" ||
-                  job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                  job.company.toLowerCase().includes(searchTerm.toLowerCase())
-                )
-                .map((job) => (
+          <div className="space-y-4">
+            {savedJobs.map((job) => (
               <Card key={job.id} className="transition-smooth hover:shadow-md" data-highlight-id={job.highlightId}>
                 <CardContent className="pt-6">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
-                      <div className="mb-3">
-                        <h3 className="text-2xl font-bold mb-1">{job.title}</h3>
-                        <p className="text-lg font-medium text-foreground">{job.company}</p>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-4">
+                      <h3 className="text-xl font-semibold mb-2">{job.title}</h3>
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-3">
+                        <div className="flex items-center gap-1">
+                          <Building2 className="h-4 w-4" />
+                          {job.company}
+                        </div>
                         <div className="flex items-center gap-1">
                           <MapPin className="h-4 w-4" />
                           {job.location}
@@ -114,14 +87,14 @@ const SavedJobs = () => {
                           Due: {job.deadline}
                         </div>
                       </div>
-                      <p className="text-base text-muted-foreground mb-4">{job.description}</p>
+                      <p className="text-sm text-muted-foreground mb-3">{job.description}</p>
                       <div className="flex flex-wrap gap-2">
                         {job.tags.map((tag) => (
-                          <Badge key={tag} variant="outline" className="bg-slate-50 border-slate-300 text-slate-700">
+                          <Badge key={tag} variant="secondary">
                             {tag}
                           </Badge>
                         ))}
-                        <Badge variant="outline" className="bg-slate-100 border-slate-400 text-slate-700 font-semibold">{job.type}</Badge>
+                        <Badge variant="outline">{job.type}</Badge>
                       </div>
                     </div>
                     <Button
@@ -143,8 +116,7 @@ const SavedJobs = () => {
                 </CardContent>
               </Card>
             ))}
-            </div>
-          </>
+          </div>
         )}
       </main>
     </div>
