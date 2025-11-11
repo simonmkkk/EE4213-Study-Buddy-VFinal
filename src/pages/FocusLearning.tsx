@@ -3,18 +3,6 @@ import { PageTitle } from "@/components/PageTitle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DatePicker } from "@/components/ui/date-picker";
-import { Card } from "@/components/ui/card";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -51,7 +39,6 @@ interface MinorTask {
   id: string;
   title: string;
   completed: boolean;
-  deadline?: string;
 }
 
 interface MajorTask {
@@ -59,7 +46,6 @@ interface MajorTask {
   title: string;
   minors: MinorTask[];
   completedAt?: string;
-  deadline?: string;
 }
 
 const createId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
@@ -162,7 +148,6 @@ const FocusLearning = () => {
   const [selectedDuration, setSelectedDuration] = useState<number>(presetDurations[0]);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
-  const [isPaused, setIsPaused] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [isAmbientPanelOpen, setIsAmbientPanelOpen] = useState<boolean>(false);
   const [isWallpaperPanelOpen, setIsWallpaperPanelOpen] = useState<boolean>(false);
@@ -170,24 +155,12 @@ const FocusLearning = () => {
   const [remainingSeconds, setRemainingSeconds] = useState<number>(presetDurations[0] * 60);
   const [majorTasks, setMajorTasks] = useState<MajorTask[]>(defaultMajorTasks);
   const [newMajorTitle, setNewMajorTitle] = useState<string>("");
-  const [newMajorDeadline, setNewMajorDeadline] = useState<string>("");
   const [newMinorInputs, setNewMinorInputs] = useState<Record<string, string>>({});
-  const [newMinorDeadlines, setNewMinorDeadlines] = useState<Record<string, string>>({});
   const [completionHistory, setCompletionHistory] = useState<Record<string, number>>(defaultCompletionHistory);
   const [pastTasks, setPastTasks] = useState<MajorTask[]>([]);
   const [isTrackerCollapsed, setIsTrackerCollapsed] = useState(true);
   const [editingMajorIds, setEditingMajorIds] = useState<Record<string, string>>({});
-  const [editingMajorDeadlines, setEditingMajorDeadlines] = useState<Record<string, string>>({});
   const [editingMinorIds, setEditingMinorIds] = useState<Record<string, Record<string, string>>>({});
-  const [editingMinorDeadlines, setEditingMinorDeadlines] = useState<Record<string, Record<string, string>>>({});
-  const [customHours, setCustomHours] = useState<number>(0);
-  const [customMinutes, setCustomMinutes] = useState<number>(0);
-  const [customSeconds, setCustomSeconds] = useState<number>(3);
-  const [directTimeInput, setDirectTimeInput] = useState<string>("00:00:03");
-  const [showCustomTimer, setShowCustomTimer] = useState<boolean>(false);
-  const [isCustomSelected, setIsCustomSelected] = useState<boolean>(false);
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<boolean>(false);
-  const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
 
   const ambientAudioRef = useRef<Record<string, HTMLAudioElement>>({});
   const trackerRef = useRef<HTMLDivElement | null>(null);
@@ -274,48 +247,6 @@ const FocusLearning = () => {
     setSelectedDuration(minutes);
     setIsRunning(false);
     setRemainingSeconds(minutes * 60);
-    setShowCustomTimer(false);
-    setIsCustomSelected(false);
-  };
-
-  const updateCustomTime = (hours: number, minutes: number, seconds: number) => {
-    const totalSeconds = hours * 3600 + minutes * 60 + seconds;
-    if (totalSeconds > 0) {
-      setSelectedDuration(totalSeconds / 60);
-      setIsRunning(false);
-      setRemainingSeconds(totalSeconds);
-      setDirectTimeInput(
-        `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
-      );
-    }
-  };
-
-  const handleDirectTimeInputChange = (value: string) => {
-    setDirectTimeInput(value);
-    
-    // Auto-format as user types
-    const cleaned = value.replace(/[^0-9]/g, "");
-    
-    if (cleaned.length >= 6) {
-      const hours = parseInt(cleaned.slice(0, 2), 10);
-      const minutes = parseInt(cleaned.slice(2, 4), 10);
-      const seconds = parseInt(cleaned.slice(4, 6), 10);
-      
-      // Validate ranges
-      if (hours <= 23 && minutes <= 59 && seconds <= 59) {
-        setCustomHours(hours);
-        setCustomMinutes(minutes);
-        setCustomSeconds(seconds);
-        updateCustomTime(hours, minutes, seconds);
-      }
-    }
-  };
-
-  const handleDirectTimeInputBlur = () => {
-    // Format on blur to ensure proper display
-    setDirectTimeInput(
-      `${String(customHours).padStart(2, "0")}:${String(customMinutes).padStart(2, "0")}:${String(customSeconds).padStart(2, "0")}`
-    );
   };
 
   const toggleFullscreen = () => {
@@ -340,9 +271,6 @@ const FocusLearning = () => {
       }
 
       if (!isActive) {
-        // Reset paused state when starting a new track
-        setIsPaused(false);
-        
         let audio = ambientAudioRef.current[trackValue];
         if (!audio) {
           const trackConfig = ambientTracks.find((track) => track.value === trackValue);
@@ -354,7 +282,7 @@ const FocusLearning = () => {
           }
         }
 
-        if (audio && !isMuted && !isPaused) {
+        if (audio && !isMuted) {
           void audio.play().catch(() => null);
         }
       }
@@ -373,12 +301,10 @@ const FocusLearning = () => {
       id: createId(),
       title,
       minors: [],
-      deadline: newMajorDeadline || undefined,
     };
 
     setMajorTasks((prev) => [newTask, ...prev]);
     setNewMajorTitle("");
-    setNewMajorDeadline("");
   };
 
   const handleAddMinor = (majorId: string) => {
@@ -387,26 +313,22 @@ const FocusLearning = () => {
       return;
     }
 
-    const deadline = newMinorDeadlines[majorId] || undefined;
-
     setMajorTasks((prev) =>
       prev.map((major) =>
         major.id === majorId
           ? {
               ...major,
-              minors: [...major.minors, { id: createId(), title: value, completed: false, deadline }],
+              minors: [...major.minors, { id: createId(), title: value, completed: false }],
             }
           : major,
       ),
     );
 
     setNewMinorInputs((prev) => ({ ...prev, [majorId]: "" }));
-    setNewMinorDeadlines((prev) => ({ ...prev, [majorId]: "" }));
   };
 
-  const handleStartEditMajor = (majorId: string, currentTitle: string, currentDeadline?: string) => {
+  const handleStartEditMajor = (majorId: string, currentTitle: string) => {
     setEditingMajorIds((prev) => ({ ...prev, [majorId]: currentTitle }));
-    setEditingMajorDeadlines((prev) => ({ ...prev, [majorId]: currentDeadline || "" }));
   };
 
   const handleEditMajorChange = (majorId: string, value: string) => {
@@ -415,10 +337,6 @@ const FocusLearning = () => {
 
   const handleCancelEditMajor = (majorId: string) => {
     setEditingMajorIds((prev) => {
-      const { [majorId]: _removed, ...rest } = prev;
-      return rest;
-    });
-    setEditingMajorDeadlines((prev) => {
       const { [majorId]: _removed, ...rest } = prev;
       return rest;
     });
@@ -434,10 +352,8 @@ const FocusLearning = () => {
       return;
     }
 
-    const nextDeadline = editingMajorDeadlines[majorId] || undefined;
-
     setMajorTasks((prev) =>
-      prev.map((major) => (major.id === majorId ? { ...major, title: nextTitle, deadline: nextDeadline } : major)),
+      prev.map((major) => (major.id === majorId ? { ...major, title: nextTitle } : major)),
     );
 
     handleCancelEditMajor(majorId);
@@ -487,19 +403,12 @@ const FocusLearning = () => {
     });
   };
 
-  const handleStartEditMinor = (majorId: string, minorId: string, currentTitle: string, currentDeadline?: string) => {
+  const handleStartEditMinor = (majorId: string, minorId: string, currentTitle: string) => {
     setEditingMinorIds((prev) => ({
       ...prev,
       [majorId]: {
         ...(prev[majorId] ?? {}),
         [minorId]: currentTitle,
-      },
-    }));
-    setEditingMinorDeadlines((prev) => ({
-      ...prev,
-      [majorId]: {
-        ...(prev[majorId] ?? {}),
-        [minorId]: currentDeadline || "",
       },
     }));
   };
@@ -530,21 +439,6 @@ const FocusLearning = () => {
         [majorId]: restMinors,
       };
     });
-    setEditingMinorDeadlines((prev) => {
-      const minorDeadlines = prev[majorId];
-      if (!minorDeadlines) {
-        return prev;
-      }
-      const { [minorId]: _removed, ...restDeadlines } = minorDeadlines;
-      if (Object.keys(restDeadlines).length === 0) {
-        const { [majorId]: _majorRemoved, ...rest } = prev;
-        return rest;
-      }
-      return {
-        ...prev,
-        [majorId]: restDeadlines,
-      };
-    });
   };
 
   const handleSaveMinorTitle = (majorId: string, minorId: string) => {
@@ -553,15 +447,13 @@ const FocusLearning = () => {
       return;
     }
 
-    const nextDeadline = editingMinorDeadlines[majorId]?.[minorId] || undefined;
-
     setMajorTasks((prev) =>
       prev.map((major) =>
         major.id === majorId
           ? {
               ...major,
               minors: major.minors.map((minor) =>
-                minor.id === minorId ? { ...minor, title: nextTitle, deadline: nextDeadline } : minor,
+                minor.id === minorId ? { ...minor, title: nextTitle } : minor,
               ),
             }
           : major,
@@ -602,14 +494,6 @@ const FocusLearning = () => {
       }
       return prev.filter((task) => task.id !== majorId);
     });
-  };
-
-  const confirmDeletePastMajor = () => {
-    if (taskToDelete) {
-      handleDeletePastMajor(taskToDelete);
-      setDeleteConfirmOpen(false);
-      setTaskToDelete(null);
-    }
   };
 
   const handleReopenPastMajor = (majorId: string) => {
@@ -668,7 +552,11 @@ const FocusLearning = () => {
     );
   };
 
-  // Removed the useEffect that was resetting time on pause
+  useEffect(() => {
+    if (!isRunning) {
+      setRemainingSeconds(selectedDuration * 60);
+    }
+  }, [selectedDuration, isRunning]);
 
   useEffect(() => {
     if (!isRunning) {
@@ -725,27 +613,19 @@ const FocusLearning = () => {
       const audio = audios[track.value];
       if (!audio) return;
 
-      const isActiveTrack = activeAmbientTrack === track.value;
-      const shouldPlay = isActiveTrack && !isMuted && !isPaused;
-      
+      const shouldPlay = activeAmbientTrack === track.value && !isMuted;
       if (shouldPlay) {
         if (audio.paused) {
           void audio.play().catch(() => null);
         }
-      } else if (isActiveTrack && (isMuted || isPaused)) {
-        // Pause but keep track active (don't reset currentTime)
-        if (!audio.paused) {
-          audio.pause();
-        }
       } else {
-        // Different track is active or no track is active
         if (!audio.paused) {
           audio.pause();
           audio.currentTime = 0;
         }
       }
     });
-  }, [activeAmbientTrack, isMuted, isPaused]);
+  }, [activeAmbientTrack, isMuted]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -758,31 +638,24 @@ const FocusLearning = () => {
 
   return (
     <div
-      lang="en"
       className={cn(
-        "relative transition-colors",
+        "relative h-screen overflow-hidden transition-colors",
         isWallpaperActive ? "text-white" : "text-slate-900",
       )}
-      style={{
-        ...backgroundStyle,
-        height: isFullscreen ? '100vh' : 'calc(100vh - 4rem)',
-        overflow: 'hidden',
-      }}
+      style={backgroundStyle}
     >
-      <div className="container py-8 h-full flex flex-col overflow-hidden">
-        {!isFullscreen && (
-          <div className="mb-12 flex-shrink-0">
-            <PageTitle
-              as="h1"
-              variant={isWallpaperActive ? "inverted" : "default"}
-              className="text-5xl md:text-6xl"
-            >
-              Deep Focus
-            </PageTitle>
-          </div>
-        )}
+      <div className="container py-8 h-full flex flex-col">
+        <div className="mb-12">
+          <PageTitle
+            as="h1"
+            variant={isWallpaperActive ? "inverted" : "default"}
+            className="text-5xl md:text-6xl"
+          >
+            Deep Focus
+          </PageTitle>
+        </div>
 
-        <main className="flex-1 flex items-end justify-center overflow-hidden pb-20">
+        <main className="flex-1 flex items-center justify-center">
           <div className="flex w-full flex-col gap-8 text-center">
         <div className="space-y-6">
           <div
@@ -837,9 +710,17 @@ const FocusLearning = () => {
           </div>
 
           <div className="space-y-3">
-            <div className="flex items-center justify-center gap-3">
+            <p
+              className={cn(
+                "text-xs uppercase tracking-[0.35em]",
+                isWallpaperActive ? "text-white/60" : "text-slate-500",
+              )}
+            >
+              Quick Presets
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3">
               {presetDurations.map((minutes) => {
-                const isSelected = selectedDuration === minutes && !isCustomSelected;
+                const isSelected = selectedDuration === minutes;
 
                 return (
                   <Button
@@ -862,162 +743,6 @@ const FocusLearning = () => {
                   </Button>
                 );
               })}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setShowCustomTimer(!showCustomTimer);
-                  // Only reset time if switching from preset to custom (not already in custom mode)
-                  if (!showCustomTimer && !isCustomSelected) {
-                    setIsCustomSelected(true);
-                    setIsRunning(false);
-                    setCustomHours(0);
-                    setCustomMinutes(0);
-                    setCustomSeconds(3);
-                    setRemainingSeconds(3);
-                    setSelectedDuration(0.05);
-                    setDirectTimeInput("00:00:03");
-                  } else if (!showCustomTimer && isCustomSelected) {
-                    // Just opening the panel again, don't reset anything
-                    setIsCustomSelected(true);
-                  }
-                }}
-                className={cn(
-                  "rounded-full px-5 text-sm font-medium transition-colors duration-200",
-                  isCustomSelected
-                    ? isWallpaperActive
-                      ? "border-white bg-white text-slate-900 hover:bg-white hover:text-slate-900"
-                      : "border-primary bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
-                    : isWallpaperActive
-                      ? "border-white/70 bg-white/12 text-white hover:bg-white/20 hover:text-white"
-                      : "border-primary text-primary hover:bg-primary hover:text-primary-foreground",
-                )}
-              >
-                Custom
-              </Button>
-            </div>
-            
-            {/* Fixed height container for custom timer to prevent layout shift */}
-            <div className={cn("transition-all duration-300", showCustomTimer ? "h-[60px]" : "h-0")}>
-              {showCustomTimer && (
-                <div className="flex items-center justify-center gap-3 pt-4">
-                  <div className="flex flex-col items-center gap-1">
-                    <span className={cn("text-xs font-medium", isWallpaperActive ? "text-white/70" : "text-slate-600")}>
-                      Hours
-                    </span>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className={cn(
-                            "w-20 rounded-full px-3 text-sm font-medium transition-colors duration-200",
-                            isWallpaperActive
-                              ? "border-white/70 bg-white/12 text-white hover:bg-white/20 hover:text-white"
-                              : "border-primary text-primary hover:bg-primary/10",
-                          )}
-                        >
-                          {String(customHours).padStart(2, "0")}
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="h-48 overflow-y-auto">
-                        {Array.from({ length: 24 }, (_, i) => (
-                          <DropdownMenuItem
-                            key={i}
-                            onClick={() => {
-                              setCustomHours(i);
-                              updateCustomTime(i, customMinutes, customSeconds);
-                            }}
-                            className="cursor-pointer"
-                          >
-                            {String(i).padStart(2, "0")}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-
-                  <span className={cn("text-2xl font-bold mt-5", isWallpaperActive ? "text-white" : "text-slate-900")}>
-                    :
-                  </span>
-
-                  <div className="flex flex-col items-center gap-1">
-                    <span className={cn("text-xs font-medium", isWallpaperActive ? "text-white/70" : "text-slate-600")}>
-                      Minutes
-                    </span>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className={cn(
-                            "w-20 rounded-full px-3 text-sm font-medium transition-colors duration-200",
-                            isWallpaperActive
-                              ? "border-white/70 bg-white/12 text-white hover:bg-white/20 hover:text-white"
-                              : "border-primary text-primary hover:bg-primary/10",
-                          )}
-                        >
-                          {String(customMinutes).padStart(2, "0")}
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="h-48 overflow-y-auto">
-                        {Array.from({ length: 60 }, (_, i) => (
-                          <DropdownMenuItem
-                            key={i}
-                            onClick={() => {
-                              setCustomMinutes(i);
-                              updateCustomTime(customHours, i, customSeconds);
-                            }}
-                            className="cursor-pointer"
-                          >
-                            {String(i).padStart(2, "0")}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-
-                  <span className={cn("text-2xl font-bold mt-5", isWallpaperActive ? "text-white" : "text-slate-900")}>
-                    :
-                  </span>
-
-                  <div className="flex flex-col items-center gap-1">
-                    <span className={cn("text-xs font-medium", isWallpaperActive ? "text-white/70" : "text-slate-600")}>
-                      Seconds
-                    </span>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className={cn(
-                            "w-20 rounded-full px-3 text-sm font-medium transition-colors duration-200",
-                            isWallpaperActive
-                              ? "border-white/70 bg-white/12 text-white hover:bg-white/20 hover:text-white"
-                              : "border-primary text-primary hover:bg-primary/10",
-                          )}
-                        >
-                          {String(customSeconds).padStart(2, "0")}
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="h-48 overflow-y-auto">
-                        {Array.from({ length: 60 }, (_, i) => (
-                          <DropdownMenuItem
-                            key={i}
-                            onClick={() => {
-                              setCustomSeconds(i);
-                              updateCustomTime(customHours, customMinutes, i);
-                            }}
-                            className="cursor-pointer"
-                          >
-                            {String(i).padStart(2, "0")}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 
@@ -1056,10 +781,8 @@ const FocusLearning = () => {
                       : "border-primary text-primary hover:bg-primary hover:text-primary-foreground",
                 )}
               >
-                {isMuted ? (
-                  <VolumeX className="h-5 w-5 fill-red-700 text-red-700" />
-                ) : activeAmbientTrack && !isPaused ? (
-                  <Volume2 className="h-5 w-5 fill-current" />
+                {isMuted || !activeAmbientTrack ? (
+                  <VolumeX className="h-5 w-5" />
                 ) : (
                   <Volume2 className="h-5 w-5" />
                 )}
@@ -1138,60 +861,20 @@ const FocusLearning = () => {
               )}
             >
               <div className="mb-3 flex items-center justify-between text-sm font-semibold">
-                <div className="flex items-center gap-2">
-                  <span>Ambient Sounds</span>
-                  {isMuted ? (
-                    <VolumeX className={cn("h-5 w-5 fill-red-700 text-red-700")} />
-                  ) : activeAmbientTrack && !isPaused ? (
-                    <Volume2 className={cn("h-5 w-5 fill-primary text-primary")} />
-                  ) : (
-                    <Volume2 className={cn("h-5 w-5", isWallpaperActive ? "text-white/70" : "text-slate-500")} />
+                <span>Ambient Sounds</span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setIsMuted((prev) => !prev)}
+                  className={cn(
+                    "h-8 rounded-full px-3 text-xs",
+                    isWallpaperActive
+                      ? "text-white/80 hover:bg-white/20"
+                      : "text-slate-600 hover:bg-slate-100",
                   )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsMuted((prev) => !prev);
-                    }}
-                    className={cn(
-                      "flex items-center justify-center rounded-xl border px-4 py-2 text-sm font-medium transition-all duration-200",
-                      "active:scale-[0.98]",
-                      "focus-visible:outline-none focus-visible:ring-2",
-                      isWallpaperActive
-                        ? "focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/30"
-                        : "focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
-                      isWallpaperActive
-                        ? "border-white/35 bg-white/18 text-white/80 hover:bg-white/28 hover:shadow-[0_12px_30px_-20px_rgba(255,255,255,0.65)]"
-                        : "border-slate-300 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:shadow-sm",
-                    )}
-                  >
-                    {isMuted ? "Unmute" : "Mute"}
-                  </button>
-                  {activeAmbientTrack && (
-                    <button
-                      type="button"
-                      onClick={() => setIsPaused((prev) => !prev)}
-                      className={cn(
-                        "flex items-center justify-center rounded-xl border px-4 py-2 text-sm transition-all duration-200",
-                        "active:scale-[0.98]",
-                        "focus-visible:outline-none focus-visible:ring-2",
-                        isWallpaperActive
-                          ? "focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/30"
-                          : "focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
-                        isWallpaperActive
-                          ? "border-white/35 bg-white/18 text-white/80 hover:bg-white/28 hover:shadow-[0_12px_30px_-20px_rgba(255,255,255,0.65)]"
-                          : "border-slate-300 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:shadow-sm",
-                      )}
-                    >
-                      {isPaused ? (
-                        <Play className="h-5 w-5 text-green-600" />
-                      ) : (
-                        <Pause className="h-5 w-5 text-red-700" />
-                      )}
-                    </button>
-                  )}
-                </div>
+                >
+                  {isMuted ? "Unmute" : "Mute"}
+                </Button>
               </div>
               <div className="space-y-2">
                 {ambientTracks.map((track) => {
@@ -1211,8 +894,8 @@ const FocusLearning = () => {
                           : "focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
                         isActive
                           ? isWallpaperActive
-                            ? "border-white bg-white text-slate-900 shadow-lg"
-                            : "border-primary bg-primary text-white shadow-lg"
+                            ? "border-white/75 bg-white/35 text-white shadow-[0_12px_32px_-16px_rgba(255,255,255,0.65)]"
+                            : "border-primary/60 bg-primary/12 text-primary shadow-[0_16px_32px_-18px_rgba(56,189,248,0.45)]"
                           : isWallpaperActive
                             ? "border-white/35 bg-white/18 text-white/80 hover:bg-white/28 hover:shadow-[0_12px_30px_-20px_rgba(255,255,255,0.65)]"
                             : "border-slate-300 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:shadow-sm",
@@ -1223,16 +906,8 @@ const FocusLearning = () => {
                         <Icon className="h-4 w-4" />
                         {track.label}
                       </span>
-                      <span className={cn(
-                        "text-xs",
-                        isActive && (isMuted || isPaused) && "text-red-700 font-bold"
-                      )}>
-                        {isActive 
-                          ? (isPaused && isMuted ? "Paused (Muted)" 
-                            : isPaused ? "Paused" 
-                            : isMuted ? "Playing (Muted)" 
-                            : "Playing") 
-                          : "Add"}
+                      <span className="text-xs">
+                        {isActive ? (isMuted ? "Paused" : "Playing") : "Add"}
                       </span>
                     </button>
                   );
@@ -1250,59 +925,34 @@ const FocusLearning = () => {
                   : "border border-slate-200 bg-white text-slate-700 shadow-sm",
               )}
             >
-              <div className="mb-4 flex items-center gap-2 text-sm font-semibold">
+              <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
                 <ImageIcon className="h-4 w-4" />
                 <span>Wallpaper</span>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
                 {wallpapers.map((option) => (
-                  <Card
+                  <button
                     key={option.value}
+                    type="button"
                     onClick={() => setSelectedWallpaper(option.value)}
                     className={cn(
-                      "cursor-pointer overflow-hidden transition-all duration-200 hover:scale-[1.02]",
+                      "w-full rounded-xl border px-3 py-2 text-left text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2",
                       "active:scale-[0.98]",
+                      isWallpaperActive
+                        ? "focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/30"
+                        : "focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
                       selectedWallpaper === option.value
                         ? isWallpaperActive
-                          ? "ring-2 ring-white shadow-lg"
-                          : "ring-2 ring-primary shadow-lg"
-                        : "hover:shadow-md",
-                      isWallpaperActive
-                        ? "bg-white/10 border-white/30"
-                        : "bg-white border-slate-200"
+                          ? "border-white/75 bg-white/35 text-white shadow-[0_12px_32px_-16px_rgba(255,255,255,0.65)]"
+                          : "border-primary/60 bg-primary/12 text-primary shadow-[0_16px_32px_-18px_rgba(56,189,248,0.45)]"
+                        : isWallpaperActive
+                          ? "border-white/35 bg-white/18 text-white/80 hover:bg-white/28 hover:shadow-[0_12px_30px_-20px_rgba(255,255,255,0.65)]"
+                          : "border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:shadow-sm",
                     )}
+                    aria-pressed={selectedWallpaper === option.value}
                   >
-                    <div className="aspect-video relative overflow-hidden">
-                      {option.url ? (
-                        <img
-                          src={option.url}
-                          alt={option.label}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className={cn(
-                          "w-full h-full flex items-center justify-center",
-                          isWallpaperActive ? "bg-white/20" : "bg-slate-100"
-                        )}>
-                          <ImageIcon className={cn(
-                            "h-8 w-8",
-                            isWallpaperActive ? "text-white/50" : "text-slate-400"
-                          )} />
-                        </div>
-                      )}
-                      {selectedWallpaper === option.value && (
-                        <div className="absolute top-2 right-2 bg-primary text-white rounded-full p-1">
-                          <Check className="h-3 w-3" />
-                        </div>
-                      )}
-                    </div>
-                    <div className={cn(
-                      "p-2 text-center text-sm font-medium",
-                      isWallpaperActive ? "text-white" : "text-slate-700"
-                    )}>
-                      {option.label}
-                    </div>
-                  </Card>
+                    {option.label}
+                  </button>
                 ))}
               </div>
             </div>
@@ -1318,7 +968,7 @@ const FocusLearning = () => {
             >
               {/* Section 1: Header + Create */}
               <div className={cn("px-5 py-4 sm:px-6 sm:py-5 border-b", isWallpaperActive ? "border-white/20" : "border-slate-300")}> 
-                <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <p className="text-2xl font-bold tracking-tight">Micro Goal Study Tracker</p>
                   </div>
@@ -1354,41 +1004,32 @@ const FocusLearning = () => {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-2.5">
-                  <div className="flex gap-2.5">
-                    <Input
-                      value={newMajorTitle}
-                      onChange={(event) => setNewMajorTitle(event.target.value)}
-                      placeholder="Create a major task"
-                      className={cn(
-                        "flex-1 h-11 text-base",
-                        isWallpaperActive
-                          ? "border-white/30 bg-white/10 text-white placeholder:text-white/55 focus-visible:border-white/65 focus-visible:ring-white/55 focus-visible:ring-offset-0"
-                          : "",
-                      )}
-                    />
-                    <Button
-                      type="button"
-                      size="lg"
-                      className={cn(
-                        "shrink-0 h-11 px-6 text-base font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg",
-                        isWallpaperActive
-                          ? "bg-white/20 text-white hover:bg-white/30"
-                          : "bg-primary text-primary-foreground hover:bg-primary/90",
-                      )}
-                      onClick={handleAddMajor}
-                      disabled={!newMajorTitle.trim()}
-                    >
-                      Create
-                    </Button>
-                  </div>
-                  <DatePicker
-                    value={newMajorDeadline}
-                    onChange={setNewMajorDeadline}
-                    placeholder="Set deadline (optional)"
-                    className="h-9 text-sm w-full"
-                    isWallpaperActive={isWallpaperActive}
-                  />
+                <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+                <Input
+                  value={newMajorTitle}
+                  onChange={(event) => setNewMajorTitle(event.target.value)}
+                  placeholder="Create a major task"
+                  className={cn(
+                    "flex-1 h-11 text-base",
+                    isWallpaperActive
+                      ? "border-white/30 bg-white/10 text-white placeholder:text-white/55 focus-visible:border-white/65 focus-visible:ring-white/55 focus-visible:ring-offset-0"
+                      : "",
+                  )}
+                />
+                <Button
+                  type="button"
+                  size="lg"
+                  className={cn(
+                    "shrink-0 h-11 px-6 text-base font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg",
+                    isWallpaperActive
+                      ? "bg-white/20 text-white hover:bg-white/30"
+                      : "bg-primary text-primary-foreground hover:bg-primary/90",
+                  )}
+                  onClick={handleAddMajor}
+                  disabled={!newMajorTitle.trim()}
+                >
+                  Create
+                </Button>
                 </div>
               </div>
 
@@ -1421,35 +1062,19 @@ const FocusLearning = () => {
                           </span>
                           <div className="flex-1">
                             {editingMajorIds[major.id] !== undefined ? (
-                              <div className="space-y-2">
-                                <Input
-                                  value={editingMajorIds[major.id] ?? ""}
-                                  onChange={(event) => handleEditMajorChange(major.id, event.target.value)}
-                                  className={cn(
-                                    "h-9 text-base",
-                                    isWallpaperActive
-                                      ? "border-white/55 bg-white/26 text-white placeholder:text-white/70 focus-visible:border-white/80 focus-visible:ring-white/60 focus-visible:ring-offset-0"
-                                      : "",
-                                  )}
-                                  autoFocus
-                                />
-                                <DatePicker
-                                  value={editingMajorDeadlines[major.id] ?? ""}
-                                  onChange={(date) => setEditingMajorDeadlines((prev) => ({ ...prev, [major.id]: date }))}
-                                  placeholder="Set deadline"
-                                  className="h-8 text-sm w-full"
-                                  isWallpaperActive={isWallpaperActive}
-                                />
-                              </div>
-                            ) : (
-                              <div>
-                                <p className="text-lg font-semibold leading-snug">{major.title}</p>
-                                {major.deadline && (
-                                  <p className={cn("text-xs mt-1", isWallpaperActive ? "text-white/70" : "text-slate-500")}>
-                                    📅 Due: {new Date(major.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                  </p>
+                              <Input
+                                value={editingMajorIds[major.id] ?? ""}
+                                onChange={(event) => handleEditMajorChange(major.id, event.target.value)}
+                                className={cn(
+                                  "h-9 text-base",
+                                  isWallpaperActive
+                                    ? "border-white/55 bg-white/26 text-white placeholder:text-white/70 focus-visible:border-white/80 focus-visible:ring-white/60 focus-visible:ring-offset-0"
+                                    : "",
                                 )}
-                              </div>
+                                autoFocus
+                              />
+                            ) : (
+                              <p className="text-lg font-semibold leading-snug">{major.title}</p>
                             )}
                           </div>
                           <div className="flex items-center gap-1">
@@ -1510,7 +1135,7 @@ const FocusLearning = () => {
                                 >
                                   <DropdownMenuItem
                                     className="w-full cursor-pointer rounded-lg bg-emerald-600 text-center text-white hover:bg-emerald-600 focus:bg-emerald-700"
-                                    onSelect={() => handleStartEditMajor(major.id, major.title, major.deadline)}
+                                    onSelect={() => handleStartEditMajor(major.id, major.title)}
                                   >
                                     Rename
                                   </DropdownMenuItem>
@@ -1555,56 +1180,32 @@ const FocusLearning = () => {
                                         disabled={isEditingMinor}
                                       />
                                       {isEditingMinor ? (
-                                        <div className="flex-1 space-y-1.5">
-                                          <Input
-                                            value={editingMinorValue ?? ""}
-                                            onChange={(event) => handleEditMinorChange(major.id, minor.id, event.target.value)}
-                                            className={cn(
-                                              "h-8 text-sm",
-                                              isWallpaperActive
-                                                ? "border-white/45 bg-white/18 text-white placeholder:text-white/55 focus-visible:border-white/70 focus-visible:ring-white/60 focus-visible:ring-offset-0"
-                                                : "",
-                                            )}
-                                            autoFocus
-                                          />
-                                          <DatePicker
-                                            value={editingMinorDeadlines[major.id]?.[minor.id] ?? ""}
-                                            onChange={(date) =>
-                                              setEditingMinorDeadlines((prev) => ({
-                                                ...prev,
-                                                [major.id]: {
-                                                  ...(prev[major.id] ?? {}),
-                                                  [minor.id]: date,
-                                                },
-                                              }))
-                                            }
-                                            placeholder="Set deadline"
-                                            className="h-7 text-xs w-full"
-                                            isWallpaperActive={isWallpaperActive}
-                                          />
-                                        </div>
-                                      ) : (
-                                        <div className="flex-1">
-                                          <span
-                                            className={cn(
-                                              "leading-relaxed block",
-                                              minor.completed
-                                                ? isWallpaperActive
-                                                  ? "text-white/60 line-through"
-                                                  : "text-slate-500 line-through"
-                                                : isWallpaperActive
-                                                  ? "text-white"
-                                                  : "text-slate-700",
-                                            )}
-                                          >
-                                            {minor.title}
-                                          </span>
-                                          {minor.deadline && (
-                                            <span className={cn("text-xs mt-0.5 block", isWallpaperActive ? "text-white/60" : "text-slate-400")}>
-                                              📅 {new Date(minor.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                            </span>
+                                        <Input
+                                          value={editingMinorValue ?? ""}
+                                          onChange={(event) => handleEditMinorChange(major.id, minor.id, event.target.value)}
+                                          className={cn(
+                                            "h-8 text-sm",
+                                            isWallpaperActive
+                                              ? "border-white/45 bg-white/18 text-white placeholder:text-white/55 focus-visible:border-white/70 focus-visible:ring-white/60 focus-visible:ring-offset-0"
+                                              : "",
                                           )}
-                                        </div>
+                                          autoFocus
+                                        />
+                                      ) : (
+                                        <span
+                                          className={cn(
+                                            "flex-1 leading-relaxed",
+                                            minor.completed
+                                              ? isWallpaperActive
+                                                ? "text-white/60 line-through"
+                                                : "text-slate-500 line-through"
+                                              : isWallpaperActive
+                                                ? "text-white"
+                                                : "text-slate-700",
+                                          )}
+                                        >
+                                          {minor.title}
+                                        </span>
                                       )}
                                     </label>
                                     <div className="flex items-center gap-1">
@@ -1665,7 +1266,7 @@ const FocusLearning = () => {
                                           >
                                             <DropdownMenuItem
                                               className="w-full cursor-pointer rounded-lg bg-emerald-600 text-center text-white hover:bg-emerald-600 focus:bg-emerald-700"
-                                              onSelect={() => handleStartEditMinor(major.id, minor.id, minor.title, minor.deadline)}
+                                              onSelect={() => handleStartEditMinor(major.id, minor.id, minor.title)}
                                             >
                                               Rename
                                             </DropdownMenuItem>
@@ -1686,45 +1287,34 @@ const FocusLearning = () => {
                           )}
                         </div>
 
-                        <div className="mt-5 space-y-2">
-                          <div className="flex gap-2">
-                            <Input
-                              value={newMinorInputs[major.id] ?? ""}
-                              onChange={(event) =>
-                                setNewMinorInputs((prev) => ({ ...prev, [major.id]: event.target.value }))
-                              }
-                              placeholder="Add a mini task"
-                              className={cn(
-                                "flex-1 h-11 text-base",
-                                isWallpaperActive
-                                  ? "border-white/30 bg-white/10 text-white placeholder:text-white/50 focus-visible:border-white/65 focus-visible:ring-white/55 focus-visible:ring-offset-0"
-                                  : "",
-                              )}
-                            />
-                            <Button
-                              type="button"
-                              size="lg"
-                              className={cn(
-                                "shrink-0 px-5 text-base transition-all duration-300 hover:-translate-y-1 hover:shadow-lg",
-                                isWallpaperActive
-                                  ? "bg-white/20 text-white hover:bg-white/30"
-                                  : "bg-primary text-primary-foreground hover:bg-primary/90",
-                              )}
-                              onClick={() => handleAddMinor(major.id)}
-                              disabled={!(newMinorInputs[major.id] ?? "").trim()}
-                            >
-                              Add
-                            </Button>
-                          </div>
-                          <DatePicker
-                            value={newMinorDeadlines[major.id] ?? ""}
-                            onChange={(date) =>
-                              setNewMinorDeadlines((prev) => ({ ...prev, [major.id]: date }))
+                        <div className="mt-5 flex flex-col gap-4 sm:flex-row">
+                          <Input
+                            value={newMinorInputs[major.id] ?? ""}
+                            onChange={(event) =>
+                              setNewMinorInputs((prev) => ({ ...prev, [major.id]: event.target.value }))
                             }
-                            placeholder="Set deadline (optional)"
-                            className="h-9 text-sm w-full"
-                            isWallpaperActive={isWallpaperActive}
+                            placeholder="Add a mini task"
+                            className={cn(
+                              "flex-1 h-11 text-base",
+                              isWallpaperActive
+                                ? "border-white/30 bg-white/10 text-white placeholder:text-white/50 focus-visible:border-white/65 focus-visible:ring-white/55 focus-visible:ring-offset-0"
+                                : "",
+                            )}
                           />
+                          <Button
+                            type="button"
+                            size="lg"
+                            className={cn(
+                              "shrink-0 px-5 text-base sm:w-auto w-full transition-all duration-300 hover:-translate-y-1 hover:shadow-lg",
+                              isWallpaperActive
+                                ? "bg-white/20 text-white hover:bg-white/30"
+                                : "bg-primary text-primary-foreground hover:bg-primary/90",
+                            )}
+                            onClick={() => handleAddMinor(major.id)}
+                            disabled={!(newMinorInputs[major.id] ?? "").trim()}
+                          >
+                            Add
+                          </Button>
                         </div>
                       </div>
                     );
@@ -1771,10 +1361,7 @@ const FocusLearning = () => {
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => {
-                                  setTaskToDelete(task.id);
-                                  setDeleteConfirmOpen(true);
-                                }}
+                                onClick={() => handleDeletePastMajor(task.id)}
                                 className={cn(
                                   "h-8 w-8 text-muted-foreground hover:text-destructive",
                                   isWallpaperActive ? "hover:bg-white/20" : "",
@@ -1864,24 +1451,6 @@ const FocusLearning = () => {
           )}
         </aside>
       </div>
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Completed Task?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this completed task? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setTaskToDelete(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDeletePastMajor} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };

@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MapPin, Bookmark, Calendar, ArrowLeft, Search } from "lucide-react";
+import { BookOpen, ExternalLink, Bookmark, Calendar } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { PageTitle } from "@/components/PageTitle";
 import { useSavedResources } from "@/context/SavedResourcesContext";
@@ -38,7 +38,6 @@ const Resources = () => {
   const [locationFilter, setLocationFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTag, setSelectedTag] = useState("all");
-  const [showAllTags, setShowAllTags] = useState(false);
 
   const resources: Resource[] = [
     {
@@ -192,142 +191,84 @@ const Resources = () => {
     <div className="min-h-screen bg-background">
       <main className="container py-8">
         <div className="mb-12">
-          <div className="flex items-center gap-4 mb-4">
-            <Button
-              variant="default"
-              size="sm"
-              onClick={() => navigate(-1)}
-              className="gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-          </div>
           <PageTitle as="h1" className="text-5xl md:text-6xl">
             Resource List
           </PageTitle>
         </div>
 
-        {/* Filters and Search */}
-        <div className="mb-6 space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        {/* Filters */}
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
             <Input
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Search by resource title, category, or tags (e.g., Career, Resume, Interview)..."
-              className="pl-10"
+              placeholder="Search resources"
+              className="w-full sm:w-[260px]"
             />
-          </div>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-full sm:w-[200px]">
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="Event">Event</SelectItem>
-                  <SelectItem value="Workshop">Workshop</SelectItem>
-                  <SelectItem value="Seminar">Seminar</SelectItem>
-                  <SelectItem value="Meetup">Meetup</SelectItem>
-                  <SelectItem value="Conference">Conference</SelectItem>
-                </SelectContent>
-              </Select>
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="Event">Event</SelectItem>
+                <SelectItem value="Workshop">Workshop</SelectItem>
+                <SelectItem value="Seminar">Seminar</SelectItem>
+                <SelectItem value="Meetup">Meetup</SelectItem>
+                <SelectItem value="Conference">Conference</SelectItem>
+              </SelectContent>
+            </Select>
 
-              <Select value={locationFilter} onValueChange={setLocationFilter}>
-                <SelectTrigger className="w-full sm:w-[200px]">
-                  <SelectValue placeholder="Location" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Locations</SelectItem>
-                  <SelectItem value="Online">Online</SelectItem>
-                  <SelectItem value="Hybrid">Hybrid</SelectItem>
-                  <SelectItem value="Singapore">Singapore</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button
-              variant="default"
-              className="self-start sm:self-auto sm:ml-auto"
-              onClick={() => navigate("/job-information/saved-resources")}
-            >
-              Saved Resources
-            </Button>
+            <Select value={locationFilter} onValueChange={setLocationFilter}>
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue placeholder="Location" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Locations</SelectItem>
+                <SelectItem value="Online">Online</SelectItem>
+                <SelectItem value="Hybrid">Hybrid</SelectItem>
+                <SelectItem value="Singapore">Singapore</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+          <Button
+            variant="default"
+            className="self-start sm:self-auto sm:ml-auto"
+            onClick={() => navigate("/job-information/saved-resources")}
+          >
+            Saved Resources
+          </Button>
         </div>
 
         {/* Tag Filters */}
-        <div className="mb-8">
-          <h3 className="text-sm font-semibold text-muted-foreground mb-3">Filter by Tags</h3>
-          <div className="flex flex-wrap gap-2">
+        <div className="mb-8 flex flex-wrap gap-2">
+          <Button
+            size="sm"
+            onClick={() => setSelectedTag("all")}
+            className={cn(
+              "border-gray-300 text-foreground hover:bg-gray-50 rounded-full",
+              "bg-background",
+              selectedTag === "all" &&
+                "bg-primary text-white border-primary hover:bg-primary/90 hover:text-white"
+            )}
+          >
+            All Tags
+          </Button>
+          {allTags.map((tag) => (
             <Button
+              key={tag}
               size="sm"
-              onClick={() => setSelectedTag("all")}
+              onClick={() => setSelectedTag(tag)}
               className={cn(
-                "border-primary/30 text-foreground hover:bg-primary/10 rounded-full",
+                "border-gray-300 text-foreground hover:bg-gray-50 rounded-full",
                 "bg-background",
-                selectedTag === "all" &&
+                selectedTag === tag &&
                   "bg-primary text-white border-primary hover:bg-primary/90 hover:text-white"
               )}
             >
-              All Tags
+              {tag}
             </Button>
-            {allTags.slice(0, 10).map((tag) => (
-              <Button
-                key={tag}
-                size="sm"
-                onClick={() => setSelectedTag(tag)}
-                className={cn(
-                  "border-primary/30 text-foreground hover:bg-primary/10 rounded-full",
-                  "bg-background",
-                  selectedTag === tag &&
-                    "bg-primary text-white border-primary hover:bg-primary/90 hover:text-white"
-                )}
-              >
-                {tag}
-              </Button>
-            ))}
-            {!showAllTags && allTags.length > 10 && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setShowAllTags(true)}
-                className="rounded-full border-primary/30 text-foreground hover:bg-primary/10 bg-background"
-              >
-                Show More ({allTags.length - 10}+)
-              </Button>
-            )}
-            {showAllTags && (
-              <>
-                {/* Force line break */}
-                <div className="basis-full h-0"></div>
-                {allTags.slice(10).map((tag) => (
-                  <Button
-                    key={tag}
-                    size="sm"
-                    onClick={() => setSelectedTag(tag)}
-                    className={cn(
-                      "border-primary/30 text-foreground hover:bg-primary/10 rounded-full",
-                      "bg-background",
-                      selectedTag === tag &&
-                        "bg-primary text-white border-primary hover:bg-primary/90 hover:text-white"
-                    )}
-                  >
-                    {tag}
-                  </Button>
-                ))}
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setShowAllTags(false)}
-                  className="rounded-full border-primary/30 text-foreground hover:bg-primary/10 bg-background"
-                >
-                  Show Less
-                </Button>
-              </>
-            )}
-          </div>
+          ))}
         </div>
 
         <div className="space-y-4">
@@ -352,15 +293,8 @@ const Resources = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-4 mb-2">
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            <h3 className="text-xl font-bold text-foreground">{resource.title}</h3>
-                            <Badge 
-                              variant="outline" 
-                              className="bg-slate-200 border-slate-600 text-slate-900 font-semibold"
-                            >
-                              {resource.category}
-                            </Badge>
-                          </div>
+                          <h3 className="text-xl font-bold text-foreground mb-1">{resource.title}</h3>
+                          <p className="text-base text-muted-foreground">{resource.location}</p>
                         </div>
                         {/* Bookmark Button */}
                         <Button
@@ -373,31 +307,42 @@ const Resources = () => {
                               addResource(resource);
                             }
                           }}
-                          className="flex-shrink-0 h-10 w-10 group bg-green-100 hover:bg-green-200 rounded-lg"
+                          className="flex-shrink-0 hover:bg-primary/10 h-10 w-10"
                         >
-                          <Bookmark className={`h-6 w-6 transition-all ${saved ? "fill-green-600 text-green-600" : "text-green-600 group-hover:fill-green-600"}`} />
+                          <Bookmark className={`h-6 w-6 ${saved ? "fill-primary text-primary" : "text-muted-foreground"}`} />
                         </Button>
                       </div>
 
-                      {/* Location and Date */}
+                      {/* Date and Category */}
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mb-4">
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-4 w-4" />
-                          <span>{resource.location}</span>
-                        </div>
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
                           <span>{resource.date}</span>
                         </div>
                       </div>
 
-                      {/* Tags */}
-                      <div className="flex flex-wrap gap-2 mb-6">
-                        {resource.tags.map((tag) => (
-                          <Badge key={tag} variant="outline" className="bg-slate-200 border-slate-600 text-slate-900 font-medium">
-                            {tag}
-                          </Badge>
-                        ))}
+                      {/* Tags and Button */}
+                      <div className="flex flex-wrap items-center gap-3 mb-6">
+                        {/* Tags */}
+                        <div className="flex flex-wrap gap-2">
+                          {resource.tags.map((tag) => (
+                            <Badge key={tag} variant="outline" className="bg-background text-foreground border-gray-300 hover:bg-gray-50">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                        
+                        {/* Action Button */}
+                        <div className="flex gap-2 ml-auto">
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className="bg-primary hover:bg-primary/90 text-white font-medium"
+                            onClick={() => handleResourceClick(resource)}
+                          >
+                            Register Now
+                          </Button>
+                        </div>
                       </div>
 
                       {/* Resource Details - Always Expanded */}
@@ -405,18 +350,6 @@ const Resources = () => {
                         <div>
                           <h4 className="font-semibold mb-2 text-foreground">Description</h4>
                           <p className="text-sm text-muted-foreground leading-relaxed">{resource.description}</p>
-                        </div>
-                        
-                        {/* Register Button */}
-                        <div className="pt-4">
-                          <Button
-                            variant="default"
-                            size="default"
-                            className="w-full bg-primary hover:bg-primary/90 text-white font-semibold"
-                            onClick={() => handleResourceClick(resource)}
-                          >
-                            Register Now
-                          </Button>
                         </div>
                       </div>
                     </div>

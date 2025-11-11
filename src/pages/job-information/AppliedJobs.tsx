@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { PageTitle } from "@/components/PageTitle";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { CalendarDays, Clock, ExternalLink, FileText, MapPin, ArrowLeft, Search } from "lucide-react";
+import { CalendarDays, Clock, ExternalLink, FileText, MapPin } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 interface AppliedApplication {
@@ -65,7 +64,6 @@ const statusVariant: Record<AppliedApplication["status"], "default" | "secondary
 const AppliedJobs = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const highlightId = (location.state as { highlightId?: string } | null)?.highlightId;
@@ -93,43 +91,18 @@ const AppliedJobs = () => {
     };
   }, [location, navigate]);
 
-  const filteredApplications = appliedApplications.filter((application) =>
-    searchTerm === "" ||
-    application.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    application.company.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   return (
     <div className="min-h-screen bg-background">
       <main className="container py-8">
         <div className="mb-12">
-          <div className="flex items-center gap-4 mb-4">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/job-information')} className="gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Jobs
-            </Button>
-          </div>
           <PageTitle className="text-5xl md:text-6xl">Applied Jobs</PageTitle>
           <p className="text-lg text-muted-foreground mt-4">
             Track every application, its current status, and upcoming actions in one place.
           </p>
         </div>
 
-        {/* Search Bar */}
-        <div className="mb-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search by job title or company..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
-
         <section className="grid gap-4">
-          {filteredApplications.map((application) => (
+          {appliedApplications.map((application) => (
             <Card
               key={application.id}
               className="transition-smooth hover:shadow-md"
