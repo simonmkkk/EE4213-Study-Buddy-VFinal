@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Plus, GripVertical, Undo2 } from "lucide-react";
+import { Plus, GripVertical, Undo2, ArrowLeft, Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 interface Goal {
@@ -17,6 +18,7 @@ interface Goal {
 }
 
 const MicroGoalTracker = () => {
+  const navigate = useNavigate();
   const [goals, setGoals] = useState<Goal[]>([
     { id: "1", title: "Review linear algebra notes", estimate: 30, tag: "Math", completed: false },
     { id: "2", title: "Complete React tutorial chapter 3", estimate: 45, tag: "Programming", completed: false },
@@ -25,6 +27,7 @@ const MicroGoalTracker = () => {
   const [newGoalEstimate, setNewGoalEstimate] = useState(25);
   const [newGoalTag, setNewGoalTag] = useState("");
   const [showUndo, setShowUndo] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleAddGoal = () => {
     if (!newGoalTitle.trim()) {
@@ -78,68 +81,91 @@ const MicroGoalTracker = () => {
     completedMinutes: goals.filter(g => g.completed).reduce((sum, g) => sum + g.estimate, 0),
   };
 
+  const filteredGoals = goals.filter((goal) =>
+    searchTerm === "" ||
+    goal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (goal.tag && goal.tag.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
   const progressPercent = stats.total > 0 ? (stats.completed / stats.total) * 100 : 0;
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="container py-8">
-        <div className="mb-12">
-          <h1 className="text-5xl md:text-6xl font-bold">Micro-Goal Study Tracker</h1>
-          <p className="text-lg text-muted-foreground mt-4">
+      <main className="container py-4">
+        <div className="mb-4">
+          <div className="flex items-center gap-4 mb-2">
+            <Button variant="ghost" size="sm" onClick={() => navigate('/focus-learning')} className="gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+          </div>
+          <h1 className="text-4xl font-bold">Micro-Goal Study Tracker</h1>
+          <p className="text-sm text-muted-foreground mt-2">
             Break down your tasks into achievable micro-goals
           </p>
         </div>
 
         {/* Progress Bar */}
-        <Card className="mb-8">
-          <CardContent className="pt-6">
-            <div className="space-y-4">
-              <div className="flex justify-between text-sm">
+        <Card className="mb-4">
+          <CardContent className="pt-4 pb-4">
+            <div className="space-y-3">
+              <div className="flex justify-between text-xs">
                 <span className="font-medium">Today's Progress</span>
                 <span className="text-muted-foreground">
                   {stats.completed} / {stats.total} goals ({Math.round(progressPercent)}%)
                 </span>
               </div>
-              <div className="h-3 bg-muted rounded-full overflow-hidden">
+              <div className="h-2 bg-muted rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-accent transition-all duration-500"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
-              <div className="flex justify-between text-sm text-muted-foreground">
+              <div className="flex justify-between text-xs text-muted-foreground">
                 <span>{stats.completedMinutes} / {stats.totalMinutes} minutes</span>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-4">
           {/* Goal List */}
-          <div className="lg:col-span-2 space-y-4">
-            <h2 className="text-2xl font-semibold">Today's Goals</h2>
+          <div className="lg:col-span-2 space-y-2">
+            <h2 className="text-lg font-semibold mb-2">Today's Goals</h2>
             
-            {goals.map((goal) => (
-              <Card key={goal.id} className={goal.completed ? "opacity-75" : ""}>
-                <CardContent className="pt-6">
-                  <div className="flex items-start gap-4">
-                    <GripVertical className="h-5 w-5 text-muted-foreground cursor-move mt-1" />
+            {/* Search Bar */}
+            <div className="relative mb-2">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by goal name or tag..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 h-8 text-sm"
+              />
+            </div>
+            
+            {filteredGoals.map((goal) => (
+              <Card key={goal.id} className={`${goal.completed ? "opacity-75" : ""}`}>
+                <CardContent className="pt-3 pb-3">
+                  <div className="flex items-start gap-3">
+                    <GripVertical className="h-4 w-4 text-muted-foreground cursor-move mt-0.5" />
                     <Checkbox
                       checked={goal.completed}
                       onCheckedChange={() => handleToggleComplete(goal.id)}
-                      className="mt-1"
+                      className="mt-0.5"
                     />
                     <div className="flex-1">
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className={`font-medium ${goal.completed ? "line-through" : ""}`}>
+                      <div className="flex items-start justify-between mb-1">
+                        <h3 className={`text-sm font-medium ${goal.completed ? "line-through" : ""}`}>
                           {goal.title}
                         </h3>
-                        <Badge variant="outline">{goal.estimate} min</Badge>
+                        <Badge variant="outline" className="text-xs py-0 px-1 h-5">{goal.estimate} min</Badge>
                       </div>
                       {goal.tag && (
-                        <Badge variant="secondary" className="mt-1">{goal.tag}</Badge>
+                        <Badge variant="secondary" className="text-xs py-0 px-1 h-5">{goal.tag}</Badge>
                       )}
                       {goal.completed && goal.completedAt && (
-                        <div className="flex items-center gap-2 mt-2">
+                        <div className="flex items-center gap-1 mt-1">
                           <p className="text-xs text-muted-foreground">
                             Completed at {goal.completedAt.toLocaleTimeString()}
                           </p>
