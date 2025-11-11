@@ -29,7 +29,7 @@ const JobInformation = () => {
       <main className="container py-8">
         <div className="mb-12">
           <PageTitle as="h1" className="font-bold text-5xl md:text-6xl">
-            Dashboard Overview
+            Career Information
           </PageTitle>
           <p className="text-lg text-muted-foreground mt-4">
             Start with a guided overview of your job search journey. Access analytics, discover new roles,

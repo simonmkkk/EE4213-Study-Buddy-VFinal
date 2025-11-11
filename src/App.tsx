@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import BackToTop from "@/components/BackToTop";
+import ScrollToTop from "@/components/ScrollToTop";
 import VisualSchoolExplorer from "./pages/overseas-exchange/VisualSchoolExplorer";
 import SyllabusAutoMatcher from "./pages/overseas-exchange/SyllabusAutoMatcher";
 import JobInformation from "./pages/JobInformation";
@@ -20,6 +21,7 @@ import MicroGoalTracker from "./pages/focus-learning/MicroGoalTracker";
 import Community from "./pages/Community";
 import AcademicWall from "./pages/community/AcademicWall";
 import EmotionCenter from "./pages/community/EmotionCenter";
+import EmotionCenterComments from "./pages/community/EmotionCenterComments";
 import SoulMatch from "./pages/community/SoulMatch";
 import KeptChats from "./pages/community/KeptChats";
 import NotFound from "./pages/NotFound";
@@ -37,6 +39,7 @@ const App = () => (
       <SavedJobsProvider>
         <SavedResourcesProvider>
           <BrowserRouter>
+            <ScrollToTop />
             <Navigation />
           <Routes>
           <Route
@@ -189,6 +192,15 @@ const App = () => (
               <>
                 <BackToTop />
                 <EmotionCenter />
+              </>
+            }
+          />
+          <Route
+            path="/community/emotion-center/comments"
+            element={
+              <>
+                <BackToTop />
+                <EmotionCenterComments />
               </>
             }
           />

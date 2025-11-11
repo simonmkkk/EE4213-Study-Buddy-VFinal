@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Send, Search, MessageSquare } from "lucide-react";
+import { AlertCircle, Send, Search, MessageSquare, ArrowLeft } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -231,6 +231,12 @@ const SoulMatch = () => {
     return (
       <div className="min-h-screen bg-background">
         <main className="container py-8">
+          <div className="flex items-center gap-4 mb-4">
+            <Button variant="default" size="sm" onClick={() => navigate(-1)} className="gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+          </div>
           <div className="mb-12 flex items-center justify-between">
             <div>
               <h1 className="text-5xl md:text-6xl font-bold">Soul Match</h1>
@@ -239,7 +245,7 @@ const SoulMatch = () => {
               </p>
             </div>
             <Button
-              variant="outline"
+              variant="default"
               onClick={() => navigate("/community/kept-chats")}
               className="gap-2"
             >
@@ -317,7 +323,7 @@ const SoulMatch = () => {
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={handleKeepChat}>
-                Keep Chat
+                Keep Chat and Leave
               </Button>
               <Button variant="destructive" size="sm" onClick={handleEndChat}>
                 <AlertCircle className="h-4 w-4 mr-2" />

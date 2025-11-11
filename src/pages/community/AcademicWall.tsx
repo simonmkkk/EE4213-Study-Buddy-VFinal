@@ -5,8 +5,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BookOpen, Send, Lightbulb, MessageSquare, Search, ArrowLeft, Trash2 } from "lucide-react";
+import { BookOpen, Send, Lightbulb, MessageSquare, Search, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface Course {
   id: string;
@@ -93,6 +94,7 @@ const courses: Course[] = [
 ];
 
 const AcademicWall = () => {
+  const navigate = useNavigate();
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [question, setQuestion] = useState("");
   const [selectedMajor, setSelectedMajor] = useState<string>("all");
@@ -170,21 +172,12 @@ const AcademicWall = () => {
     toast.success("Comment added anonymously.");
   };
 
-  const handleDeleteComment = (qaId: string, commentId: string) => {
-    setQas((prev) =>
-      prev.map((qa) =>
-        qa.id === qaId
-          ? { ...qa, comments: qa.comments.filter((comment) => comment.id !== commentId) }
-          : qa,
-      ),
-    );
-    toast.success("Comment deleted successfully.");
-  };
-
   // Filter courses based on major and search query
   const filteredCourses = courses.filter((course) => {
     const matchesMajor = selectedMajor === "all" || course.major === selectedMajor;
-    const matchesSearch = searchQuery === "" || course.code.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = searchQuery === "" || 
+      course.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      course.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesMajor && matchesSearch;
   });
 
@@ -197,6 +190,17 @@ const AcademicWall = () => {
       <div className="min-h-screen bg-background">
         <main className="container py-8">
           <div className="mb-12">
+            <div className="flex items-center gap-4 mb-4">
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => navigate(-1)}
+                className="gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+            </div>
             <h1 className="text-5xl md:text-6xl font-bold">Course Discussion Groups</h1>
             <p className="text-lg text-muted-foreground mt-4">
               Join course-specific discussions and get AI-powered answers
@@ -209,7 +213,7 @@ const AcademicWall = () => {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by course code (e.g., PHY1202)..."
+                  placeholder="Search by course code or name (e.g., CS101 or Computer Science)..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -280,8 +284,21 @@ const AcademicWall = () => {
     <div className="min-h-screen bg-background">
       <main className="container py-8">
         <div className="mb-8">
-          <Badge variant="secondary" className="mb-2">{selectedCourse.code}</Badge>
-          <h1 className="text-4xl font-bold mb-2">{selectedCourse.name}</h1>
+          <div className="flex items-center gap-3 mb-4">
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => setSelectedCourse(null)}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+          </div>
+          <div className="flex items-center gap-3 mb-2">
+            <Badge variant="secondary">{selectedCourse.code}</Badge>
+            <h1 className="text-4xl font-bold">{selectedCourse.name}</h1>
+          </div>
           <p className="text-lg text-muted-foreground">{selectedCourse.description}</p>
         </div>
 
@@ -359,18 +376,8 @@ const AcademicWall = () => {
                           {qa.comments.map((comment) => (
                             <div key={comment.id} className="rounded-lg border border-border p-3">
                               <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium text-foreground text-sm">{comment.author}</span>
-                                  <span>{comment.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-                                </div>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleDeleteComment(qa.id, comment.id)}
-                                  className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
-                                >
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                </Button>
+                                <span className="font-medium text-foreground text-sm">{comment.author}</span>
+                                <span>{comment.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
                               </div>
                               <p className="text-sm text-foreground/90">{comment.content}</p>
                             </div>
