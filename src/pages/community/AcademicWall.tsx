@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BookOpen, Send, Lightbulb, MessageSquare, Search } from "lucide-react";
+import { BookOpen, Send, Lightbulb, MessageSquare, Search, ArrowLeft, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface Course {
@@ -168,6 +168,17 @@ const AcademicWall = () => {
     setCommentDrafts((prev) => ({ ...prev, [qaId]: "" }));
     setActiveCommentId(null);
     toast.success("Comment added anonymously.");
+  };
+
+  const handleDeleteComment = (qaId: string, commentId: string) => {
+    setQas((prev) =>
+      prev.map((qa) =>
+        qa.id === qaId
+          ? { ...qa, comments: qa.comments.filter((comment) => comment.id !== commentId) }
+          : qa,
+      ),
+    );
+    toast.success("Comment deleted successfully.");
   };
 
   // Filter courses based on major and search query
@@ -348,8 +359,18 @@ const AcademicWall = () => {
                           {qa.comments.map((comment) => (
                             <div key={comment.id} className="rounded-lg border border-border p-3">
                               <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-                                <span className="font-medium text-foreground text-sm">{comment.author}</span>
-                                <span>{comment.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium text-foreground text-sm">{comment.author}</span>
+                                  <span>{comment.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteComment(qa.id, comment.id)}
+                                  className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
                               </div>
                               <p className="text-sm text-foreground/90">{comment.content}</p>
                             </div>
