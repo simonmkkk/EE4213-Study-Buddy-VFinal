@@ -34,42 +34,102 @@ const mockJobs: Job[] = [
     id: "1",
     title: "Software Engineering Intern",
     company: "Google",
-    location: "Mountain View, CA",
+    location: "Central, Hong Kong Island",
     type: "Internship",
     deadline: "2025-02-15",
     description: "Join our team to work on cutting-edge projects in cloud computing and AI. You'll collaborate with world-class engineers and contribute to products used by billions.",
-    tags: ["Tech", "AI", "Cloud"],
+    tags: ["IT", "Engineering", "AI", "Cloud"],
     highlightId: "job-deadline-google",
   },
   {
     id: "2",
     title: "Product Management Graduate",
     company: "Microsoft",
-    location: "Seattle, WA",
+    location: "Kowloon Bay, Kowloon",
     type: "Graduate",
     deadline: "2025-03-01",
     description: "Lead product strategy for Microsoft Azure. This role involves working with cross-functional teams to deliver innovative cloud solutions.",
-    tags: ["Tech", "Product", "Cloud"],
+    tags: ["IT", "Product", "Cloud"],
   },
   {
     id: "3",
     title: "Financial Analyst Intern",
     company: "Goldman Sachs",
-    location: "New York, NY",
+    location: "Admiralty, Hong Kong Island",
     type: "Internship",
     deadline: "2025-01-25",
     description: "Gain hands-on experience in investment banking. Analyze market trends, prepare client presentations, and support deal execution.",
-    tags: ["Finance", "Banking"],
+    tags: ["Finance", "Banking", "Accounting"],
   },
   {
     id: "4",
     title: "UX Design Graduate",
     company: "Apple",
-    location: "Cupertino, CA",
+    location: "Tsim Sha Tsui, Kowloon",
     type: "Graduate",
     deadline: "2025-02-28",
     description: "Design intuitive user experiences for next-generation Apple products. Work with a talented team of designers and engineers.",
-    tags: ["Tech", "Design", "UX"],
+    tags: ["IT", "Design", "Creative"],
+  },
+  {
+    id: "5",
+    title: "Civil Engineering Intern",
+    company: "AECOM",
+    location: "Quarry Bay, Hong Kong Island",
+    type: "Internship",
+    deadline: "2025-02-20",
+    description: "Work on major infrastructure projects in Hong Kong. Assist senior engineers in design, planning and project management of construction projects.",
+    tags: ["Engineering", "Construction", "Infrastructure"],
+  },
+  {
+    id: "6",
+    title: "Marketing Graduate",
+    company: "Cathay Pacific",
+    location: "Hung Hom, Kowloon",
+    type: "Graduate",
+    deadline: "2025-03-10",
+    description: "Join our marketing team to develop innovative campaigns for one of Asia's leading airlines. Work on brand strategy and customer engagement.",
+    tags: ["Marketing", "Business", "Aviation"],
+  },
+  {
+    id: "7",
+    title: "Mechanical Engineer Intern",
+    company: "MTR Corporation",
+    location: "Kowloon Bay, Kowloon",
+    type: "Internship",
+    deadline: "2025-02-25",
+    description: "Support the maintenance and engineering team for Hong Kong's railway system. Gain hands-on experience with mechanical systems.",
+    tags: ["Engineering", "Mechanical", "Transportation"],
+  },
+  {
+    id: "8",
+    title: "Human Resources Graduate",
+    company: "HSBC",
+    location: "Central, Hong Kong Island",
+    type: "Graduate",
+    deadline: "2025-03-05",
+    description: "Build your career in HR at one of the world's largest banking organizations. Focus on talent acquisition and employee development.",
+    tags: ["HR", "Business", "Finance"],
+  },
+  {
+    id: "9",
+    title: "Data Analyst Intern",
+    company: "Alibaba",
+    location: "Tsuen Wan, New Territories",
+    type: "Internship",
+    deadline: "2025-03-15",
+    description: "Analyze large datasets to drive business insights. Work with cutting-edge data analytics tools and machine learning models.",
+    tags: ["IT", "Data", "Analytics"],
+  },
+  {
+    id: "10",
+    title: "Electrical Engineer Graduate",
+    company: "CLP Power",
+    location: "Yuen Long, New Territories",
+    type: "Graduate",
+    deadline: "2025-03-20",
+    description: "Join our engineering team to work on power generation and distribution systems. Contribute to Hong Kong's energy infrastructure.",
+    tags: ["Engineering", "Electrical", "Energy"],
   },
 ];
 
@@ -79,6 +139,7 @@ const JobOpportunityHub = () => {
   const [locationFilter, setLocationFilter] = useState("all");
   const [selectedTag, setSelectedTag] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [showAllTags, setShowAllTags] = useState(false);
   const { addJob, removeJob, isJobSaved } = useSavedJobs();
   const location = useLocation();
   const navigate = useNavigate();
@@ -199,9 +260,9 @@ const JobOpportunityHub = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Locations</SelectItem>
-                  <SelectItem value="CA">California</SelectItem>
-                  <SelectItem value="NY">New York</SelectItem>
-                  <SelectItem value="WA">Washington</SelectItem>
+                  <SelectItem value="Hong Kong Island">Hong Kong Island</SelectItem>
+                  <SelectItem value="Kowloon">Kowloon</SelectItem>
+                  <SelectItem value="New Territories">New Territories</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -231,7 +292,7 @@ const JobOpportunityHub = () => {
             >
               All Categories
             </Button>
-            {categories.map((category) => (
+            {categories.slice(0, 10).map((category) => (
               <Button
                 key={category}
                 size="sm"
@@ -246,6 +307,45 @@ const JobOpportunityHub = () => {
                 {category}
               </Button>
             ))}
+            {!showAllTags && categories.length > 10 && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setShowAllTags(true)}
+                className="rounded-full border-primary/30 text-foreground hover:bg-primary/10 bg-background"
+              >
+                Show More ({categories.length - 10}+)
+              </Button>
+            )}
+            {showAllTags && (
+              <>
+                {/* Force line break */}
+                <div className="basis-full h-0"></div>
+                {categories.slice(10).map((category) => (
+                  <Button
+                    key={category}
+                    size="sm"
+                    onClick={() => setSelectedTag(category)}
+                    className={cn(
+                      "border-primary/30 text-foreground hover:bg-primary/10 rounded-full",
+                      "bg-background",
+                      selectedTag === category &&
+                        "bg-primary text-white border-primary hover:bg-primary/90 hover:text-white"
+                    )}
+                  >
+                    {category}
+                  </Button>
+                ))}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setShowAllTags(false)}
+                  className="rounded-full border-primary/30 text-foreground hover:bg-primary/10 bg-background"
+                >
+                  Show Less
+                </Button>
+              </>
+            )}
           </div>
         </div>
 
@@ -268,7 +368,15 @@ const JobOpportunityHub = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-4 mb-2">
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-xl font-bold text-foreground mb-1">{job.title}</h3>
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <h3 className="text-xl font-bold text-foreground">{job.title}</h3>
+                            <Badge 
+                              variant="outline" 
+                              className="bg-slate-200 border-slate-600 text-slate-900 font-semibold"
+                            >
+                              {job.type}
+                            </Badge>
+                          </div>
                           <p className="text-base text-foreground">{job.company}</p>
                         </div>
                         {/* Bookmark Button */}
@@ -276,9 +384,9 @@ const JobOpportunityHub = () => {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleSave(job)}
-                          className="flex-shrink-0 hover:bg-primary/10 h-10 w-10"
+                          className="flex-shrink-0 h-10 w-10 group bg-green-100 hover:bg-green-200 rounded-lg"
                         >
-                          <Bookmark className={`h-6 w-6 ${saved ? "fill-primary text-primary" : "text-muted-foreground"}`} />
+                          <Bookmark className={`h-6 w-6 transition-all ${saved ? "fill-green-600 text-green-600" : "text-green-600 group-hover:fill-green-600"}`} />
                         </Button>
                       </div>
 
@@ -297,40 +405,13 @@ const JobOpportunityHub = () => {
                         </div>
                       </div>
 
-                      {/* Position Type */}
-                      <div className="mb-3">
-                        <Badge 
-                          variant="outline" 
-                          className="bg-slate-200 border-slate-600 text-slate-900 font-semibold"
-                        >
-                          {job.type}
-                        </Badge>
-                      </div>
-
-                      {/* Tags and Buttons */}
-                      <div className="flex flex-wrap items-center gap-3 mb-6">
-                        {/* Job Field Tags */}
-                        <div className="flex flex-wrap gap-2">
-                          {job.tags.map((tag) => (
-                            <Badge key={tag} variant="outline" className="bg-slate-200 border-slate-600 text-slate-900 font-medium">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                        
-                        {/* Action Button */}
-                        <div className="flex gap-2 ml-auto">
-                          <Button
-                            variant="default"
-                            size="sm"
-                            className="bg-primary hover:bg-primary/90 text-white font-medium"
-                            asChild
-                          >
-                            <a href="#" target="_blank" rel="noopener noreferrer">
-                              Apply Now
-                            </a>
-                          </Button>
-                        </div>
+                      {/* Job Field Tags */}
+                      <div className="flex flex-wrap gap-2 mb-6">
+                        {job.tags.map((tag) => (
+                          <Badge key={tag} variant="outline" className="bg-slate-200 border-slate-600 text-slate-900 font-medium">
+                            {tag}
+                          </Badge>
+                        ))}
                       </div>
 
                       {/* Job Details - Always Expanded */}
@@ -346,6 +427,20 @@ const JobOpportunityHub = () => {
                             <li>Prepare examples of past projects and achievements</li>
                             <li>Research the company culture and values</li>
                           </ul>
+                        </div>
+                        
+                        {/* Apply Button */}
+                        <div className="pt-4">
+                          <Button
+                            variant="default"
+                            size="default"
+                            className="w-full bg-primary hover:bg-primary/90 text-white font-semibold"
+                            asChild
+                          >
+                            <a href="#" target="_blank" rel="noopener noreferrer">
+                              Apply Now
+                            </a>
+                          </Button>
                         </div>
                       </div>
                     </div>

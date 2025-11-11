@@ -10,12 +10,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { BookOpen, CheckCircle2, XCircle, Trophy, MessageSquare, Star, ArrowLeft, Search, Edit2, Trash2, X } from "lucide-react";
+import { BookOpen, CheckCircle2, XCircle, Trophy, MessageSquare, Star, ArrowLeft, Search, Edit2, Trash2, X, Check, ChevronsUpDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface Course {
   code: string;
@@ -24,6 +37,7 @@ interface Course {
   transferable: boolean;
   matchText?: string;
   keywords: string[];
+  major: string;
 }
 
 const schoolNameMap: Record<string, string> = {
@@ -104,160 +118,160 @@ const schoolMajors: Record<string, { value: string; label: string }[]> = {
 
 const mockCourses: Record<string, Course[]> = {
   "eth-cs": [
-    { code: "ETH-CS310", name: "AI for Autonomous Systems", credits: 6, transferable: true, matchText: "Matches CS450 - Intelligent Systems", keywords: ["AI", "Robotics"] },
-    { code: "ETH-CS325", name: "Distributed Computing", credits: 5, transferable: true, matchText: "Matches CS360 - Distributed Systems", keywords: ["Distributed Systems", "Cloud"] },
+    { code: "ETH-CS310", name: "AI for Autonomous Systems", credits: 6, transferable: true, matchText: "Matches CS450 - Intelligent Systems", keywords: ["AI", "Robotics"], major: "Computer Science" },
+    { code: "ETH-CS325", name: "Distributed Computing", credits: 5, transferable: true, matchText: "Matches CS360 - Distributed Systems", keywords: ["Distributed Systems", "Cloud"], major: "Computer Science" },
   ],
   "eth-electrical": [
-    { code: "ETH-EE220", name: "Power Electronics", credits: 5, transferable: true, matchText: "Matches EE320 - Power Systems", keywords: ["Power", "Circuits"] },
-    { code: "ETH-EE340", name: "Embedded Control Systems", credits: 6, transferable: false, keywords: ["Embedded", "Control"] },
+    { code: "ETH-EE220", name: "Power Electronics", credits: 5, transferable: true, matchText: "Matches EE320 - Power Systems", keywords: ["Power", "Circuits"], major: "Electrical Engineering" },
+    { code: "ETH-EE340", name: "Embedded Control Systems", credits: 6, transferable: false, keywords: ["Embedded", "Control"], major: "Electrical Engineering" },
   ],
   "eth-math": [
-    { code: "ETH-MTH210", name: "Advanced Linear Algebra", credits: 5, transferable: true, matchText: "Matches MA210 - Linear Algebra II", keywords: ["Matrix", "Vector"] },
-    { code: "ETH-MTH330", name: "Numerical Analysis", credits: 4, transferable: true, matchText: "Matches MA330 - Numerical Methods", keywords: ["Numerical", "Computation"] },
+    { code: "ETH-MTH210", name: "Advanced Linear Algebra", credits: 5, transferable: true, matchText: "Matches MA210 - Linear Algebra II", keywords: ["Matrix", "Vector"], major: "Mathematics" },
+    { code: "ETH-MTH330", name: "Numerical Analysis", credits: 4, transferable: true, matchText: "Matches MA330 - Numerical Methods", keywords: ["Numerical", "Computation"], major: "Mathematics" },
   ],
   "eth-datascience": [
-    { code: "ETH-DS200", name: "Applied Machine Learning", credits: 5, transferable: true, matchText: "Matches DS300 - Applied ML", keywords: ["ML", "Data"] },
-    { code: "ETH-DS315", name: "Big Data Systems", credits: 4, transferable: false, keywords: ["Big Data", "Analytics"] },
+    { code: "ETH-DS200", name: "Applied Machine Learning", credits: 5, transferable: true, matchText: "Matches DS300 - Applied ML", keywords: ["ML", "Data"], major: "Data Science" },
+    { code: "ETH-DS315", name: "Big Data Systems", credits: 4, transferable: false, keywords: ["Big Data", "Analytics"], major: "Data Science" },
   ],
   "tum-mechanical": [
-    { code: "TUM-ME210", name: "Thermodynamics II", credits: 5, transferable: true, matchText: "Matches ME230 - Thermodynamics", keywords: ["Thermo", "Energy"] },
-    { code: "TUM-ME340", name: "Advanced CAD Design", credits: 4, transferable: true, matchText: "Matches ME340 - CAD/CAE", keywords: ["CAD", "Design"] },
+    { code: "TUM-ME210", name: "Thermodynamics II", credits: 5, transferable: true, matchText: "Matches ME230 - Thermodynamics", keywords: ["Thermo", "Energy"], major: "Mechanical Engineering" },
+    { code: "TUM-ME340", name: "Advanced CAD Design", credits: 4, transferable: true, matchText: "Matches ME340 - CAD/CAE", keywords: ["CAD", "Design"], major: "Mechanical Engineering" },
   ],
   "tum-aerospace": [
-    { code: "TUM-AE320", name: "Flight Mechanics", credits: 6, transferable: true, matchText: "Matches AE320 - Flight Mechanics", keywords: ["Flight", "Dynamics"] },
-    { code: "TUM-AE350", name: "Space Systems", credits: 5, transferable: false, keywords: ["Space", "Systems"] },
+    { code: "TUM-AE320", name: "Flight Mechanics", credits: 6, transferable: true, matchText: "Matches AE320 - Flight Mechanics", keywords: ["Flight", "Dynamics"], major: "Aerospace Engineering" },
+    { code: "TUM-AE350", name: "Space Systems", credits: 5, transferable: false, keywords: ["Space", "Systems"], major: "Aerospace Engineering" },
   ],
   "tum-robotics": [
-    { code: "TUM-RB200", name: "Robotics Programming", credits: 5, transferable: true, matchText: "Matches CS360 - Robotics Programming", keywords: ["Robotics", "Programming"] },
-    { code: "TUM-RB320", name: "Autonomous Navigation", credits: 4, transferable: true, matchText: "Matches CS420 - Autonomous Systems", keywords: ["Navigation", "AI"] },
+    { code: "TUM-RB200", name: "Robotics Programming", credits: 5, transferable: true, matchText: "Matches CS360 - Robotics Programming", keywords: ["Robotics", "Programming"], major: "Robotics" },
+    { code: "TUM-RB320", name: "Autonomous Navigation", credits: 4, transferable: true, matchText: "Matches CS420 - Autonomous Systems", keywords: ["Navigation", "AI"], major: "Robotics" },
   ],
   "tum-industrial": [
-    { code: "TUM-IE210", name: "Operations Research", credits: 5, transferable: true, matchText: "Matches IE310 - Operations Research", keywords: ["Optimization", "Operations"] },
-    { code: "TUM-IE330", name: "Lean Manufacturing", credits: 4, transferable: false, keywords: ["Lean", "Manufacturing"] },
+    { code: "TUM-IE210", name: "Operations Research", credits: 5, transferable: true, matchText: "Matches IE310 - Operations Research", keywords: ["Optimization", "Operations"], major: "Industrial Engineering" },
+    { code: "TUM-IE330", name: "Lean Manufacturing", credits: 4, transferable: false, keywords: ["Lean", "Manufacturing"], major: "Industrial Engineering" },
   ],
   "nus-businessadmin": [
-    { code: "NUS-MG220", name: "Innovation Strategy", credits: 4, transferable: true, matchText: "Matches MG220 - Innovation Strategy", keywords: ["Innovation", "Strategy"] },
-    { code: "NUS-MG325", name: "Global Leadership", credits: 4, transferable: false, keywords: ["Leadership", "Global"] },
+    { code: "NUS-MG220", name: "Innovation Strategy", credits: 4, transferable: true, matchText: "Matches MG220 - Innovation Strategy", keywords: ["Innovation", "Strategy"], major: "Business Administration" },
+    { code: "NUS-MG325", name: "Global Leadership", credits: 4, transferable: false, keywords: ["Leadership", "Global"], major: "Business Administration" },
   ],
   "nus-finance": [
-    { code: "NUS-FIN310", name: "Emerging Markets Finance", credits: 4, transferable: true, matchText: "Matches FIN310 - Emerging Markets", keywords: ["Finance", "Markets"] },
-    { code: "NUS-FIN360", name: "Sustainable Investing", credits: 4, transferable: true, matchText: "Matches FIN360 - Sustainable Finance", keywords: ["Sustainability", "Investing"] },
+    { code: "NUS-FIN310", name: "Emerging Markets Finance", credits: 4, transferable: true, matchText: "Matches FIN310 - Emerging Markets", keywords: ["Finance", "Markets"], major: "Finance" },
+    { code: "NUS-FIN360", name: "Sustainable Investing", credits: 4, transferable: true, matchText: "Matches FIN360 - Sustainable Finance", keywords: ["Sustainability", "Investing"], major: "Finance" },
   ],
   "nus-marketing": [
-    { code: "NUS-MKT330", name: "Digital Consumer Insights", credits: 4, transferable: true, matchText: "Matches MKT340 - Consumer Analytics", keywords: ["Digital", "Analytics"] },
-    { code: "NUS-MKT380", name: "Brand Storytelling", credits: 3, transferable: false, keywords: ["Brand", "Storytelling"] },
+    { code: "NUS-MKT330", name: "Digital Consumer Insights", credits: 4, transferable: true, matchText: "Matches MKT340 - Consumer Analytics", keywords: ["Digital", "Analytics"], major: "Marketing" },
+    { code: "NUS-MKT380", name: "Brand Storytelling", credits: 3, transferable: false, keywords: ["Brand", "Storytelling"], major: "Marketing" },
   ],
   "nus-infosystems": [
-    { code: "NUS-IS210", name: "Enterprise Data Systems", credits: 4, transferable: true, matchText: "Matches IS320 - Enterprise Systems", keywords: ["Enterprise", "Data"] },
-    { code: "NUS-IS340", name: "Cloud Architecture", credits: 4, transferable: true, matchText: "Matches CS350 - Cloud Architecture", keywords: ["Cloud", "Architecture"] },
+    { code: "NUS-IS210", name: "Enterprise Data Systems", credits: 4, transferable: true, matchText: "Matches IS320 - Enterprise Systems", keywords: ["Enterprise", "Data"], major: "Information Systems" },
+    { code: "NUS-IS340", name: "Cloud Architecture", credits: 4, transferable: true, matchText: "Matches CS350 - Cloud Architecture", keywords: ["Cloud", "Architecture"], major: "Information Systems" },
   ],
   "uoft-medicine": [
-    { code: "UOFT-MED310", name: "Advanced Clinical Practice", credits: 5, transferable: true, matchText: "Matches MED410 - Clinical Practice", keywords: ["Clinical", "Practice"] },
-    { code: "UOFT-MED330", name: "Medical Ethics", credits: 3, transferable: true, matchText: "Matches MED330 - Medical Ethics", keywords: ["Ethics", "Medicine"] },
+    { code: "UOFT-MED310", name: "Advanced Clinical Practice", credits: 5, transferable: true, matchText: "Matches MED410 - Clinical Practice", keywords: ["Clinical", "Practice"], major: "Medicine" },
+    { code: "UOFT-MED330", name: "Medical Ethics", credits: 3, transferable: true, matchText: "Matches MED330 - Medical Ethics", keywords: ["Ethics", "Medicine"], major: "Medicine" },
   ],
   "uoft-biomedical": [
-    { code: "UOFT-BME220", name: "Biomedical Instrumentation", credits: 4, transferable: true, matchText: "Matches BME320 - Instrumentation", keywords: ["Biomedical", "Instrumentation"] },
-    { code: "UOFT-BME340", name: "Tissue Engineering", credits: 4, transferable: false, keywords: ["Tissue", "Engineering"] },
+    { code: "UOFT-BME220", name: "Biomedical Instrumentation", credits: 4, transferable: true, matchText: "Matches BME320 - Instrumentation", keywords: ["Biomedical", "Instrumentation"], major: "Biomedical Sciences" },
+    { code: "UOFT-BME340", name: "Tissue Engineering", credits: 4, transferable: false, keywords: ["Tissue", "Engineering"], major: "Biomedical Sciences" },
   ],
   "uoft-publichealth": [
-    { code: "UOFT-PH200", name: "Global Health Policy", credits: 4, transferable: true, matchText: "Matches PH300 - Global Health", keywords: ["Policy", "Global Health"] },
-    { code: "UOFT-PH320", name: "Epidemiology Methods", credits: 4, transferable: true, matchText: "Matches PH320 - Epidemiology", keywords: ["Epidemiology", "Data"] },
+    { code: "UOFT-PH200", name: "Global Health Policy", credits: 4, transferable: true, matchText: "Matches PH300 - Global Health", keywords: ["Policy", "Global Health"], major: "Public Health" },
+    { code: "UOFT-PH320", name: "Epidemiology Methods", credits: 4, transferable: true, matchText: "Matches PH320 - Epidemiology", keywords: ["Epidemiology", "Data"], major: "Public Health" },
   ],
   "uoft-neuroscience": [
-    { code: "UOFT-NEU210", name: "Neural Systems", credits: 4, transferable: true, matchText: "Matches NEU310 - Systems Neuroscience", keywords: ["Neural", "Systems"] },
-    { code: "UOFT-NEU330", name: "Cognitive Neuroscience", credits: 4, transferable: false, keywords: ["Cognitive", "Brain"] },
+    { code: "UOFT-NEU210", name: "Neural Systems", credits: 4, transferable: true, matchText: "Matches NEU310 - Systems Neuroscience", keywords: ["Neural", "Systems"], major: "Neuroscience" },
+    { code: "UOFT-NEU330", name: "Cognitive Neuroscience", credits: 4, transferable: false, keywords: ["Cognitive", "Brain"], major: "Neuroscience" },
   ],
   "oxford-law": [
-    { code: "OXF-LAW300", name: "Comparative Constitutional Law", credits: 4, transferable: true, matchText: "Matches LAW320 - Comparative Law", keywords: ["Constitutional", "Comparative"] },
-    { code: "OXF-LAW340", name: "Human Rights Advocacy", credits: 3, transferable: true, matchText: "Matches LAW360 - Human Rights", keywords: ["Human Rights", "Advocacy"] },
+    { code: "OXF-LAW300", name: "Comparative Constitutional Law", credits: 4, transferable: true, matchText: "Matches LAW320 - Comparative Law", keywords: ["Constitutional", "Comparative"], major: "Law" },
+    { code: "OXF-LAW340", name: "Human Rights Advocacy", credits: 3, transferable: true, matchText: "Matches LAW360 - Human Rights", keywords: ["Human Rights", "Advocacy"], major: "Law" },
   ],
   "oxford-intlrelations": [
-    { code: "OXF-IR310", name: "Global Governance", credits: 4, transferable: true, matchText: "Matches IR320 - Global Governance", keywords: ["Governance", "Global"] },
-    { code: "OXF-IR360", name: "Diplomacy in Practice", credits: 3, transferable: false, keywords: ["Diplomacy", "Practice"] },
+    { code: "OXF-IR310", name: "Global Governance", credits: 4, transferable: true, matchText: "Matches IR320 - Global Governance", keywords: ["Governance", "Global"], major: "International Relations" },
+    { code: "OXF-IR360", name: "Diplomacy in Practice", credits: 3, transferable: false, keywords: ["Diplomacy", "Practice"], major: "International Relations" },
   ],
   "oxford-philosophy": [
-    { code: "OXF-PHIL210", name: "Ethics of Technology", credits: 4, transferable: true, matchText: "Matches PHI320 - Ethics", keywords: ["Ethics", "Technology"] },
-    { code: "OXF-PHIL330", name: "Political Philosophy", credits: 4, transferable: true, matchText: "Matches PHI340 - Political Philosophy", keywords: ["Political", "Philosophy"] },
+    { code: "OXF-PHIL210", name: "Ethics of Technology", credits: 4, transferable: true, matchText: "Matches PHI320 - Ethics", keywords: ["Ethics", "Technology"], major: "Philosophy" },
+    { code: "OXF-PHIL330", name: "Political Philosophy", credits: 4, transferable: true, matchText: "Matches PHI340 - Political Philosophy", keywords: ["Political", "Philosophy"], major: "Philosophy" },
   ],
   "oxford-publicpolicy": [
-    { code: "OXF-PP320", name: "Urban Policy Innovation", credits: 4, transferable: true, matchText: "Matches PP320 - Urban Policy", keywords: ["Urban", "Policy"] },
-    { code: "OXF-PP360", name: "Public Finance", credits: 3, transferable: false, keywords: ["Public", "Finance"] },
+    { code: "OXF-PP320", name: "Urban Policy Innovation", credits: 4, transferable: true, matchText: "Matches PP320 - Urban Policy", keywords: ["Urban", "Policy"], major: "Public Policy" },
+    { code: "OXF-PP360", name: "Public Finance", credits: 3, transferable: false, keywords: ["Public", "Finance"], major: "Public Policy" },
   ],
   "mit-physics": [
-    { code: "MIT8.311", name: "Electromagnetism II", credits: 6, transferable: true, matchText: "Matches PHY330 - Electromagnetism", keywords: ["Physics", "Electromagnetism"] },
-    { code: "MIT8.321", name: "Quantum Theory", credits: 6, transferable: true, matchText: "Matches PHY420 - Quantum Mechanics", keywords: ["Quantum", "Physics"] },
+    { code: "MIT8.311", name: "Electromagnetism II", credits: 6, transferable: true, matchText: "Matches PHY330 - Electromagnetism", keywords: ["Physics", "Electromagnetism"], major: "Physics" },
+    { code: "MIT8.321", name: "Quantum Theory", credits: 6, transferable: true, matchText: "Matches PHY420 - Quantum Mechanics", keywords: ["Quantum", "Physics"], major: "Physics" },
   ],
   "mit-aerospace": [
-    { code: "MIT16.100", name: "Aerodynamics", credits: 6, transferable: true, matchText: "Matches AE320 - Aerodynamics", keywords: ["Aerodynamics", "Flight"] },
-    { code: "MIT16.120", name: "Space Propulsion", credits: 5, transferable: false, keywords: ["Space", "Propulsion"] },
+    { code: "MIT16.100", name: "Aerodynamics", credits: 6, transferable: true, matchText: "Matches AE320 - Aerodynamics", keywords: ["Aerodynamics", "Flight"], major: "Aerospace Engineering" },
+    { code: "MIT16.120", name: "Space Propulsion", credits: 5, transferable: false, keywords: ["Space", "Propulsion"], major: "Aerospace Engineering" },
   ],
   "mit-ai": [
-    { code: "MIT6.864", name: "Advanced Machine Learning", credits: 6, transferable: true, matchText: "Matches CS460 - Advanced ML", keywords: ["ML", "Advanced"] },
-    { code: "MIT6.861", name: "Computational Vision", credits: 6, transferable: true, matchText: "Matches CS480 - Computer Vision", keywords: ["Vision", "AI"] },
+    { code: "MIT6.864", name: "Advanced Machine Learning", credits: 6, transferable: true, matchText: "Matches CS460 - Advanced ML", keywords: ["ML", "Advanced"], major: "Artificial Intelligence" },
+    { code: "MIT6.861", name: "Computational Vision", credits: 6, transferable: true, matchText: "Matches CS480 - Computer Vision", keywords: ["Vision", "AI"], major: "Artificial Intelligence" },
   ],
   "utokyo-materialsscience": [
-    { code: "UTK-MS210", name: "Nano Materials", credits: 4, transferable: true, matchText: "Matches MS320 - Nanomaterials", keywords: ["Nano", "Materials"] },
-    { code: "UTK-MS330", name: "Smart Materials", credits: 4, transferable: false, keywords: ["Smart", "Materials"] },
+    { code: "UTK-MS210", name: "Nano Materials", credits: 4, transferable: true, matchText: "Matches MS320 - Nanomaterials", keywords: ["Nano", "Materials"], major: "Materials Science" },
+    { code: "UTK-MS330", name: "Smart Materials", credits: 4, transferable: false, keywords: ["Smart", "Materials"], major: "Materials Science" },
   ],
   "utokyo-computerengineering": [
-    { code: "UTK-CE220", name: "VLSI Design", credits: 4, transferable: true, matchText: "Matches CE330 - VLSI", keywords: ["VLSI", "Design"] },
-    { code: "UTK-CE340", name: "Embedded AI Systems", credits: 4, transferable: true, matchText: "Matches CE360 - Embedded AI", keywords: ["Embedded", "AI"] },
+    { code: "UTK-CE220", name: "VLSI Design", credits: 4, transferable: true, matchText: "Matches CE330 - VLSI", keywords: ["VLSI", "Design"], major: "Computer Engineering" },
+    { code: "UTK-CE340", name: "Embedded AI Systems", credits: 4, transferable: true, matchText: "Matches CE360 - Embedded AI", keywords: ["Embedded", "AI"], major: "Computer Engineering" },
   ],
   "utokyo-architecture": [
-    { code: "UTK-AR200", name: "Urban Architecture Studio", credits: 5, transferable: true, matchText: "Matches AR310 - Urban Studio", keywords: ["Urban", "Studio"] },
-    { code: "UTK-AR320", name: "Sustainable Building Design", credits: 4, transferable: true, matchText: "Matches AR330 - Sustainable Design", keywords: ["Sustainable", "Design"] },
+    { code: "UTK-AR200", name: "Urban Architecture Studio", credits: 5, transferable: true, matchText: "Matches AR310 - Urban Studio", keywords: ["Urban", "Studio"], major: "Architecture" },
+    { code: "UTK-AR320", name: "Sustainable Building Design", credits: 4, transferable: true, matchText: "Matches AR330 - Sustainable Design", keywords: ["Sustainable", "Design"], major: "Architecture" },
   ],
   "utokyo-robotics": [
-    { code: "UTK-RB210", name: "Humanoid Robotics", credits: 4, transferable: true, matchText: "Matches RB320 - Humanoid Systems", keywords: ["Humanoid", "Robotics"] },
-    { code: "UTK-RB330", name: "Motion Planning", credits: 4, transferable: false, keywords: ["Motion", "Planning"] },
+    { code: "UTK-RB210", name: "Humanoid Robotics", credits: 4, transferable: true, matchText: "Matches RB320 - Humanoid Systems", keywords: ["Humanoid", "Robotics"], major: "Robotics" },
+    { code: "UTK-RB330", name: "Motion Planning", credits: 4, transferable: false, keywords: ["Motion", "Planning"], major: "Robotics" },
   ],
   "melbourne-environmentalscience": [
-    { code: "MELB-ENV210", name: "Climate Risk Assessment", credits: 4, transferable: true, matchText: "Matches ENVS310 - Climate Risk", keywords: ["Climate", "Risk"] },
-    { code: "MELB-ENV320", name: "Sustainable Ecosystems", credits: 4, transferable: true, matchText: "Matches ENVS320 - Ecosystems", keywords: ["Ecosystems", "Sustainability"] },
+    { code: "MELB-ENV210", name: "Climate Risk Assessment", credits: 4, transferable: true, matchText: "Matches ENVS310 - Climate Risk", keywords: ["Climate", "Risk"], major: "Environmental Science" },
+    { code: "MELB-ENV320", name: "Sustainable Ecosystems", credits: 4, transferable: true, matchText: "Matches ENVS320 - Ecosystems", keywords: ["Ecosystems", "Sustainability"], major: "Environmental Science" },
   ],
   "melbourne-medicine": [
-    { code: "MELB-MED320", name: "Advanced Clinical Simulation", credits: 5, transferable: true, matchText: "Matches MED420 - Clinical Simulation", keywords: ["Simulation", "Clinical"] },
-    { code: "MELB-MED340", name: "Global Health Practicum", credits: 4, transferable: false, keywords: ["Global Health", "Practicum"] },
+    { code: "MELB-MED320", name: "Advanced Clinical Simulation", credits: 5, transferable: true, matchText: "Matches MED420 - Clinical Simulation", keywords: ["Simulation", "Clinical"], major: "Medicine" },
+    { code: "MELB-MED340", name: "Global Health Practicum", credits: 4, transferable: false, keywords: ["Global Health", "Practicum"], major: "Medicine" },
   ],
   "melbourne-dataanalytics": [
-    { code: "MELB-DA210", name: "Data Visualization", credits: 4, transferable: true, matchText: "Matches DA310 - Data Visualization", keywords: ["Visualization", "Analytics"] },
-    { code: "MELB-DA330", name: "Predictive Analytics", credits: 4, transferable: true, matchText: "Matches DA320 - Predictive Analytics", keywords: ["Predictive", "Analytics"] },
+    { code: "MELB-DA210", name: "Data Visualization", credits: 4, transferable: true, matchText: "Matches DA310 - Data Visualization", keywords: ["Visualization", "Analytics"], major: "Data Analytics" },
+    { code: "MELB-DA330", name: "Predictive Analytics", credits: 4, transferable: true, matchText: "Matches DA320 - Predictive Analytics", keywords: ["Predictive", "Analytics"], major: "Data Analytics" },
   ],
   "melbourne-business": [
-    { code: "MELB-BUS310", name: "Asia-Pacific Business", credits: 4, transferable: true, matchText: "Matches BUS410 - International Business", keywords: ["International", "Asia-Pacific"] },
-    { code: "MELB-BUS340", name: "Business Analytics", credits: 4, transferable: false, keywords: ["Analytics", "Business"] },
+    { code: "MELB-BUS310", name: "Asia-Pacific Business", credits: 4, transferable: true, matchText: "Matches BUS410 - International Business", keywords: ["International", "Asia-Pacific"], major: "Business" },
+    { code: "MELB-BUS340", name: "Business Analytics", credits: 4, transferable: false, keywords: ["Analytics", "Business"], major: "Business" },
   ],
   "hec-businessadmin": [
-    { code: "HEC-MG300", name: "Strategic Management", credits: 4, transferable: true, matchText: "Matches MG410 - Strategy", keywords: ["Strategy", "Management"] },
-    { code: "HEC-MG340", name: "Change Leadership", credits: 4, transferable: true, matchText: "Matches MG430 - Change Management", keywords: ["Change", "Leadership"] },
+    { code: "HEC-MG300", name: "Strategic Management", credits: 4, transferable: true, matchText: "Matches MG410 - Strategy", keywords: ["Strategy", "Management"], major: "Business Administration" },
+    { code: "HEC-MG340", name: "Change Leadership", credits: 4, transferable: true, matchText: "Matches MG430 - Change Management", keywords: ["Change", "Leadership"], major: "Business Administration" },
   ],
   "hec-entrepreneurship": [
-    { code: "HEC-ENT320", name: "Startup Financing", credits: 4, transferable: true, matchText: "Matches ENT320 - Venture Finance", keywords: ["Startup", "Finance"] },
-    { code: "HEC-ENT350", name: "Innovation Lab", credits: 3, transferable: false, keywords: ["Innovation", "Lab"] },
+    { code: "HEC-ENT320", name: "Startup Financing", credits: 4, transferable: true, matchText: "Matches ENT320 - Venture Finance", keywords: ["Startup", "Finance"], major: "Entrepreneurship" },
+    { code: "HEC-ENT350", name: "Innovation Lab", credits: 3, transferable: false, keywords: ["Innovation", "Lab"], major: "Entrepreneurship" },
   ],
   "hec-finance": [
-    { code: "HEC-FIN330", name: "Corporate Valuation", credits: 4, transferable: true, matchText: "Matches FIN430 - Valuation", keywords: ["Valuation", "Corporate"] },
-    { code: "HEC-FIN360", name: "Risk Analytics", credits: 4, transferable: true, matchText: "Matches FIN440 - Risk Management", keywords: ["Risk", "Analytics"] },
+    { code: "HEC-FIN330", name: "Corporate Valuation", credits: 4, transferable: true, matchText: "Matches FIN430 - Valuation", keywords: ["Valuation", "Corporate"], major: "Finance" },
+    { code: "HEC-FIN360", name: "Risk Analytics", credits: 4, transferable: true, matchText: "Matches FIN440 - Risk Management", keywords: ["Risk", "Analytics"], major: "Finance" },
   ],
   "hec-luxury": [
-    { code: "HEC-LUX310", name: "Luxury Branding", credits: 4, transferable: true, matchText: "Matches MKT420 - Luxury Branding", keywords: ["Luxury", "Branding"] },
-    { code: "HEC-LUX330", name: "Retail Experience Design", credits: 3, transferable: false, keywords: ["Retail", "Experience"] },
+    { code: "HEC-LUX310", name: "Luxury Branding", credits: 4, transferable: true, matchText: "Matches MKT420 - Luxury Branding", keywords: ["Luxury", "Branding"], major: "Luxury Management" },
+    { code: "HEC-LUX330", name: "Retail Experience Design", credits: 3, transferable: false, keywords: ["Retail", "Experience"], major: "Luxury Management" },
   ],
   "snu-cs": [
-    { code: "SNU-CS320", name: "Data Mining", credits: 4, transferable: true, matchText: "Matches CS340 - Data Mining", keywords: ["Data", "Mining"] },
-    { code: "SNU-CS340", name: "Blockchain Platforms", credits: 4, transferable: false, keywords: ["Blockchain", "Platforms"] },
+    { code: "SNU-CS320", name: "Data Mining", credits: 4, transferable: true, matchText: "Matches CS340 - Data Mining", keywords: ["Data", "Mining"], major: "Computer Science" },
+    { code: "SNU-CS340", name: "Blockchain Platforms", credits: 4, transferable: false, keywords: ["Blockchain", "Platforms"], major: "Computer Science" },
   ],
   "snu-bioengineering": [
-    { code: "SNU-BIO300", name: "Bioinformatics", credits: 4, transferable: true, matchText: "Matches BIO320 - Bioinformatics", keywords: ["Bioinformatics", "Genomics"] },
-    { code: "SNU-BIO340", name: "Biomaterials", credits: 4, transferable: false, keywords: ["Biomaterials", "Design"] },
+    { code: "SNU-BIO300", name: "Bioinformatics", credits: 4, transferable: true, matchText: "Matches BIO320 - Bioinformatics", keywords: ["Bioinformatics", "Genomics"], major: "Bioengineering" },
+    { code: "SNU-BIO340", name: "Biomaterials", credits: 4, transferable: false, keywords: ["Biomaterials", "Design"], major: "Bioengineering" },
   ],
   "snu-economics": [
-    { code: "SNU-ECON310", name: "Asian Economic Policy", credits: 4, transferable: true, matchText: "Matches ECON420 - Economic Policy", keywords: ["Policy", "Asia"] },
-    { code: "SNU-ECON340", name: "Development Economics", credits: 4, transferable: true, matchText: "Matches ECON340 - Development Economics", keywords: ["Development", "Economics"] },
+    { code: "SNU-ECON310", name: "Asian Economic Policy", credits: 4, transferable: true, matchText: "Matches ECON420 - Economic Policy", keywords: ["Policy", "Asia"], major: "Economics" },
+    { code: "SNU-ECON340", name: "Development Economics", credits: 4, transferable: true, matchText: "Matches ECON340 - Development Economics", keywords: ["Development", "Economics"], major: "Economics" },
   ],
   "snu-design": [
-    { code: "SNU-DES210", name: "Interaction Design", credits: 4, transferable: true, matchText: "Matches DES320 - Interaction Design", keywords: ["Interaction", "Design"] },
-    { code: "SNU-DES330", name: "Service Innovation Studio", credits: 3, transferable: false, keywords: ["Service", "Innovation"] },
+    { code: "SNU-DES210", name: "Interaction Design", credits: 4, transferable: true, matchText: "Matches DES320 - Interaction Design", keywords: ["Interaction", "Design"], major: "Design" },
+    { code: "SNU-DES330", name: "Service Innovation Studio", credits: 3, transferable: false, keywords: ["Service", "Innovation"], major: "Design" },
   ],
 };
 
@@ -278,12 +292,27 @@ const getAvailableMajorOptions = (school: string | null | undefined) => {
   return [baseMajorOption, ...schoolMajors[school]];
 };
 
+// Extract popular tags from all courses
+const getAllTags = () => {
+  const allKeywords = new Set<string>();
+  Object.values(mockCourses).forEach((courseList) => {
+    courseList.forEach((course) => {
+      course.keywords.forEach((keyword) => allKeywords.add(keyword));
+    });
+  });
+  return Array.from(allKeywords).sort();
+};
+
+const popularTags = ["AI", "Robotics", "ML", "Data", "Finance", "Business", "Design", "Cloud", "Analytics"];
+
 const SyllabusAutoMatcher = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedSchool, setSelectedSchool] = useState("");
   const [selectedMajor, setSelectedMajor] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [openMajor, setOpenMajor] = useState(false);
   const [courses, setCourses] = useState<Course[]>([]);
   const [showReviews, setShowReviews] = useState(false);
   const [reviewText, setReviewText] = useState("");
@@ -425,13 +454,13 @@ const SyllabusAutoMatcher = () => {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 rounded-lg border bg-muted/20 px-3 py-2 shadow-sm">
+      <div className="flex items-center gap-2 rounded-lg border-2 border-accent bg-muted/20 px-3 py-2 shadow-sm">
         <div className="p-1.5 rounded-md bg-accent-light">
           <CheckCircle2 className="h-4 w-4 text-accent" />
         </div>
         <div className="leading-tight">
           <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Transfer Eligible</p>
-          <p className="text-base font-semibold">{stats.transferable}</p>
+          <p className="text-base font-bold">{stats.transferable}</p>
         </div>
       </div>
 
@@ -473,6 +502,12 @@ const SyllabusAutoMatcher = () => {
   const schoolShortName = selectedSchool ? schoolShortNameMap[selectedSchool] ?? selectedSchool.toUpperCase() : "";
 
   const availableMajorOptions = getAvailableMajorOptions(selectedSchool);
+  
+  const handleTagClick = (tag: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -503,20 +538,47 @@ const SyllabusAutoMatcher = () => {
                 <div>
                   <h2 className="text-4xl md:text-5xl font-semibold text-foreground">{schoolName}</h2>
                 </div>
-                <div className="w-full sm:w-[250px]">
-                  <Select value={selectedMajor} onValueChange={setSelectedMajor}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose a major..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableMajorOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <Popover open={openMajor} onOpenChange={setOpenMajor}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={openMajor}
+                      className="w-full sm:w-[300px] justify-between"
+                    >
+                      {selectedMajor === "all"
+                        ? "All Majors"
+                        : availableMajorOptions.find((option) => option.value === selectedMajor)?.label || "Select major"}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[300px] p-0">
+                    <Command>
+                      <CommandInput placeholder="Search major..." />
+                      <CommandEmpty>No major found.</CommandEmpty>
+                      <CommandGroup>
+                        {availableMajorOptions.map((option) => (
+                          <CommandItem
+                            key={option.value}
+                            value={option.label}
+                            onSelect={() => {
+                              setSelectedMajor(option.value);
+                              setOpenMajor(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedMajor === option.value ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {option.label}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
               {showInlineStats && (
                 <div className="self-start space-y-3">
@@ -555,18 +617,47 @@ const SyllabusAutoMatcher = () => {
               </SelectContent>
             </Select>
 
-            <Select value={selectedMajor} onValueChange={setSelectedMajor}>
-              <SelectTrigger className="w-full sm:w-[250px]">
-                <SelectValue placeholder="Choose a major..." />
-              </SelectTrigger>
-              <SelectContent>
-                {availableMajorOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover open={openMajor} onOpenChange={setOpenMajor}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={openMajor}
+                  className="w-full sm:w-[250px] justify-between"
+                >
+                  {selectedMajor === "all"
+                    ? "All Majors"
+                    : availableMajorOptions.find((option) => option.value === selectedMajor)?.label || "Select major"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[250px] p-0">
+                <Command>
+                  <CommandInput placeholder="Search major..." />
+                  <CommandEmpty>No major found.</CommandEmpty>
+                  <CommandGroup>
+                    {availableMajorOptions.map((option) => (
+                      <CommandItem
+                        key={option.value}
+                        value={option.label}
+                        onSelect={() => {
+                          setSelectedMajor(option.value);
+                          setOpenMajor(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            selectedMajor === option.value ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {option.label}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
         )}
 
@@ -604,24 +695,73 @@ const SyllabusAutoMatcher = () => {
             </h2>
 
             {/* Course Search Bar */}
-            <div className="relative mb-6">
+            <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search by course code or name..."
+                placeholder="Search by course code, name, or tags..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
             </div>
 
+            {/* Field Tags */}
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold text-muted-foreground mb-3">Filter by Field</h3>
+              <div className="flex flex-wrap gap-2">
+                {popularTags.map((tag) => {
+                  const isSelected = selectedTags.includes(tag);
+                  return (
+                    <Button
+                      key={tag}
+                      variant={isSelected ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handleTagClick(tag)}
+                      className={cn(
+                        "rounded-full transition-all",
+                        isSelected 
+                          ? "bg-primary text-primary-foreground shadow-md hover:bg-primary/90" 
+                          : "hover:bg-primary/10 hover:border-primary"
+                      )}
+                    >
+                      {tag}
+                      {isSelected && (
+                        <X className="ml-1 h-3 w-3" />
+                      )}
+                    </Button>
+                  );
+                })}
+                {selectedTags.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedTags([])}
+                    className="rounded-full text-muted-foreground hover:text-destructive"
+                  >
+                    Clear all
+                  </Button>
+                )}
+              </div>
+            </div>
+
             {/* Course Cards */}
             <div className="space-y-4 mb-8">
               {courses
-                .filter((course) =>
-                  searchTerm === "" ||
-                  course.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                  course.name.toLowerCase().includes(searchTerm.toLowerCase())
-                )
+                .filter((course) => {
+                  // Search filter - now includes keywords
+                  const searchMatch = 
+                    searchTerm === "" ||
+                    course.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    course.keywords.some((keyword) => keyword.toLowerCase().includes(searchTerm.toLowerCase()));
+                  
+                  // Tag filter - course must have ALL selected tags
+                  const tagMatch = selectedTags.length === 0 || selectedTags.every((tag) =>
+                    course.keywords.some((keyword) => keyword.toLowerCase().includes(tag.toLowerCase()))
+                  );
+                  
+                  return searchMatch && tagMatch;
+                })
                 .map((course) => (
                 <Card key={course.code} className={course.transferable ? "border-accent" : ""}>
                   <CardContent className="pt-6">
@@ -642,6 +782,11 @@ const SyllabusAutoMatcher = () => {
                         {course.matchText && (
                           <p className="text-sm text-accent ml-8 mb-2">{course.matchText}</p>
                         )}
+                        <div className="ml-8 mb-2">
+                          <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-300">
+                            📚 {course.major}
+                          </Badge>
+                        </div>
                         <div className="flex flex-wrap gap-2 ml-8">
                           {course.keywords.map((keyword) => (
                             <Badge key={keyword} variant="outline">{keyword}</Badge>

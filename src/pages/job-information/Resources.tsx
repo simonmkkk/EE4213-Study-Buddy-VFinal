@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BookOpen, ExternalLink, Bookmark, Calendar, ArrowLeft, Search } from "lucide-react";
+import { MapPin, Bookmark, Calendar, ArrowLeft, Search } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { PageTitle } from "@/components/PageTitle";
 import { useSavedResources } from "@/context/SavedResourcesContext";
@@ -38,6 +38,7 @@ const Resources = () => {
   const [locationFilter, setLocationFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTag, setSelectedTag] = useState("all");
+  const [showAllTags, setShowAllTags] = useState(false);
 
   const resources: Resource[] = [
     {
@@ -264,7 +265,7 @@ const Resources = () => {
               size="sm"
               onClick={() => setSelectedTag("all")}
               className={cn(
-                "border-gray-300 text-foreground hover:bg-gray-50 rounded-full",
+                "border-primary/30 text-foreground hover:bg-primary/10 rounded-full",
                 "bg-background",
                 selectedTag === "all" &&
                   "bg-primary text-white border-primary hover:bg-primary/90 hover:text-white"
@@ -272,13 +273,13 @@ const Resources = () => {
             >
               All Tags
             </Button>
-            {allTags.map((tag) => (
+            {allTags.slice(0, 10).map((tag) => (
               <Button
                 key={tag}
                 size="sm"
                 onClick={() => setSelectedTag(tag)}
                 className={cn(
-                  "border-gray-300 text-foreground hover:bg-gray-50 rounded-full",
+                  "border-primary/30 text-foreground hover:bg-primary/10 rounded-full",
                   "bg-background",
                   selectedTag === tag &&
                     "bg-primary text-white border-primary hover:bg-primary/90 hover:text-white"
@@ -287,6 +288,45 @@ const Resources = () => {
                 {tag}
               </Button>
             ))}
+            {!showAllTags && allTags.length > 10 && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setShowAllTags(true)}
+                className="rounded-full border-primary/30 text-foreground hover:bg-primary/10 bg-background"
+              >
+                Show More ({allTags.length - 10}+)
+              </Button>
+            )}
+            {showAllTags && (
+              <>
+                {/* Force line break */}
+                <div className="basis-full h-0"></div>
+                {allTags.slice(10).map((tag) => (
+                  <Button
+                    key={tag}
+                    size="sm"
+                    onClick={() => setSelectedTag(tag)}
+                    className={cn(
+                      "border-primary/30 text-foreground hover:bg-primary/10 rounded-full",
+                      "bg-background",
+                      selectedTag === tag &&
+                        "bg-primary text-white border-primary hover:bg-primary/90 hover:text-white"
+                    )}
+                  >
+                    {tag}
+                  </Button>
+                ))}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setShowAllTags(false)}
+                  className="rounded-full border-primary/30 text-foreground hover:bg-primary/10 bg-background"
+                >
+                  Show Less
+                </Button>
+              </>
+            )}
           </div>
         </div>
 
@@ -312,8 +352,15 @@ const Resources = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-4 mb-2">
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-xl font-bold text-foreground mb-1">{resource.title}</h3>
-                          <p className="text-base text-muted-foreground">{resource.location}</p>
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <h3 className="text-xl font-bold text-foreground">{resource.title}</h3>
+                            <Badge 
+                              variant="outline" 
+                              className="bg-slate-200 border-slate-600 text-slate-900 font-semibold"
+                            >
+                              {resource.category}
+                            </Badge>
+                          </div>
                         </div>
                         {/* Bookmark Button */}
                         <Button
@@ -326,42 +373,31 @@ const Resources = () => {
                               addResource(resource);
                             }
                           }}
-                          className="flex-shrink-0 hover:bg-primary/10 h-10 w-10"
+                          className="flex-shrink-0 h-10 w-10 group bg-green-100 hover:bg-green-200 rounded-lg"
                         >
-                          <Bookmark className={`h-6 w-6 ${saved ? "fill-primary text-primary" : "text-muted-foreground"}`} />
+                          <Bookmark className={`h-6 w-6 transition-all ${saved ? "fill-green-600 text-green-600" : "text-green-600 group-hover:fill-green-600"}`} />
                         </Button>
                       </div>
 
-                      {/* Date and Category */}
+                      {/* Location and Date */}
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mb-4">
+                        <div className="flex items-center gap-1">
+                          <MapPin className="h-4 w-4" />
+                          <span>{resource.location}</span>
+                        </div>
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
                           <span>{resource.date}</span>
                         </div>
                       </div>
 
-                      {/* Tags and Button */}
-                      <div className="flex flex-wrap items-center gap-3 mb-6">
-                        {/* Tags */}
-                        <div className="flex flex-wrap gap-2">
-                          {resource.tags.map((tag) => (
-                            <Badge key={tag} variant="outline" className="bg-background text-foreground border-gray-300 hover:bg-gray-50">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                        
-                        {/* Action Button */}
-                        <div className="flex gap-2 ml-auto">
-                          <Button
-                            variant="default"
-                            size="sm"
-                            className="bg-primary hover:bg-primary/90 text-white font-medium"
-                            onClick={() => handleResourceClick(resource)}
-                          >
-                            Register Now
-                          </Button>
-                        </div>
+                      {/* Tags */}
+                      <div className="flex flex-wrap gap-2 mb-6">
+                        {resource.tags.map((tag) => (
+                          <Badge key={tag} variant="outline" className="bg-slate-200 border-slate-600 text-slate-900 font-medium">
+                            {tag}
+                          </Badge>
+                        ))}
                       </div>
 
                       {/* Resource Details - Always Expanded */}
@@ -369,6 +405,18 @@ const Resources = () => {
                         <div>
                           <h4 className="font-semibold mb-2 text-foreground">Description</h4>
                           <p className="text-sm text-muted-foreground leading-relaxed">{resource.description}</p>
+                        </div>
+                        
+                        {/* Register Button */}
+                        <div className="pt-4">
+                          <Button
+                            variant="default"
+                            size="default"
+                            className="w-full bg-primary hover:bg-primary/90 text-white font-semibold"
+                            onClick={() => handleResourceClick(resource)}
+                          >
+                            Register Now
+                          </Button>
                         </div>
                       </div>
                     </div>
